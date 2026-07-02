@@ -76,13 +76,13 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
                     </ul>
                 </div>
             </li>
-            <li><a href="/search.php" class="mm-item"><span class="mm-label">Поиск</span></a>
+            <li><a href="/search" class="mm-item"><span class="mm-label">Поиск</span></a>
                 <div>
                     <ul class="mm-level-2">
-                        <li><a href="/search.php" class="mm-item"><span class="mm-label">Поиск фотографий</span></a></li>
-                        <li><a href="/vsearch.php" class="mm-item"><span class="mm-label">Поиск ТС</span></a></li>
-                        <li><a href="/csearch.php" class="mm-item"><span class="mm-label">Поиск комментариев</span></a></li>
-                        <li><a href="/authors.php" class="mm-item"><span class="mm-label">Поиск авторов</span></a></li>
+                        <li><a href="/search" class="mm-item"><span class="mm-label">Поиск фотографий</span></a></li>
+                        <li><a href="/vsearch" class="mm-item"><span class="mm-label">Поиск ТС</span></a></li>
+                        <li><a href="/csearch" class="mm-item"><span class="mm-label">Поиск комментариев</span></a></li>
+                        <li><a href="/authors" class="mm-item"><span class="mm-label">Поиск авторов</span></a></li>
                     </ul>
                 </div>
             </li>

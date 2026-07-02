@@ -63,7 +63,14 @@ class Routes
             Router::get('/messages', 'MessagesController@i');
 
 
-            Router::get('/search', 'SearchController@i');
+            Router::get('/search', 'SearchController@photos');
+            Router::get('/search.php', 'SearchController@photos');
+            Router::get('/vsearch', 'SearchController@vehicles');
+            Router::get('/vsearch.php', 'SearchController@vehicles');
+            Router::get('/csearch', 'SearchController@comments');
+            Router::get('/csearch.php', 'SearchController@comments');
+            Router::get('/authors', 'SearchController@authors');
+            Router::get('/authors.php', 'SearchController@authors');
 
             Router::get('/fav', 'MainController@fav');
             Router::get('/mapmedia', 'MainController@mapmedia');

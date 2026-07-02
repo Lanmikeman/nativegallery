@@ -2,6 +2,7 @@
     'use strict';
 
     var STORAGE_KEY = 'ng_music_player_v2';
+    var PLAYBACK_KEY = 'ng_music_playback_v1';
     var queue = [];
     var index = -1;
     var volume = 0.8;
@@ -22,6 +23,19 @@
                 if (typeof Notify !== 'undefined') {
                     Notify.noty('danger', 'Не удалось воспроизвести трек');
                 }
+            });
+            var lastSave = 0;
+            audio.addEventListener('timeupdate', function () {
+                var now = Date.now();
+                if (now - lastSave < 2000) return;
+                lastSave = now;
+                try {
+                    sessionStorage.setItem(PLAYBACK_KEY, JSON.stringify({
+                        src: audio.src,
+                        time: audio.currentTime,
+                        paused: audio.paused
+                    }));
+                } catch (e) { /* ignore */ }
             });
         } else {
             audio = window.__ngMusicAudio;
@@ -123,9 +137,19 @@
         if (!cur || cur.indexOf(track.src) < 0) {
             a.src = track.src;
         }
+        var resumed = false;
+        try {
+            var pb = JSON.parse(sessionStorage.getItem(PLAYBACK_KEY) || 'null');
+            if (pb && pb.src && a.src && a.src.indexOf(pb.src) >= 0 && pb.time > 1 && !pb.paused) {
+                a.currentTime = pb.time;
+                resumed = true;
+            }
+        } catch (e) { /* ignore */ }
+
         a.play().catch(function () {
             updateBar();
         });
+        if (resumed) updateBar();
         saveState();
         updateBar();
         window.dispatchEvent(new CustomEvent('ngmusic:change', { detail: { track: track, index: index } }));

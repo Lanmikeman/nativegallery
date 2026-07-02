@@ -135,14 +135,12 @@ class Upload
         if ((int)$_POST['disablesubsnotify'] === 1) $this->subsnotify = 'disabled';
         if ((int)$_POST['disableexif'] === 1) $this->exif = 'disabled';
 
-        if ((int)$_POST['nid'] >= 1) {
+        if ((int)($_POST['nid'] ?? 0) >= 1) {
             $ent = DB::query('SELECT id FROM entities_data WHERE id=:id', [':id' => $_POST['nid']]);
             if (!empty($ent)) {
-                $this->entitydata_id = $_POST['nid'];
-                $this->entityroute = $_POST["route"][$_POST['nid']];
-                $this->entitycomment = $_POST["notes"][$_POST['nid']];
-            } else {
-                return;
+                $this->entitydata_id = (int) $_POST['nid'];
+                $this->entityroute = $_POST['route'][$_POST['nid']] ?? null;
+                $this->entitycomment = $_POST['notes'][$_POST['nid']] ?? null;
             }
         }
 

@@ -61,14 +61,23 @@ if (isset($_POST['create'])) {
                 $requestTitle = $linkGos === 1 ? $gos : $num;
             }
 
+            $photoId = (int)($_POST['photo_id'] ?? 0);
+            if ($photoId > 0) {
+                $photoRows = DB::query('SELECT id FROM photos WHERE id = :id', array(':id' => $photoId));
+                if (!$photoRows) {
+                    die('Указанная фотография не найдена');
+                }
+            }
+
             DB::query(
-                'INSERT INTO entities_requests (title, user_id, created_at, entityid, data, status) VALUES (:title, :user_id, :created_at, :entityid, :data, 0)',
+                'INSERT INTO entities_requests (title, user_id, created_at, entityid, data, photo_id, status) VALUES (:title, :user_id, :created_at, :entityid, :data, :photo_id, 0)',
                 array(
                     ':title' => $requestTitle,
                     ':user_id' => Auth::userid(),
                     ':created_at' => time(),
                     ':entityid' => $type,
                     ':data' => $jsonResult,
+                    ':photo_id' => $photoId,
                 )
             );
             $success = 1;
@@ -178,9 +187,14 @@ if ($linkGos === 1 && $gos !== '') {
                                 }
                                 ?>
                                 <tr>
+                                    <td class="lcol">Фотография</td>
+                                    <td style="padding-bottom:15px">
+                                        <input type="number" name="photo_id" min="0" style="width:100px" maxlength="10" placeholder="ID" value="<?= (int)($_POST['photo_id'] ?? 0) ?: '' ?>">
+                                        <span class="sm" style="color:#888; margin-left:8px">Необязательно — ID фото с сайта, подтверждающего данные</span>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td style="width: 10%"></td>
-
-
                                 </tr>
                                 <?php
                                 if (NGALLERY['root']['security']['captcha'] === true) { ?>
@@ -215,6 +229,7 @@ if ($linkGos === 1 && $gos !== '') {
                         <li>Если какие-либо данные отсутствуют, оставьте соответствующее поле пустым. Пожалуйста, не вписывайте дефис и тому подобные знаки.</li>
                         <li>Если требуемой модели нет в списке — укажите её в поле «Примечание». После публикации фотографии модель будет добавлена в список.</li>
                         <li>Если Вы обладаете информацией о приписке данного ТС, а поле «Депо/Парк» отсутствует, укажите эти данные в поле «Примечание».</li>
+                        <li>Привязка фотографии необязательна. Укажите ID фото, если оно подтверждает вносимые данные.</li>
                     </ul>
                 </div>
             </td>

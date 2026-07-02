@@ -126,8 +126,9 @@ if ($nonreviewedentities > 0) {
                             <th width="100">ID</th>
                             <th width="20%">Название</th>
                             <th width="35%">Сущность</th>
-                            <th width="50%">Данные</th>
-                            <th width="50%">Действия</th>
+                            <th width="35%">Данные</th>
+                            <th width="15%">Фото</th>
+                            <th width="20%">Действия</th>
                         </tr>
 
                         <?php
@@ -141,6 +142,16 @@ if ($nonreviewedentities > 0) {
                             foreach ($vehiclevariables as $vb) {
                                 $vhhtml .= '<b>' . $vb['name'] . ': </b>' . $vehicledatavariables[$num]['value'] . '<br>';
                                 $num++;
+                            }
+                            $photoHtml = '—';
+                            $requestPhotoId = (int) ($p['photo_id'] ?? 0);
+                            if ($requestPhotoId > 0) {
+                                $photoRows = DB::query('SELECT id, photourl FROM photos WHERE id = :id', array(':id' => $requestPhotoId));
+                                if ($photoRows) {
+                                    $photoHtml = '<a href="/photo/' . $requestPhotoId . '/" target="_blank"><img src="/api/photo/compress?url=' . htmlspecialchars($photoRows[0]['photourl']) . '" style="max-width:80px"></a>';
+                                } else {
+                                    $photoHtml = '#' . $requestPhotoId . ' (не найдено)';
+                                }
                             }
                             echo '<tr id="mdl' . $p['id'] . '">
                                     <td>
@@ -156,8 +167,9 @@ if ($nonreviewedentities > 0) {
                                     </td>
                                       <td>
                                      '.$vhhtml.'
-                                      
-                                       
+                                    </td>
+                                    <td class="c">
+                                        '.$photoHtml.'
                                     </td>
                                     <td class="c">
                                    ';

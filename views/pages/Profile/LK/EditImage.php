@@ -19,6 +19,17 @@ $descr = (string) ($photo->content('comment') ?? $photo->i('postbody'));
 $place = (string) $photo->i('place');
 $galleryId = (int) $photo->i('gallery_id');
 $isDeclined = (int) $photo->i('moderated') === 2;
+$entitydataId = (int) $photo->i('entitydata_id');
+$linkedEntity = null;
+if ($entitydataId > 0) {
+    $linkedRows = DB::query(
+        'SELECT ed.*, e.title AS entity_type FROM entities_data ed JOIN entities e ON e.id = ed.entityid WHERE ed.id = :id',
+        [':id' => $entitydataId]
+    );
+    $linkedEntity = $linkedRows[0] ?? null;
+}
+$entityRoute = (string) ($content['entityroute'] ?? '');
+$entityNotes = (string) ($content['entitycomment'] ?? '');
 
 ?>
 <!DOCTYPE html>
@@ -88,6 +99,47 @@ $isDeclined = (int) $photo->i('moderated') === 2;
                                     <select name="year" id="year" style="width:65px">
                                         <?= Date::yearSelectOptions($year) ?>
                                     </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="lcol">Сущность</td>
+                                <td>
+                                    <input type="hidden" name="nid" id="entity_nid" value="<?= $entitydataId ?>">
+                                    <table class="nospaces">
+                                        <tr>
+                                            <td class="sm" style="padding-right:10px">Вид:</td>
+                                            <td>
+                                                <select id="entity_type" style="min-width:180px">
+                                                    <?php
+                                                    foreach (DB::query('SELECT * FROM entities ORDER BY title') as $e) {
+                                                        $selected = $linkedEntity && (int) $linkedEntity['entityid'] === (int) $e['id'] ? ' selected' : '';
+                                                        echo '<option value="' . $e['id'] . '"' . $selected . '>' . htmlspecialchars($e['title']) . '</option>';
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sm" style="padding-right:10px">ID/название:</td>
+                                            <td>
+                                                <input type="text" id="entity_search" maxlength="20" style="width:150px">
+                                                <input type="button" id="entity_search_btn" value="Найти" style="margin-left:4px">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <div id="entity_vlist" class="shadow" style="display:none; margin-top:6px"></div>
+                                    <div id="entity_selected" style="margin-top:10px<?= $linkedEntity ? '' : '; display:none' ?>">
+                                        <?php if ($linkedEntity) { ?>
+                                            <b><a href="/vehicle/<?= (int) $linkedEntity['id'] ?>" target="_blank">#<?= (int) $linkedEntity['id'] ?> <?= htmlspecialchars($linkedEntity['title']) ?></a></b>
+                                            <span class="sm" style="color:#777">(<?= htmlspecialchars($linkedEntity['entity_type']) ?>)</span>
+                                            <a href="#" id="entity_clear" style="margin-left:10px">убрать привязку</a>
+                                        <?php } ?>
+                                    </div>
+                                    <div id="entity_extra" style="margin-top:10px<?= $linkedEntity ? '' : '; display:none' ?>">
+                                        Маршрут: <input type="text" name="entity_route" maxlength="7" style="width:60px" value="<?= htmlspecialchars($entityRoute) ?>">
+                                        Примечание: <input type="text" name="entity_notes" maxlength="100" style="width:220px" value="<?= htmlspecialchars($entityNotes) ?>">
+                                    </div>
+                                    <div class="sm" style="color:#888; padding-top:8px">Необязательно. Оставьте пустым, если фото не относится к конкретной модели.</div>
                                 </td>
                             </tr>
                             <tr>
@@ -201,6 +253,44 @@ $isDeclined = (int) $photo->i('moderated') === 2;
         if (document.getElementById('nomap').checked) {
             document.getElementById('map_canvas').style.display = 'none';
         }
+
+        function setEntityBinding(id, title, typeTitle) {
+            $('#entity_nid').val(id);
+            if (id > 0) {
+                $('#entity_selected').html(
+                    '<b><a href="/vehicle/' + id + '" target="_blank">#' + id + ' ' + $('<span>').text(title).html() + '</a></b> ' +
+                    '<span class="sm" style="color:#777">(' + $('<span>').text(typeTitle).html() + ')</span> ' +
+                    '<a href="#" id="entity_clear" style="margin-left:10px">убрать привязку</a>'
+                ).show();
+                $('#entity_extra').show();
+            } else {
+                $('#entity_selected').hide().html('');
+                $('#entity_extra').hide();
+                $('input[name="entity_route"], input[name="entity_notes"]').val('');
+            }
+            $('#entity_vlist').hide().html('');
+        }
+
+        $('#entity_search_btn').on('click', function() {
+            const num = $('#entity_search').val().trim();
+            if (!num) return;
+            $('#entity_vlist').html('<div style="padding:6px 10px">Поиск...</div>').show();
+            $.get('/api/vehicles/load', { type: $('#entity_type').val(), num: num }, function(html) {
+                $('#entity_vlist').html(html);
+            });
+        });
+
+        $('#entity_vlist').on('click', '.found_vehicle', function() {
+            const vid = $(this).data('vid');
+            const title = $('.mname', this).text();
+            const typeTitle = $('td.d', this).last().text();
+            setEntityBinding(vid, title, typeTitle);
+        });
+
+        $('#entity_selected').on('click', '#entity_clear', function(e) {
+            e.preventDefault();
+            setEntityBinding(0, '', '');
+        });
 
         $('#editForm').on('submit', function(e) {
             e.preventDefault();

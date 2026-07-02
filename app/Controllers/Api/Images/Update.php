@@ -52,6 +52,20 @@ class Update
         $content['rating'] = ((int) ($_POST['disablerating'] ?? 0) === 1) ? 'disabled' : 'allowed';
         $content['showtop'] = ((int) ($_POST['disableshowtop'] ?? 0) === 1) ? 'disabled' : 'allowed';
 
+        $entitydataId = (int) ($_POST['nid'] ?? 0);
+        if ($entitydataId > 0) {
+            $entityRows = DB::query('SELECT id FROM entities_data WHERE id = :id', [':id' => $entitydataId]);
+            if (empty($entityRows)) {
+                echo json_encode(['errorcode' => 1, 'error' => 'Модель сущности не найдена']);
+                return;
+            }
+            $content['entityroute'] = trim((string) ($_POST['entity_route'] ?? ''));
+            $content['entitycomment'] = trim((string) ($_POST['entity_notes'] ?? ''));
+        } else {
+            $entitydataId = 0;
+            unset($content['entityroute'], $content['entitycomment']);
+        }
+
         if (isset($_POST['nomap'])) {
             $content['lat'] = null;
             $content['lng'] = null;
@@ -88,7 +102,8 @@ class Update
 
         DB::query(
             'UPDATE photos SET postbody = :postbody, photourl = :photourl, posted_at = :posted_at, exif = :exif,
-             moderated = :moderated, place = :place, endmoderation = :endmoderation, gallery_id = :gallery_id, content = :content
+             moderated = :moderated, place = :place, endmoderation = :endmoderation, gallery_id = :gallery_id,
+             entitydata_id = :entitydata_id, content = :content
              WHERE id = :id',
             [
                 ':postbody' => $descr,
@@ -99,6 +114,7 @@ class Update
                 ':place' => $place,
                 ':endmoderation' => $endmoderation,
                 ':gallery_id' => $galleryId,
+                ':entitydata_id' => $entitydataId,
                 ':content' => json_encode($content, JSON_UNESCAPED_UNICODE),
                 ':id' => $photoId,
             ]

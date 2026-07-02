@@ -215,7 +215,7 @@ LIMIT 10;');
                             <br>
 
 
-                            <h4 style="clear:both"><a href="/update">Недавно добавленные фотографии</a></h4>
+                            <h4 style="clear:both"><a href="/update?time=24">Недавно добавленные фотографии</a></h4>
                             <?php
                             $photos = DB::query('SELECT * FROM photos WHERE moderated=1 ORDER BY id DESC LIMIT 30');
 

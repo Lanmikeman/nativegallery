@@ -121,7 +121,7 @@ LIMIT 10;');
                                     echo '<div class="prw-grid-item">';
                                     echo '<div class="prw-wrapper"><span style="word-spacing:-1px"><b>' . htmlspecialchars((string) $p['place']) . '</b></span>';
                                     echo '<div>' . htmlspecialchars($date) . '</div></div>';
-                                    echo '<a href="/photo/' . $photoId . '/" class="prw-animate" data-no-ajax="1" style="background-image:url(\'' . htmlspecialchars($thumb, ENT_QUOTES) . '\')" aria-label="' . htmlspecialchars((string) $p['place']) . '"></a>';
+                                    echo '<a href="/photo/' . $photoId . '/" class="prw-animate" style="background-image:url(\'' . htmlspecialchars($thumb, ENT_QUOTES) . '\')" aria-label="' . htmlspecialchars((string) $p['place']) . '"></a>';
                                     echo '</div>';
                                 }
                                 ?>

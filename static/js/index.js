@@ -1,5 +1,21 @@
+function initIndexPage() {
+	if (!$('#random-photos').length && !$('#idx-main').length) return;
+
+	$('#loadmore').off('click.ngIndex').on('click.ngIndex', LoadRecentPhotos);
+	if ($('#recent-photos').attr('lastpid') && $('#recent-photos').children().length === 0) {
+		LoadRecentPhotos();
+	}
+
+	$('#newrand').off('click.ngIndex').on('click.ngIndex', function (e) {
+		e.preventDefault();
+		LoadRandomPhotos();
+	});
+}
+
 $(document).ready(function()
 {
+	initIndexPage();
+
 	$('.ix-country > a[href="#"]').on('click', function(e)
 	{
 		var block = $(this).parent().next('div');
@@ -31,15 +47,13 @@ $(document).ready(function()
 	});
 
 
-	$('#loadmore').on('click', LoadRecentPhotos).click();
-	if ($('#newrand').length) {
-		$('#newrand').on('click', function (e) {
-			e.preventDefault();
-			LoadRandomPhotos();
-		});
+	if ($('#loadmore').length && $('#recent-photos').children().length === 0) {
+		LoadRecentPhotos();
 	}
 
-	updateInterval = setInterval(LoadPubPhotos, 60000);
+	if (typeof updateInterval === 'undefined') {
+		updateInterval = setInterval(LoadPubPhotos, 60000);
+	}
 
 
 	//$('#cname').citySelector('cid', { defaultLabel: _text['IX_ANY'] });
@@ -117,7 +131,7 @@ function AddPhotoToBlock(block, arr, prepend) {
             ${arr.place}
             <div>${arr.date}</div>
         </div>
-        <a href="/photo/${photoId}/" data-no-ajax="1" class="prw-animate blur-load"
+        <a href="/photo/${photoId}/" class="prw-animate blur-load"
            style="background-image: url('${arr.photourl_extrasmall}')"
            data-src="${arr.photourl_small}">
             ${arr.ccnt != 0 ? `
@@ -259,6 +273,13 @@ function startCountdown(unixTimestamp) {
 	updateTimer(); // сразу обновляем отображение
 	const interval = setInterval(updateTimer, 1000);
 }
+
+window.addEventListener('ng:navigate', function (e) {
+	var path = (e.detail && e.detail.path) || '';
+	if (path === '/' || path === '') {
+		initIndexPage();
+	}
+});
 
 function LoadPubPhotos()
 {

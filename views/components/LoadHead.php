@@ -29,6 +29,7 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <link rel="stylesheet" href="/static/css/progress.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
     <?php if ($musicUserLoggedIn) { ?>
     <link rel="stylesheet" href="/static/css/music-player.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>"></script>
     <?php } ?>
     <script src="/static/js/jquery.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/jquery.form.min.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>

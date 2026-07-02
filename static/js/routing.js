@@ -63,10 +63,6 @@
         return false;
       }
 
-      if (/^\/photo\/\d+/.test(path)) {
-        return false;
-      }
-
       return true;
     } catch {
       return false;
@@ -161,7 +157,7 @@
   function replacePmain(doc) {
     removePmain();
     const newPmain = doc.querySelector("#pmain");
-    if (!newPmain) return;
+    if (!newPmain) return null;
 
     const tmain = getTmain();
     const clone = newPmain.cloneNode(true);
@@ -170,6 +166,43 @@
     } else {
       document.body.appendChild(clone);
     }
+
+    return clone;
+  }
+
+  function executeScriptsIn(root) {
+    if (!root) return;
+
+    Array.from(root.querySelectorAll("script")).forEach((oldScript) => {
+      const code = (oldScript.textContent || "").trim();
+      if (!oldScript.src && (!code || /^Tracy\.Debug\.init/.test(code))) {
+        oldScript.remove();
+        return;
+      }
+
+      if (!oldScript.src) {
+        const hash = simpleHash(code);
+        if (executedInlineScripts.has(hash)) {
+          oldScript.remove();
+          return;
+        }
+        executedInlineScripts.add(hash);
+      }
+
+      const newScript = document.createElement("script");
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+
+      if (oldScript.src) {
+        newScript.src = oldScript.src;
+        newScript.async = false;
+      } else {
+        newScript.textContent = code;
+      }
+
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
   }
 
   function cleanupOrphanFooterTables() {
@@ -201,9 +234,10 @@
 
       cleanupOrphanFooterTables();
 
+      let pmainEl = null;
       if (photoPage) {
         removeTmainFooterRow();
-        replacePmain(doc);
+        pmainEl = replacePmain(doc);
       } else {
         removePmain();
         const newFooter = doc.querySelector("td.footer");
@@ -221,8 +255,12 @@
 
       if (newTitle) document.title = newTitle;
 
+      const currMain = document.querySelector("table.tmain td.main");
+      executeScriptsIn(currMain);
+      executeScriptsIn(pmainEl);
+
       reloadExternalScripts(doc);
-      reloadInlineScripts();
+      reloadScopedScripts(doc, currMain, pmainEl);
 
       window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -284,21 +322,35 @@
     loadScript(0);
   }
 
-  function reloadInlineScripts() {
-    document.querySelectorAll("script:not([src])").forEach((oldScript) => {
-      const code = oldScript.textContent.trim();
-      if (!code || /^Tracy\.Debug\.init/.test(code)) return;
+  function reloadScopedScripts(doc, mainEl, pmainEl) {
+    const scopes = [doc.querySelector("td.main"), doc.querySelector("#pmain")].filter(Boolean);
+    const loadedUrls = new Set(Array.from(document.scripts).map((s) => s.src));
 
-      const hash = simpleHash(code);
-      if (executedInlineScripts.has(hash)) return;
+    scopes.forEach((scope) => {
+      scope.querySelectorAll("script[src]").forEach((script) => {
+        const src = script.getAttribute("src");
+        if (!src) return;
 
-      const newScript = document.createElement("script");
-      Array.from(oldScript.attributes).forEach((attr) =>
-        newScript.setAttribute(attr.name, attr.value)
-      );
-      newScript.textContent = code;
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-      executedInlineScripts.add(hash);
+        let absoluteSrc;
+        try {
+          absoluteSrc = new URL(src, location.origin).href;
+        } catch {
+          return;
+        }
+
+        const srcPath = new URL(absoluteSrc).pathname;
+        if (PERMANENT_SCRIPTS.some((p) => srcPath.endsWith(p))) return;
+        if (loadedUrls.has(absoluteSrc)) return;
+
+        const newScript = document.createElement("script");
+        newScript.src = src;
+        newScript.async = false;
+        Array.from(script.attributes).forEach((attr) => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        (mainEl || pmainEl || document.body).appendChild(newScript);
+        loadedUrls.add(absoluteSrc);
+      });
     });
   }
 

@@ -21,7 +21,4 @@ function get_current_git_commit($branch = 'main')
             ?>
             <p><?= $footerSlogan !== '' ? htmlspecialchars($footerSlogan) . ' | ' : '' ?><?= $footerMeta ?></p>
             <b><a href="/">Главная</a> &nbsp; &nbsp; <a href="/lk/">Личный кабинет</a> &nbsp; &nbsp; <a href="/rules">Правила</a> &nbsp; &nbsp; <a href="/about">О сервере</a></b><br>
-            <?php if (Auth::userid() > 0) { ?>
-            <script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>"></script>
-            <?php } ?>
         </td>

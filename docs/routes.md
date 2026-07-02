@@ -22,12 +22,12 @@
 
 ## Авторизация OpenVK
 
-Доступна при `openvk.enabled: true` в `ngallery.yaml`.
+Доступна при `openvk.enabled: true` в `ngallery.yaml`. На production-сервере форка подключены два инстанса: **openvk.org** и **vepurovk.xyz** (второй узел OVK).
 
 | URL | Метод | Описание |
 |-----|-------|----------|
 | `/auth/openvk/start?provider=openvk_org` | GET | Старт OAuth на openvk.org |
-| `/auth/openvk/start?provider=vepurovk` | GET | Старт OAuth на vepurovk.xyz |
+| `/auth/openvk/start?provider=vepurovk` | GET | Старт OAuth на vepurovk.xyz (второй инстанс на сервере) |
 | `/auth/callback` | GET | Callback после авторизации |
 | `/api/auth/openvk` | POST | Обмен токена на локальную сессию |
 | `/lk/profile?type=OpenVK` | GET | Привязка OpenVK к существующему аккаунту |

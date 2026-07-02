@@ -190,6 +190,13 @@ Cron: `deploy/setup-cron.sh` → задача каждые 5 минут для `
 
 ## Вход через OpenVK
 
+Поддерживается авторизация через несколько инстансов OpenVK. В `ngallery-example.yaml` и на production-сервере форка настроены два провайдера:
+
+- **openvk.org** (`openvk_org`) — основной инстанс;
+- **vepurovk.xyz** (`vepurovk`) — второй инстанс OVK на сервере, пример для сайтов с собственным или альтернативным узлом OpenVK.
+
+Дополнительные инстансы добавляются в `openvk.providers` по тому же шаблону.
+
 ```yaml
 openvk:
   enabled: true
@@ -204,7 +211,7 @@ openvk:
       api_domain: 'https://api.openvk.org'
       accent: '#5181b8'
       icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
-    vepurovk:
+    vepurovk:                    # второй инстанс OVK (production-сервер форка)
       label: 'VepurOVK'
       domain: 'https://vepurovk.xyz'
       accent: '#45668e'

@@ -86,6 +86,7 @@ ngallery:
           api_domain: 'https://api.openvk.org'
           accent: '#5181b8'
           icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
+        # второй инстанс OVK — подключён на production-сервере форка как пример
         vepurovk:
           label: 'VepurOVK'
           domain: 'https://vepurovk.xyz'

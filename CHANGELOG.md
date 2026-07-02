@@ -14,7 +14,7 @@
 
 ### Добавлено
 
-- **Вход через OpenVK** (openvk.org и vepurovk.xyz):
+- **Вход через OpenVK** (openvk.org и vepurovk.xyz — второй инстанс OVK на production-сервере):
   - Кнопки на `/login` и `/register`
   - Маршруты `/auth/openvk/start`, `/auth/callback`, API `POST /api/auth/openvk`
   - Автоматическая регистрация (`openvk.auto_register`) или привязка к существующему аккаунту

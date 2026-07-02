@@ -177,6 +177,33 @@ li.ui-menu-item a:hover, li.ui-menu-item a:visited:hover {
 #idx-column-center { vertical-align:top; padding:0 20px; width:100%; }
 #idx-column-menu   { vertical-align:top; min-width:300px; }
 
+#contestNotify {
+	float:left;
+	border:solid 1px #171022;
+	padding:6px 10px 7px;
+	margin-bottom:13px;
+	background-color:#E5D6FF;
+	color:#171022;
+	background-size:550px 211.2px;
+	background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 550 211.2" width="550" height="211.2" style="opacity: 0.3; filter: grayscale(0);"><text x="0em" y="1em" font-size="88" transform="rotate(17 55 52.8)">🎁</text><text x="1.25em" y="2em" font-size="88" transform="rotate(17 165 140.8)">🎈</text><text x="2.5em" y="1em" font-size="88" transform="rotate(17 275 52.8)">🎀</text><text x="3.75em" y="2em" font-size="88" transform="rotate(17 385 140.8)">🎊</text><text x="5em" y="1em" font-size="88" transform="rotate(17 495 52.8)">🎉</text></svg>');
+}
+#contestNotify h4 { color:#171022; margin:0 0 6px; }
+#contestNotify .contest-notify__highlight,
+#contestNotify #textContest { color:#412378; }
+#contestNotify b,
+#contestNotify #countdown { color:#2a1048; }
+#contestBtns a {
+	display:inline-block;
+	margin-right:6px;
+	margin-bottom:4px;
+	padding:4px 12px;
+	background-color:#37009D;
+	color:#fff !important;
+	text-decoration:none;
+	border-radius:2px;
+}
+#contestBtns a:hover { background-color:#4f14c4; color:#fff !important; }
+
 .idx-donate { display:inline-block; background-color:#db7746; text-align:right; margin-right:-20px; padding:0 4px 0 0; text-shadow: 1px 1px 1px rgba(0,0,0,.3); }
 .idx-donate > a { display:inline-block; padding:2px 24px 3px 19px; margin:0 -4px; font-size:18px; color:#fff; font-family:var(--narrow-font); }
 

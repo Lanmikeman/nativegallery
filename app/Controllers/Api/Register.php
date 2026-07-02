@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Api;
 
-use App\Services\{Auth, Router, GenerateRandomStr, DB, Json, Word};
+use App\Services\{Auth, Router, GenerateRandomStr, DB, Json, Word, AuthSession};
 use \App\Controllers\ExceptionRegister;
 use \App\Core\Page;
 
@@ -321,7 +321,6 @@ class Register
                                 if (NGALLERY['root']['registration']['emailverify'] === true) {
                                     $status === 3;
                                 }
-                                $token = GenerateRandomStr::gen_uuid();
                                 DB::query('INSERT INTO users VALUES (\'0\', :username, :email, :password, :photourl, 5, :online, 0, :status, :content)', array(':username' => ltrim($username), ':password' => password_hash(ltrim($password), PASSWORD_BCRYPT), ':photourl' => '/static/img/avatar.png', ':email' => $email, ':content' => $content, ':online' => time(), ':status'=>$status));
                                 $user_id = DB::query('SELECT id FROM users WHERE username=:username', array(':username' => $username))[0]['id'];
                                 if (NGALLERY['root']['registration']['emailverify'] === true) {
@@ -420,47 +419,7 @@ class Register
                                 }
                               
 
-                                if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-                                    $ip = $_SERVER['HTTP_CLIENT_IP'];
-                                } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                                    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-                                } else {
-                                    $ip = $_SERVER['REMOTE_ADDR'];
-                                }
-                                $parser = new UserAgentParser();
-
-                                $ua = $parser->parse();
-                                $ua = $parser();
-
-                                $servicekey = GenerateRandomStr::gen_uuid();
-                                $url = 'http://ip-api.com/json/' . $ip;
-
-                                $response = file_get_contents($url);
-
-                                $data = json_decode($response, true);
-                                $loc = $data['country'] . ', ' . $data['city'];
-                                $device = $ua->platform();
-                                $os = $ua->platform();
-                                $encryptionKey = NGALLERY['root']['encryptionkey'];
-
-                                $iv = openssl_random_pseudo_bytes(16);
-                                $encryptedIp = openssl_encrypt($ip, 'AES-256-CBC', $encryptionKey, 0, $iv);
-                                $encryptedLoc = openssl_encrypt($loc, 'AES-256-CBC', $encryptionKey, 0, $iv);
-                                DB::query('INSERT INTO login_tokens (id, token, iv, user_id, device_name, os, ip, location, last_activity, created_at) VALUES (\'0\', :token, :iv, :user_id, :device, :os, :ip, :loc, :la, :crd)', array(
-                                    ':token' => $token,
-                                    ':user_id' => $user_id,
-                                    ':device' => $device,
-                                    ':os' => $os,
-                                    ':ip' => $encryptedIp,
-                                    ':loc' => $encryptedLoc,
-                                    ':la' => time(),
-                                    ':crd' => time(),
-                                    ':iv' => $iv
-                                ));
-
-                                setcookie("NGALLERYSESS", $token, time() + 120 * 180 * 240 * 720, '/', NULL, NULL, TRUE);
-                                setcookie("NGALLERYSESS_", '1', time() + 120 * 180 * 240 * 360, '/', NULL, NULL, TRUE);
-                                setcookie("NGALLERYID", $user_id, time() + 10 * 10 * 24 * 72, '/', NULL, NULL, TRUE);
+                                $token = AuthSession::establish((int) $user_id);
                                 echo json_encode(
                                     array(
                                         'errorcode' => '0',

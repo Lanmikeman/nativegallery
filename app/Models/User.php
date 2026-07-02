@@ -12,8 +12,11 @@ class User {
         return DB::query("SELECT * FROM users WHERE id=:id", array(':id'=>$this->userid))[0][$table];
     }
     public function content($table) {
-        $content = json_decode(self::i('content'), true);
-        return $content[$table];
+        $content = json_decode((string) self::i('content'), true);
+        if (!is_array($content)) {
+            return null;
+        }
+        return $content[$table] ?? null;
     }
     public function getPhotoUrl(): string
     {

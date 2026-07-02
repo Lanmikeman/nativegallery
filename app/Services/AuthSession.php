@@ -49,11 +49,26 @@ class AuthSession
         );
 
         $ttl = time() + 50 * 50 * 54 * 72;
-        setcookie('NGALLERYSESS', $token, $ttl, '/', null, null, true);
-        setcookie('NGALLERYSERVICE', $servicekey, $ttl, '/', null, null, true);
-        setcookie('NGALLERYSESS_', '1', $ttl, '/', null, null, true);
-        setcookie('NGALLERYID', (string) $userId, $ttl, '/', null, null, true);
+        self::setAuthCookie('NGALLERYSESS', $token, $ttl);
+        self::setAuthCookie('NGALLERYSERVICE', $servicekey, $ttl);
+        self::setAuthCookie('NGALLERYSESS_', '1', $ttl);
+        self::setAuthCookie('NGALLERYID', (string) $userId, $ttl);
 
         return $token;
+    }
+
+    private static function setAuthCookie(string $name, string $value, int $expires): void
+    {
+        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443);
+
+        setcookie($name, $value, [
+            'expires' => $expires,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
 }

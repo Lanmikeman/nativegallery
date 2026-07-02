@@ -95,6 +95,28 @@ span.pg { color:#777; }
 	-webkit-box-shadow: 1px 1px 7px 3px #000;
 }
 
+/* Main page — фотоконкурс (блок #contestNotify) */
+#contestNotify {
+	background-color:#2a2438;
+	border:solid 1px #5c4f78;
+	color:#e8e2f4;
+	background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 550 211.2" width="550" height="211.2" style="opacity: 0.12; filter: grayscale(1);"><text x="0em" y="1em" font-size="88" transform="rotate(17 55 52.8)">🎁</text><text x="1.25em" y="2em" font-size="88" transform="rotate(17 165 140.8)">🎈</text><text x="2.5em" y="1em" font-size="88" transform="rotate(17 275 52.8)">🎀</text><text x="3.75em" y="2em" font-size="88" transform="rotate(17 385 140.8)">🎊</text><text x="5em" y="1em" font-size="88" transform="rotate(17 495 52.8)">🎉</text></svg>');
+}
+#contestNotify h4 { color:#f5f0ff; }
+#contestNotify .contest-notify__highlight,
+#contestNotify #textContest { color:#d8ccf0; }
+#contestNotify b,
+#contestNotify #countdown,
+#contestNotify #timett { color:#fff; }
+#contestBtns a {
+	background-color:#5b3db8;
+	color:#fff !important;
+}
+#contestBtns a:hover {
+	background-color:#7350d4;
+	color:#fff !important;
+}
+
 [type="text"],
 [type="password"],
 [type="color"],

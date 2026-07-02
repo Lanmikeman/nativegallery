@@ -126,34 +126,27 @@ LIMIT 10;');
                                 }
                                 ?>
                             </div>
-                            <style>
-                                #contestNotify {
-                                    background-size: 550px 211.2px;
-                                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 550 211.2" width="550" height="211.2" style="opacity: 0.3; filter: grayscale(0);"><text x="0em" y="1em" font-size="88" transform="rotate(17 55 52.8)">🎁</text><text x="1.25em" y="2em" font-size="88" transform="rotate(17 165 140.8)">🎈</text><text x="2.5em" y="1em" font-size="88" transform="rotate(17 275 52.8)">🎀</text><text x="3.75em" y="2em" font-size="88" transform="rotate(17 385 140.8)">🎊</text><text x="5em" y="1em" font-size="88" transform="rotate(17 495 52.8)">🎉</text></svg>');
-                                }
-                            </style>
-                            
                             <?php
                             $activeVoting = DB::query('SELECT * FROM contests WHERE status=2 ORDER BY id DESC LIMIT 1');
                             if (!empty($activeVoting)) {
                                 $contest = $activeVoting[0];
                                 $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0];
-                                echo ' <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
+                                echo ' <div id="contestNotify"><h4>Фотоконкурс!</h4>
                                 <span id="timett">Закончится через:</span> <b id="countdown"></b><br>
-                                Тематика: <b>' . $theme['title'] . '</b><br>
-                                <b style="color: #412378;">Голосуйте за лучшие фотографии, которые должны стать победителями сегодняшнего конкурса!</b><br><br>
-                                <div id="contestBtns"><a href="/voting" style="background-color: #37009D; color: #fff;" type="button">Голосовать!</a></div>
+                                Тематика: <b>' . htmlspecialchars((string) $theme['title']) . '</b><br>
+                                <b class="contest-notify__highlight">Голосуйте за лучшие фотографии, которые должны стать победителями сегодняшнего конкурса!</b><br><br>
+                                <div id="contestBtns"><a href="/voting" type="button">Голосовать!</a></div>
                                 <script>startCountdown(' . $contest['closedate'] . ');</script>';
                             } else {
                                 $pretendContest = DB::query('SELECT * FROM contests WHERE status=1 ORDER BY id DESC LIMIT 1');
                                 if (!empty($pretendContest)) {
                                 $contest = $pretendContest[0];
                                 $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0];
-                                echo ' <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
+                                echo ' <div id="contestNotify"><h4>Фотоконкурс!</h4>
                                 <span id="timett">Начнётся через:</span> <b id="countdown"></b><br>
-                                Тематика: <b>' . $theme['title'] . '</b><br>
-                                <b id="textContest" style="color: #412378;">Лучшие фотографии по мнению сообщества ' . NGALLERY['root']['title'] . ' будут отмечены</b><br><br>
-                                <div id="contestBtns"><a href="/voting/sendpretend" style="background-color: #37009D; color: #fff;" type="button">Участвовать!</a> <a href="/voting/waiting" style="background-color: #37009D; color: #fff;" type="button">Голосовать за претендентов</a></div>
+                                Тематика: <b>' . htmlspecialchars((string) $theme['title']) . '</b><br>
+                                <b id="textContest" class="contest-notify__highlight">Лучшие фотографии по мнению сообщества ' . htmlspecialchars((string) NGALLERY['root']['title']) . ' будут отмечены</b><br><br>
+                                <div id="contestBtns"><a href="/voting/sendpretend" type="button">Участвовать!</a> <a href="/voting/waiting" type="button">Голосовать за претендентов</a></div>
                                 <script>startCountdown(' . $contest['closepretendsdate'] . ');</script>
                                 <script>
                                  $(document).ready(function () {
@@ -177,7 +170,7 @@ LIMIT 10;');
                                                         clearInterval(pingInterval); // Останавливаем старый пинг
                                                         $("#textContest").text("Голосуйте за лучшие фотографии, которые должны стать победителями сегодняшнего конкурса!");
                                                         $("#timett").text("Закончится через:");
-                                                        $("#contestBtns").html(`<a href="/voting" style="background-color: #37009D; color: #fff;" type="button">Голосовать!</a>`)
+                                                        $("#contestBtns").html(`<a href="/voting" type="button">Голосовать!</a>`)
                                                         unixThreshold = data.contest.closedate;
                                                         startCountdown(data.contest.closedate);
                                                         pingInterval = setInterval(checkUnixTime, checkInterval);

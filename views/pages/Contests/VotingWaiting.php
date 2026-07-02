@@ -29,7 +29,7 @@ ExecContests::tick();
 						var self_p = false;
 						var pid = 0;
 					</script>
-					<p class="narrow" style="font-size:19px"><a href="/voting">Голосование</a> &nbsp;·&nbsp; <a href="/voting/results">Победители</a> &nbsp;·&nbsp; <a href="/voting/rating">Рейтинг</a> &nbsp;·&nbsp; <b>Претенденты</b></p>
+					<?php $contestNavActive = 'waiting'; include $_SERVER['DOCUMENT_ROOT'] . '/views/components/ContestNav.php'; ?>
 					<p style="margin:20px">На этой странице собраны фотографии, предложенные для участия в конкурсе их авторами либо пользователями сайта, для того, чтобы Вы проголосовали за их участие или против. Снимки отсортированы по времени публикации.<br><br>Пожалуйста, не стесняйтесь нажимать синюю кнопку.</p>
 					<?php
 					$pretendContest = DB::query('SELECT * FROM contests WHERE status=1 ORDER BY id DESC LIMIT 1');
@@ -99,7 +99,7 @@ ExecContests::tick();
 							
 				
 					<br>
-					<p class="narrow" style="font-size:19px"><a href="/voting">Голосование</a> &nbsp;·&nbsp; <a href="/voting/results">Победители</a> &nbsp;·&nbsp; <a href="/voting/rating">Рейтинг</a> &nbsp;·&nbsp; <b>Претенденты</b></p>
+					<?php $contestNavActive = 'waiting'; include $_SERVER['DOCUMENT_ROOT'] . '/views/components/ContestNav.php'; ?>
 				</center>
 			</td>
 		</tr>

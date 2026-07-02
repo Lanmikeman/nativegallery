@@ -96,7 +96,7 @@ $(document).ready(function()
                 <center>
                     <h1>Фотоконкурс</h1>
 
-                    <p class="narrow" style="font-size:19px"><b>Голосование</b> &nbsp;&middot;&nbsp; <a href="/voting/results">Победители</a> &nbsp;&middot;&nbsp; <a href="/voting/rating">Рейтинг</a> &nbsp;&middot;&nbsp; <a href="/voting/waiting">Претенденты</a></p>
+                    <?php $contestNavActive = 'voting'; include $_SERVER['DOCUMENT_ROOT'] . '/views/components/ContestNav.php'; ?>
                     <div style="margin-top:20px">Чтобы проголосовать, отметьте одну, две или три фотографии, которые Вам понравились</div><br><br>
                     <?php
                     if ($votingContest) {

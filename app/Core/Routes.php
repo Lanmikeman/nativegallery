@@ -44,6 +44,7 @@ class Routes
         Router::get('/article/$id', 'MainController@gallery');
         Router::get('/voting', 'ContestsController@index');
         Router::get('/voting/results', 'ContestsController@results');
+        Router::get('/voting/rating', 'ContestsController@rating');
         Router::get('/voting/waiting', 'ContestsController@waiting');
         Router::get('/comments', 'MainController@comments');
         Router::get('/news', 'MainController@chronology');

@@ -28,4 +28,9 @@ class ContestsController
        
     }
 
+    public static function rating()
+    {
+        Page::set('Contests/VotingRating');
+    }
+
 }

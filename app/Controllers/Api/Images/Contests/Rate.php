@@ -13,28 +13,44 @@ class Rate
     public function __construct()
     {
         $count = 3;
-        $uservotes = DB::query('SELECT COUNT(*) FROM contests_rates WHERE user_id=:uid AND contest_id=:cid', array(':uid' => Auth::userid(), ':cid' => $_GET['kid']))[0]['COUNT(*)'];
-        $countvotes = $count - $uservotes;
-        $contest = DB::query('SELECT * FROM contests WHERE id=:id', array(":id" => $_GET['kid']))[0];
-        $photo = new Photo($_GET['pid']);
-        if ($contest['status'] != 2) {
-            exit;
+        $contestId = (int) ($_GET['kid'] ?? 0);
+        $photoId = (int) ($_GET['pid'] ?? 0);
+        if ($contestId <= 0 || $photoId <= 0) {
+            $this->respond($photoId, 0, 'Некорректные параметры голосования.');
         }
-        if ($photo->i('on_contest') != 1 && $photo->i('contest_id') != $_GET['kid']) {
-            exit;
+
+        $uservotes = (int) (DB::query(
+            'SELECT COUNT(*) AS cnt FROM contests_rates WHERE user_id=:uid AND contest_id=:cid',
+            [':uid' => Auth::userid(), ':cid' => $contestId]
+        )[0]['cnt'] ?? 0);
+        $countvotes = $count - $uservotes;
+
+        $contestRows = DB::query('SELECT * FROM contests WHERE id=:id', [':id' => $contestId]);
+        if (empty($contestRows)) {
+            $this->respond($photoId, 0, 'Конкурс не найден.');
+        }
+        $contest = $contestRows[0];
+
+        $photo = new Photo($photoId);
+        if ((int) $contest['status'] !== 2) {
+            $this->respond($photoId, 0, 'Голосование сейчас не проводится.');
+        }
+        if ((int) $photo->i('on_contest') !== 2 || (int) $photo->i('contest_id') !== $contestId) {
+            $this->respond($photoId, 0, 'Фото не участвует в этом конкурсе.');
         }
         $existingRate = DB::query(
             'SELECT photo_id FROM contests_rates WHERE photo_id=:pid AND user_id=:uid AND contest_id=:cid',
-            [':uid' => Auth::userid(), ':pid' => $_GET['pid'], ':cid' => $_GET['kid']]
+            [':uid' => Auth::userid(), ':pid' => $photoId, ':cid' => $contestId]
         );
+        $status = 0;
         if (!empty($existingRate)) {
-            DB::query('DELETE FROM contests_rates WHERE user_id=:uid AND photo_id=:pid AND contest_id=:cid', array(':pid' => $_GET['pid'], ':uid' => Auth::userid(), ':cid' => $_GET['kid']));
+            DB::query('DELETE FROM contests_rates WHERE user_id=:uid AND photo_id=:pid AND contest_id=:cid', [':pid' => $photoId, ':uid' => Auth::userid(), ':cid' => $contestId]);
             $status = 0;
             $newval = $countvotes + 1;
         } else {
             $newval = $countvotes - 1;
             if ($newval >= 0) {
-                DB::query('INSERT INTO contests_rates VALUES (\'0\', :pid, :uid, :cid)', array(':pid' => $_GET['pid'], ':uid' => Auth::userid(), ':cid' => $_GET['kid']));
+                DB::query('INSERT INTO contests_rates VALUES (\'0\', :pid, :uid, :cid)', [':pid' => $photoId, ':uid' => Auth::userid(), ':cid' => $contestId]);
                 $status = 1;
             }
         }
@@ -45,6 +61,13 @@ class Rate
         } else {
             $text = "Вы можете выбрать ещё {$newval} фото.";
         }
-        echo '[{"' . $_GET['pid'] . '":'.$status.'},"' . $text . '"]';
+        $this->respond($photoId, $status, $text);
+    }
+
+    private function respond(int $photoId, int $status, string $text): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([[(string) $photoId => $status], $text], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

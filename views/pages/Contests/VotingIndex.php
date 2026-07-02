@@ -43,8 +43,9 @@ function hideTip()
 
 $(document).ready(function()
 {
-	$('.contestBtn').click(function()
+	$('.contestBtn').click(function(e)
 	{
+		e.preventDefault();
 		var pid = $(this).attr('pid');
 		var savedClass = $(this).attr('class');
 		$(this).addClass('loading');
@@ -68,8 +69,13 @@ $(document).ready(function()
 
 	$(document).on('mouseenter', '.f', function()
 	{
-		var hidden_img = $(this).closest('.p20p').prev('img');
-		$('#img').html('<a href="/photo/' + hidden_img.attr('pid') + '/" target="_blank"><img src="' + (hidden_img.length ? hidden_img.attr('src') : this.src.replace('_s', '')) + '"></a>');
+		var block = $(this).closest('.p20p');
+		var pid = block.data('pid') || block.prevAll('img[pid]').first().attr('pid');
+		if (!pid) {
+			return;
+		}
+		var previewSrc = this.src.replace('_s', '');
+		$('#img').html('<img src="' + previewSrc + '" alt="">');
 		$('#tip').css('top', $(window).scrollTop() + 20).show();
 	})
     .on('mouseenter', '.f, #tip', function()
@@ -116,10 +122,10 @@ $(document).ready(function()
                                 $class = ' voted';
                             }
                             echo '<img pid="'.$pc['id'].'" src="'.$pc['photourl'].'" style="display:none">
-                        <div class="p20p">
+                        <div class="p20p" data-pid="'.$pc['id'].'">
                             <table>
                                 <tr>
-                                    <td><a href="#" pid="'.$pc['id'].'" class="contestBtn'.$class.'"></a></td>
+                                    <td><a href="javascript:void(0)" role="button" pid="'.$pc['id'].'" class="contestBtn'.$class.'"></a></td>
                                     <td class="pb_photo" id="p2068176"><a href="/photo/'.$pc['id'].'/" target="_blank" class="prw"><img class="f" src="/api/photo/compress?url='.$pc['photourl'].'" data-src="/api/photo/compress?url='.$pc['photourl'].'" alt="630 КБ">
                                             <div class="hpshade">
                                                 <div class="eye-icon">'.DB::query('SELECT COUNT(*) FROM photos_views WHERE photo_id=:id', array(':id'=>$pc['id']))[0]['COUNT(*)'].'</div>

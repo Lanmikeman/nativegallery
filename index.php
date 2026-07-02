@@ -3,7 +3,7 @@
 require __DIR__.'/vendor/autoload.php';
 session_start();
 use App\Core\{Routes, Page};
-use App\Services\DB;
+use App\Services\{DB, GalleryConfig};
 use Symfony\Component\Yaml\Yaml;
 use Tracy\Debugger;
 
@@ -16,7 +16,9 @@ class App
         error_reporting(E_ALL);
 
         if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/ngallery.yaml')) {
-            define("NGALLERY", Yaml::parse(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/ngallery.yaml'))['ngallery']);
+            $ngallery = Yaml::parse(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/ngallery.yaml'))['ngallery'];
+            $ngallery = GalleryConfig::applyAuthOverlay($ngallery);
+            define('NGALLERY', $ngallery);
             define("NGALLERY_TASKS", Yaml::parse(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/app/Controllers/Exec/Tasks/ngallery-tasks.yaml'))['tasks']);
             \App\Services\Date::applySiteTimezone();
             if (NGALLERY['root']['debug'] === true) {

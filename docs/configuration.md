@@ -232,7 +232,7 @@ openvk:
 | `providers.*.accent` | Цвет кнопки входа |
 | `providers.*.icon` | Favicon/иконка инстанса |
 
-Управление из админки: `/admin?type=AuthSettings` (только для `admin = 1`).
+Управление из админки: `/admin?type=AuthSettings` (только для `admin = 1`). Переключатели сохраняются в `storage/auth-settings.json` и перекрывают значения из yaml — `ngallery.yaml` можно оставить только для чтения.
 
 Привязка существующего аккаунта: `/lk/profile?type=OpenVK`.
 

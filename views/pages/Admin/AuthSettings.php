@@ -16,7 +16,7 @@ if (!is_array($providers)) {
 }
 ?>
 <h1><b>Авторизация</b></h1>
-<p class="text-muted">Включение и отключение регистрации и входа через внешние сервисы. Изменения записываются в <code>ngallery.yaml</code>.</p>
+<p class="text-muted">Включение и отключение регистрации и входа через внешние сервисы. Изменения сохраняются в <code>storage/auth-settings.json</code> (базовые значения — в <code>ngallery.yaml</code>).</p>
 
 <div id="auth-settings-alert"></div>
 

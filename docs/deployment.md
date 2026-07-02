@@ -46,6 +46,7 @@ chmod -R 775 uploads cdn logs storage
 | `uploads/` | Загруженные фото и видео (`storage.type: server`) |
 | `cdn/` | Превью, временные файлы обработки |
 | `storage/locks/` | Блокировки при генерации превью |
+| `storage/auth-settings.json` | Переключатели регистрации и OpenVK из админки |
 | `logs/` | Логи Tracy (при `debug: true`) |
 
 ## Cron фотоконкурсов

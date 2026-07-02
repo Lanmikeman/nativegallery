@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\DB;
+use App\Services\{DB, GalleryConfig};
 use Symfony\Component\Yaml\Yaml;
 
 $projectRoot = dirname(__DIR__, 3);
@@ -15,7 +15,8 @@ if (!defined('NGALLERY')) {
         fwrite(STDERR, "ngallery.yaml not found: {$configPath}\n");
         exit(1);
     }
-    define('NGALLERY', Yaml::parse(file_get_contents($configPath))['ngallery']);
+    $ngallery = Yaml::parse(file_get_contents($configPath))['ngallery'];
+    define('NGALLERY', GalleryConfig::applyAuthOverlay($ngallery));
 }
 
 if (empty($_SERVER['DOCUMENT_ROOT'])) {

@@ -4,17 +4,47 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/).
 
+## О форке
+
+Форк [Lanmikeman/nativegallery](https://github.com/Lanmikeman/nativegallery) основан на upstream-проекте [claradex/nativegallery](https://github.com/claradex/nativegallery). Точка ответвления — коммит `7975610` (merge PR #17, 2026-03-06). Собственные изменения форка — 32 коммита (2026-07-02), ориентированы на production-развёртывание Ubuntu 24.04 + Nginx + PHP 8.3 + MariaDB и функциональный паритет с [transphoto.org](https://transphoto.org).
+
 ## [Unreleased]
+
+## [1.5] — 2026-07-02
 
 ### Добавлено
 
-- Редактирование новостей сайта в админке (`/admin?type=News`):
-  - кнопка «Редактировать» и модальное окно для правки текста (орфография и др.)
-  - дата публикации (`time`) не меняется; фиксируются `edited_at` и `edited_by`
-  - на `/news2` и главной: подпись «Отредактировано {дата} — {ник}»
+- **Вход через OpenVK** (openvk.org и vepurovk.xyz):
+  - Кнопки на `/login` и `/register`
+  - Маршруты `/auth/openvk/start`, `/auth/callback`, API `POST /api/auth/openvk`
+  - Автоматическая регистрация (`openvk.auto_register`) или привязка к существующему аккаунту
+  - Вкладка привязки в `/lk/profile?type=OpenVK`
+  - Ссылки на профиль OpenVK в личном кабинете и публичном профиле
+  - Настройка в `ngallery.yaml` → `openvk` (см. [docs/configuration.md](docs/configuration.md))
+- **Редактирование новостей сайта** в админке (`/admin?type=News`):
+  - Кнопка «Редактировать» и модальное окно для правки текста (орфография и др.)
+  - Дата публикации (`time`) не меняется; фиксируются `edited_at` и `edited_by`
+  - На `/news2` и главной: подпись «Отредактировано {дата} — {ник}»
   - API: `GET /api/admin/news/{id}`, `POST /api/admin/news/{id}/edit`
-  - сервис `App\Services\SiteNews`
-  - миграция `sqlcore/sql_0008.sql`
+  - Сервис `App\Services\SiteNews`
+  - Миграция `sqlcore/sql_0008.sql`
+- Страницы админки:
+  - `/admin?type=Galleries` — управление тематическими галереями (CRUD)
+  - `/admin?type=EntityEdit` — редактирование типов сущностей и моделей
+
+### Изменено
+
+- `AdminController`: маршрутизация по `?type=` через `resolvePage()` (раньше конструктор не вызывался)
+- Боковое меню админки: счётчики непромодерированных фото и заявок на изменение БД
+
+### Исправлено
+
+- Пустая страница тематической галереи `/article/{id}` — корректный доступ к строке БД и ID фото
+- Проверка токена OpenVK: API-хост `https://api.openvk.org`, `user_id` из callback
+- Предупреждения PHP 8.3 в `User::content` и cookies сессии (`AuthSession`)
+- Предупреждения PHP в страницах админки (`$nonr`, `$nonr_e`, неопределённые переменные)
+- Кнопка редактирования новости: загрузка текста из data-атрибутов, порядок скриптов
+- Неиспользуемый импорт `UserAgentParser` в `Register`
 
 ## [1.4] — 2026-07-02
 
@@ -99,6 +129,6 @@
 
 ## [1.3] — 2025-05-26
 
-Базовая версия upstream-проекта [claradex/nativegallery](https://github.com/claradex/nativegallery).
+Базовая версия upstream-проекта [claradex/nativegallery](https://github.com/claradex/nativegallery) на момент форка.
 
 Основной функционал: авторизация, профили, публикация фото, GeoDB, галереи, комментарии, рейтинги, модерация, фотоконкурсы (beta), админ-панель.

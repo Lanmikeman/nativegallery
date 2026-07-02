@@ -8,14 +8,31 @@
 | `/photo/{id}` | Страница фотографии |
 | `/author/{id}` | Профиль автора |
 | `/vehicle/{id}` | Карточка транспортного средства |
+| `/article/{id}` | Тематическая фотогалерея |
 | `/news` | Новости и хронология |
-| `/news2` | Новости сайта |
-| `/misc` | Тематические галереи |
+| `/news2` | Новости сайта (с пометкой об исправлениях) |
+| `/misc` | Список тематических галерей |
 | `/links` | Внешние ссылки |
 | `/voting` | Фотоконкурс |
 | `/comments` | Лента комментариев |
 | `/feed` | Лента обновлений |
-| `/mapmedia` | Карта медиа |
+| `/mapmedia` | Карта медиа (требуется вход) |
+| `/login` | Вход (логин/пароль + OpenVK) |
+| `/register` | Регистрация (+ OpenVK) |
+
+## Авторизация OpenVK
+
+Доступна при `openvk.enabled: true` в `ngallery.yaml`.
+
+| URL | Метод | Описание |
+|-----|-------|----------|
+| `/auth/openvk/start?provider=openvk_org` | GET | Старт OAuth на openvk.org |
+| `/auth/openvk/start?provider=vepurovk` | GET | Старт OAuth на vepurovk.xyz |
+| `/auth/callback` | GET | Callback после авторизации |
+| `/api/auth/openvk` | POST | Обмен токена на локальную сессию |
+| `/lk/profile?type=OpenVK` | GET | Привязка OpenVK к существующему аккаунту |
+
+Параметр `provider` соответствует ключу в `openvk.providers` (`openvk_org`, `vepurovk`).
 
 ## Обновления (`/update`)
 
@@ -64,20 +81,35 @@
 | `/lk/` | Личный кабинет |
 | `/lk/upload` | Загрузка медиа |
 | `/lk/editimage?id=` | Редактирование фото |
+| `/lk/profile?type=OpenVK` | Привязка OpenVK |
 | `/vehicle/dbedit` | Заявка на изменение БД сущностей |
 
 ## Администрирование
 
 | URL | Описание |
 |-----|----------|
-| `/admin` | Панель администратора |
-| `/admin?type=News` | Новости сайта |
+| `/admin` | Пользователи |
+| `/admin?type=Photo` | Модерация фотографий |
+| `/admin?type=News` | Новости сайта (создание, редактирование, удаление) |
 | `/admin?type=Chronology` | Хронология |
 | `/admin?type=Links` | Ссылки |
-| `/admin?type=Galleries` | Галереи |
+| `/admin?type=Galleries` | Тематические галереи |
+| `/admin?type=Entities` | Список сущностей |
+| `/admin?type=EntityEdit` | Редактирование типов и моделей (`?mod=1`) |
 | `/admin?type=Models` | Заявки на изменение БД |
 | `/admin?type=Contests` | Фотоконкурсы |
+| `/admin?type=GeoDB` | GeoDB |
+| `/admin?type=Settings` | Настройки |
+
+### API админки (новости)
+
+| URL | Метод | Описание |
+|-----|-------|----------|
+| `/api/admin/news/create` | POST | Создать новость |
+| `/api/admin/news/{id}` | GET | Получить новость для редактирования |
+| `/api/admin/news/{id}/edit` | POST | Сохранить правки (фиксирует `edited_at`, `edited_by`) |
+| `/api/admin/news/{id}/delete` | POST | Удалить новость |
 
 ## Обратная совместимость
 
-Старые `.php` URL перенаправляются на новые маршруты, например: `/news.php`, `/search.php`, `/update.php`.
+Старые `.php` URL перенаправляются на новые маршруты, например: `/news.php`, `/news2.php`, `/links.php`, `/search.php`, `/update.php`.

@@ -86,9 +86,7 @@ $isDeclined = (int) $photo->i('moderated') === 2;
                                         ?>
                                     </select>
                                     <select name="year" id="year" style="width:65px">
-                                        <?php for ($y = (int) date('Y'); $y >= 1850; $y--) {
-                                            echo '<option value="' . $y . '"' . ($y === $year ? ' selected' : '') . '>' . $y . '</option>';
-                                        } ?>
+                                        <?= Date::yearSelectOptions($year) ?>
                                     </select>
                                 </td>
                             </tr>

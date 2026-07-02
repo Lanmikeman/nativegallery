@@ -48,7 +48,8 @@ use \App\Models\{User, Photo};
                     foreach ($final_result as $fc) {
                         $themeid = DB::query('SELECT themeid FROM contests WHERE id=:id', array(':id'=>$fc[0]['contest_id']))[0]['themeid'];
                         $theme = DB::query('SELECT title FROM contests_themes WHERE id=:id', array(':id'=>$themeid))[0]['title'];
-                        echo '<p><span class="narrow" style="font-size:21px"><b><a href="?show=table&amp;date=2025-02-04" title="Подробный отчёт о конкурсе">'.date('d.m.Y', $fc[0]['date']).'</a></b></span><br><span class="sm">'.$theme.'</span></p>
+                        $contestDate = date('Y-m-d', (int) $fc[0]['date']);
+                        echo '<p><span class="narrow" style="font-size:21px"><b><a href="?show=table&amp;date='.$contestDate.'" title="Подробный отчёт о конкурсе">'.date('d.m.Y', $fc[0]['date']).'</a></b></span><br><span class="sm">'.$theme.'</span></p>
                         <table>
                             <tr>';
                                 foreach ($fc as $f) {

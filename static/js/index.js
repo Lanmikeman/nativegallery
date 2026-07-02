@@ -229,7 +229,8 @@ function startCountdown(unixTimestamp) {
 
 		if (diff <= 0) {
 			clearInterval(interval);
-			document.getElementById('countdown').textContent = "00 дней 00 часов 00 минут 00 секунд";
+			const el = document.getElementById('countdown');
+			if (el) el.textContent = "Скоро";
 			return;
 		}
 

@@ -9,6 +9,9 @@ class Date
         $currentTime = time();
         $dateDiff = $currentTime - $date;
         if ($date != null) {
+            if ($dateDiff < 0) {
+                return self::formatDate($date);
+            }
             if ($dateDiff <= 1) {
                 return "только что";
             } elseif ($dateDiff < 60) {
@@ -65,6 +68,18 @@ class Date
             $formattedDate
         );
         return $formattedDate;
+    }
+
+    public static function yearSelectOptions(int $selected = 0, int $minYear = 1850, bool $includeUnknown = false): string
+    {
+        $html = '';
+        if ($includeUnknown) {
+            $html .= '<option value="0"' . ($selected === 0 ? ' selected' : '') . '>????</option>';
+        }
+        for ($year = (int) date('Y'); $year >= $minYear; $year--) {
+            $html .= '<option value="' . $year . '"' . ($year === $selected ? ' selected' : '') . '>' . $year . '</option>';
+        }
+        return $html;
     }
 
     public static function chronologyDate(int $date): string

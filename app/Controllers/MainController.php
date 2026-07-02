@@ -32,6 +32,10 @@ class MainController
        Page::set('MapMedia');
        
     }
+    public static function help()
+    {
+        Page::set('Help');
+    }
     public static function rules()
     {
        Page::set('Rules');

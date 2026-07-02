@@ -25,6 +25,7 @@ class Routes
         Router::post('/api/auth/openvk', 'ApiController@openvkauth');
         Router::get('/api/photo/stats', 'ApiController@photostats');
         Router::get('/about', 'MainController@about');
+        Router::get('/help', 'MainController@help');
         Router::get('/rules', 'MainController@rules');
         Router::get('/rules/pub', 'MainController@publicationRules');
         Router::get('/rules/photo', 'MainController@photoRules');

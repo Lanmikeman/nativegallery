@@ -18,7 +18,10 @@ class RequestHandler
         $modelrequest = DB::query('SELECT * FROM entities_requests WHERE id=:id', array(':id' => $id))[0];
         if ($modelrequest) {
             if ($type === 'accept') {
-                DB::query('INSERT INTO entities_data VALUES (\'0\', :title, :createdate, :entityid, NULL, :content)', array(':title' => $modelrequest['title'], ':createdate' => time(), ':entityid' => $modelrequest['entityid'], ':content' => $modelrequest['data']));
+                DB::query(
+                    'INSERT INTO entities_data (title, createdate, entityid, comment, content) VALUES (:title, :createdate, :entityid, NULL, :content)',
+                    array(':title' => $modelrequest['title'], ':createdate' => time(), ':entityid' => $modelrequest['entityid'], ':content' => $modelrequest['data'])
+                );
                 DB::query('UPDATE entities_requests SET status=1 WHERE id=:id', array(':id' => $id));
             } else if ($type === 'decline') {
                 DB::query('UPDATE entities_requests SET status=2 WHERE id=:id', array(':id' => $id));

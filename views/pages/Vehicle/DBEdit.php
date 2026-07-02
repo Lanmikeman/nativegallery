@@ -3,10 +3,22 @@
 use \App\Services\{Auth, DB, Date, Captcha};
 use \App\Models\{Vehicle, User};
 
-$vehicle = DB::query('SELECT * FROM entities WHERE id=:id', array(':id' => $_GET['type']))[0];
-$lastRequestUnix = DB::query('SELECT created_at FROM entities_requests WHERE user_id=:id ORDER BY id DESC LIMIT 1', array(':id' => Auth::userid()))[0]['created_at'];
+$type = (int)($_POST['type'] ?? $_GET['type'] ?? 0);
+$linkGos = (int)($_POST['link_gos'] ?? $_GET['link_gos'] ?? 0);
+$num = trim((string)($_POST['num'] ?? $_GET['num'] ?? ''));
+$gos = trim((string)($_POST['gos'] ?? $_GET['gos'] ?? ''));
+
+$vehicleRows = DB::query('SELECT * FROM entities WHERE id=:id', array(':id' => $type));
+if (!$vehicleRows) {
+    die('Неизвестный тип сущности');
+}
+$vehicle = $vehicleRows[0];
+
+$lastRequestRows = DB::query('SELECT created_at FROM entities_requests WHERE user_id=:id ORDER BY id DESC LIMIT 1', array(':id' => Auth::userid()));
+$lastRequestUnix = $lastRequestRows[0]['created_at'] ?? 0;
 $secondsDifference = time() - $lastRequestUnix;
 $hoursDifference = floor($secondsDifference / 3600);
+
 if (isset($_POST['create'])) {
     if ($hoursDifference >= 23) {
         try {
@@ -38,12 +50,51 @@ if (isset($_POST['create'])) {
             }
             $jsonResult = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-            DB::query('INSERT INTO entities_requests VALUES (\'0\', :user_id, :createdate, :entityid, :content, 0)', array(':user_id' => Auth::userid(), ':createdate' => time(), ':entityid' => $_GET['type'], ':content' => $jsonResult));
+            $baseNid = (int)($_POST['base_nid'] ?? 0);
+            if ($baseNid > 0) {
+                $baseRows = DB::query('SELECT title FROM entities_data WHERE id=:id', array(':id' => $baseNid));
+                $requestTitle = $baseRows[0]['title'] ?? '';
+            } else {
+                $requestTitle = $result[1]['value'] ?? '';
+            }
+            if ($requestTitle === '') {
+                $requestTitle = $linkGos === 1 ? $gos : $num;
+            }
+
+            DB::query(
+                'INSERT INTO entities_requests (title, user_id, created_at, entityid, data, status) VALUES (:title, :user_id, :created_at, :entityid, :data, 0)',
+                array(
+                    ':title' => $requestTitle,
+                    ':user_id' => Auth::userid(),
+                    ':created_at' => time(),
+                    ':entityid' => $type,
+                    ':data' => $jsonResult,
+                )
+            );
             $success = 1;
         } catch (Exception $e) {
             die("Error: " . $e->getMessage());
         }
     }
+}
+
+if ($linkGos === 1 && $gos !== '') {
+    $entities = DB::query(
+        'SELECT * FROM entities_data WHERE entityid=:id AND LOWER(title) LIKE :title',
+        array(':id' => $type, ':title' => '%' . mb_strtolower($gos) . '%')
+    );
+} elseif ($num !== '' && ctype_digit($num)) {
+    $entities = DB::query(
+        'SELECT * FROM entities_data WHERE entityid=:id AND id=:num',
+        array(':id' => $type, ':num' => (int)$num)
+    );
+} elseif ($num !== '') {
+    $entities = DB::query(
+        'SELECT * FROM entities_data WHERE entityid=:id AND LOWER(title) LIKE :title',
+        array(':id' => $type, ':title' => '%' . mb_strtolower($num) . '%')
+    );
+} else {
+    $entities = [];
 }
 ?>
 
@@ -70,7 +121,12 @@ if (isset($_POST['create'])) {
                 <?php if ($success) { ?> <div style="border:solid 1px rgb(0, 140, 86); padding:6px 10px 7px; margin-bottom:13px; background-color:rgb(137, 216, 150);">Заявка на рассмотрение успешно отправлена</div> <?php } ?>
                 <?php if ($hoursDifference >= 23) { ?>
                 <form method="post" id="mform" action="<?= $_SERVER['REQUEST_URI'] ?>">
-
+                    <input type="hidden" name="type" value="<?= htmlspecialchars((string)$type) ?>">
+                    <input type="hidden" name="num" value="<?= htmlspecialchars($num) ?>">
+                    <input type="hidden" name="gos" value="<?= htmlspecialchars($gos) ?>">
+                    <input type="hidden" name="link_gos" value="<?= $linkGos ?>">
+                    <input type="hidden" name="action" value="add">
+                    <input type="hidden" name="mid" value="<?= (int)($_POST['mid'] ?? $_GET['mid'] ?? 0) ?>">
 
                     <h4>Какую запись вы хотите уточнить?</h4>
                     <div class="p20w">
@@ -86,7 +142,6 @@ if (isset($_POST['create'])) {
                                     <td class="d" colspan="7">Никакую, я хочу добавить новое ТС</td>
                                 </tr>
                                 <?php
-                                $entities = DB::query('SELECT * FROM entities_data WHERE entityid=:id AND (LOWER(title) LIKE :title)', array(':title' => $_GET['num'], ':id' => $_GET['type']));
                                 foreach ($entities as $e) {
                                     echo '<tr>
                                     <td class="ds"><input type="radio" name="base_nid" id="n' . $e['id'] . '" value="' . $e['id'] . '" onclick="fillFields(' . $e['id'] . ')"></td>
@@ -107,7 +162,6 @@ if (isset($_POST['create'])) {
                             <input type="hidden" name="did" value="27">
                             <tbody>
                                 <?php
-                                $vehicle = DB::query('SELECT * FROM entities WHERE id=:id', array(':id' => $_GET['type']))[0];
                                 $data = json_decode($vehicle['sampledata'], true);
                                 $count = 1;
                                 foreach ($data as $d) {

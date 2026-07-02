@@ -163,6 +163,7 @@ class Routes
                 Router::post('/api/admin/contests/forceclose', 'ApiController@admincontestsforceclose');
                 Router::post('/api/admin/contests/cancel', 'ApiController@admincontestscancel');
                 Router::any('/api/admin/settings/taskmanager', 'ApiController@admintaskmanager');
+                Router::post('/api/admin/settings/music', 'ApiController@adminsettingsmusic');
                 Router::post('/api/admin/settings/auth', 'ApiController@adminsettingsauth');
                 Router::post('/api/admin/settings/auth/providers', 'ApiController@adminsettingsauthprovider');
                 Router::post('/api/admin/settings/auth/providers/$id', 'ApiController@adminsettingsauthprovider');

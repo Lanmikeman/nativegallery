@@ -10,7 +10,7 @@
 
 | Файл | Кто управляет | Что перекрывает |
 |------|---------------|-----------------|
-| `storage/auth-settings.json` | Админ (`/admin?type=AuthSettings`) | `registration`, `openvk` (инстансы, включение регистрации) |
+| `storage/auth-settings.json` | Админ (`/admin?type=AuthSettings`, `/admin?type=MusicSettings`) | `registration`, `openvk` (инстансы, включение регистрации), `audio.enabled` |
 | `storage/server-settings.json` | Владелец (`/admin?type=ServerSettings`, `admin = 4`) | Параметры `root` (включая `debug`, `footerslogan`, `title` и др.) |
 
 Приоритет: `ngallery.yaml` → `storage/server-settings.json` → `storage/auth-settings.json` (auth применяется отдельно).
@@ -189,6 +189,7 @@ video:
 
 ```yaml
 audio:
+  enabled: true
   upload:
     allow: true
     maxsize: 52428800    # байты, по умолчанию 50 МБ
@@ -198,11 +199,12 @@ audio:
 
 | Параметр | Описание |
 |----------|----------|
+| `enabled` | Включить раздел музыки (`/music`, мини-плеер, API `/api/audio/*`). Можно переключать в админке: `/admin?type=MusicSettings` |
 | `upload.allow` | Разрешить загрузку аудиофайлов в личную библиотеку |
 | `upload.maxsize` | Максимальный размер файла в байтах |
 | `streams.allow` | Разрешить добавление HTTP-потоков и внешних URL |
 
-Общие станции сайта (для всех пользователей) настраиваются в админке и **не** задаются в yaml.
+Общие станции сайта (для всех пользователей) настраиваются в админке и **не** задаются в yaml. Управление радиостанциями (`/admin?type=RadioStations`) доступно даже при `enabled: false`.
 
 ## Комментарии
 

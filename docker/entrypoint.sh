@@ -84,6 +84,7 @@ ngallery:
       upload:
         allow: true
     audio:
+      enabled: true
       upload:
         allow: true
         maxsize: 52428800

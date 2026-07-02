@@ -17,6 +17,10 @@ class Delete
             echo Json::return(['errorcode' => 'NO_TABLES', 'error' => 1, 'message' => 'Примените миграцию sql_0010.sql']);
             return;
         }
+        if ($disabled = AudioLibrary::disabledResponse()) {
+            echo Json::return($disabled);
+            return;
+        }
 
         $kind = trim((string) ($_POST['kind'] ?? $_GET['kind'] ?? ''));
         $id = (int) ($_POST['id'] ?? $_GET['id'] ?? 0);

@@ -1,6 +1,6 @@
 <?php
 
-use \App\Services\{Auth, DB};
+use \App\Services\{Auth, DB, AudioLibrary};
 use \App\Models\User;
 
 $user = new \App\Models\User(Auth::userid());
@@ -106,8 +106,10 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
                                 }
                             }
                                 ?>
-                <li class="mm-pad-right mm-wide ng-music-user-row">
-                    <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/MusicPlayer.php'; ?>
+                <li class="mm-pad-right<?= AudioLibrary::isEnabled() ? ' mm-wide ng-music-user-row' : '' ?>">
+                    <?php if (AudioLibrary::isEnabled()) {
+                        include $_SERVER['DOCUMENT_ROOT'] . '/views/components/MusicPlayer.php';
+                    } ?>
                     <a href="/author/<?=Auth::userid()?>/" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-user"></i></span><span class="mm-label"><?=$user->i('username')?></span><?=$nonr?></a>
                     <div>
                         <ul class="mm-level-2">
@@ -129,7 +131,9 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
                             <li><a href="/lk/profile.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-cog"></i></span><span class="mm-label">Настройки профиля</span></a></li>
                             <li><a href="/search?id=<?=Auth::userid()?>" class="mm-item"><span class="mm-icon"><i class="far fa-sm fa-fw fa-images"></i></span><span class="mm-label">Мои фотографии</span></a></li>
                             <li><a href="/fav" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-star"></i></span><span class="mm-label">Избранные снимки</span></a></li>
+                            <?php if (AudioLibrary::isEnabled()) { ?>
                             <li><a href="/music" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-music"></i></span><span class="mm-label">Музыка</span></a></li>
+                            <?php } ?>
                             <li><a href="/logout" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-sign-out-alt"></i></span><span class="mm-label">Выход</span></a></li>
                         </ul>
                     </div>

@@ -18,6 +18,10 @@ class Proxy
             http_response_code(401);
             exit;
         }
+        if (!AudioLibrary::isEnabled()) {
+            http_response_code(403);
+            exit;
+        }
 
         $url = trim((string) ($_GET['url'] ?? ''));
         if (!AudioLibrary::canProxyUrl($userId, $url)) {

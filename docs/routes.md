@@ -151,6 +151,7 @@
 | `/admin?type=Contests` | Фотоконкурсы |
 | `/admin?type=GeoDB` | GeoDB |
 | `/admin?type=AuthSettings` | Регистрация, OpenVK, управление инстансами |
+| `/admin?type=MusicSettings` | Включение/отключение раздела музыки на сайте |
 | `/admin?type=UserEdit&user_id=` | Права пользователя |
 | `/admin?type=Settings` | Менеджер задач (cron) |
 | `/admin?type=ServerSettings` | **Только владелец (`admin = 4`)** — Debug и конфиг сервера |
@@ -168,6 +169,7 @@
 
 | URL | Метод | Описание |
 |-----|-------|----------|
+| `/api/admin/settings/music` | POST | Включить/выключить раздел музыки (`audio_enabled`) |
 | `/api/admin/settings/auth` | POST | Настройки регистрации |
 | `/api/admin/settings/auth/providers` | POST | Добавить инстанс OpenVK |
 | `/api/admin/settings/auth/providers/{id}` | POST | Изменить инстанс; при смене домена обновляет привязки |

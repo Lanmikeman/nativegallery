@@ -22,14 +22,29 @@ class AudioLibrary
         return !empty($row) && (int) $row[0]['c'] > 0;
     }
 
+    public static function isEnabled(): bool
+    {
+        return (NGALLERY['root']['audio']['enabled'] ?? true) === true;
+    }
+
+    /** @return array<string, mixed>|null */
+    public static function disabledResponse(): ?array
+    {
+        if (self::isEnabled()) {
+            return null;
+        }
+
+        return ['errorcode' => 'DISABLED', 'error' => 1, 'message' => 'Раздел музыки отключён'];
+    }
+
     public static function uploadAllowed(): bool
     {
-        return (NGALLERY['root']['audio']['upload']['allow'] ?? true) === true;
+        return self::isEnabled() && (NGALLERY['root']['audio']['upload']['allow'] ?? true) === true;
     }
 
     public static function streamsAllowed(): bool
     {
-        return (NGALLERY['root']['audio']['streams']['allow'] ?? true) === true;
+        return self::isEnabled() && (NGALLERY['root']['audio']['streams']['allow'] ?? true) === true;
     }
 
     public static function maxUploadBytes(): int

@@ -59,6 +59,7 @@ use \App\Controllers\Api\Admin\Contests\ForceClose as AdminContestsForceClose;
 use \App\Controllers\Api\Admin\Contests\Cancel as AdminContestsCancel;
 use \App\Controllers\Api\Admin\Settings\TaskManager as AdminTaskManager;
 use \App\Controllers\Api\Admin\Settings\Auth as AdminSettingsAuth;
+use \App\Controllers\Api\Admin\Settings\Music as AdminSettingsMusic;
 use \App\Controllers\Api\Admin\Settings\AuthProvider as AdminSettingsAuthProvider;
 use \App\Controllers\Api\Admin\Settings\Debug as AdminSettingsDebug;
 use \App\Controllers\Api\Admin\Settings\ServerConfig as AdminSettingsServerConfig;
@@ -236,6 +237,9 @@ class ApiController
     }
     public static function admintaskmanager() {
         return new AdminTaskManager();
+    }
+    public static function adminsettingsmusic() {
+        return new AdminSettingsMusic();
     }
     public static function adminsettingsauth() {
         return new AdminSettingsAuth();

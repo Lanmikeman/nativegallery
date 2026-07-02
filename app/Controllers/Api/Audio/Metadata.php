@@ -13,6 +13,10 @@ class Metadata
             echo Json::return(['errorcode' => 'NO_AUTH', 'error' => 1, 'message' => 'Требуется авторизация']);
             return;
         }
+        if ($disabled = AudioLibrary::disabledResponse()) {
+            echo Json::return($disabled);
+            return;
+        }
 
         $url = trim((string) ($_GET['url'] ?? ''));
         if (!AudioLibrary::canProxyUrl($userId, $url)) {

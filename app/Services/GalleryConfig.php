@@ -175,6 +175,13 @@ class GalleryConfig
             $ngallery['root']['openvk']['auto_register'] = (bool) $overlay['openvk']['auto_register'];
         }
 
+        if (array_key_exists('enabled', $overlay['audio'] ?? null)) {
+            if (!isset($ngallery['root']['audio']) || !is_array($ngallery['root']['audio'])) {
+                $ngallery['root']['audio'] = [];
+            }
+            $ngallery['root']['audio']['enabled'] = (bool) $overlay['audio']['enabled'];
+        }
+
         if (!empty($overlay['openvk']['providers']) && is_array($overlay['openvk']['providers'])) {
             if (!isset($ngallery['root']['openvk']['providers']) || !is_array($ngallery['root']['openvk']['providers'])) {
                 $ngallery['root']['openvk']['providers'] = [];
@@ -418,6 +425,28 @@ class GalleryConfig
                 }
                 $overlay['openvk']['providers'][$providerId]['enabled'] = (bool) $enabled;
             }
+        }
+
+        if (!self::saveOverlay($overlay)) {
+            return ['ok' => false, 'message' => self::writableErrorMessage()];
+        }
+
+        return ['ok' => true, 'message' => 'Настройки сохранены в storage/auth-settings.json'];
+    }
+
+    /**
+     * @param array{enabled?: bool} $settings
+     * @return array{ok: bool, message: string}
+     */
+    public static function updateMusicSettings(array $settings): array
+    {
+        $overlay = self::loadOverlay();
+        if (!isset($overlay['audio']) || !is_array($overlay['audio'])) {
+            $overlay['audio'] = [];
+        }
+
+        if (array_key_exists('enabled', $settings)) {
+            $overlay['audio']['enabled'] = (bool) $settings['enabled'];
         }
 
         if (!self::saveOverlay($overlay)) {

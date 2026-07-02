@@ -1,5 +1,5 @@
 <?php
-use \App\Services\{ThemeManager, Auth};
+use \App\Services\{ThemeManager, Auth, AudioLibrary};
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/views/components/AssetHelper.php';
 
@@ -8,6 +8,7 @@ $themeManager->loadThemes();
 
 $stylesheet = $themeManager->getThemeStylesheet();
 $musicUserLoggedIn = Auth::userid() > 0;
+$musicEnabled = $musicUserLoggedIn && AudioLibrary::isEnabled();
 ?>
 
 <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -30,7 +31,7 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <link rel="stylesheet" href="<?= ng_asset('/static/css/map.css') ?>">
     <link rel="stylesheet" href="<?= ng_asset('/static/css/jquery-ui-1.8.20.custom.css') ?>">
     <link rel="stylesheet" href="<?= ng_asset('/static/css/progress.css') ?>">
-    <?php if ($musicUserLoggedIn) { ?>
+    <?php if ($musicEnabled) { ?>
     <link rel="stylesheet" href="<?= ng_asset('/static/css/music-player.css') ?>">
     <?php } ?>
     <script src="<?= ng_asset('/static/js/jquery.js') ?>" data-restart></script>
@@ -43,8 +44,10 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <script src="<?= ng_asset('/static/js/imageupload.js') ?>" data-restart></script>
     <script src="<?= ng_asset('/static/js/progress.js') ?>" data-restart></script>
     <script src="<?= ng_asset('/static/js/notie.js') ?>" data-restart></script>
-    <?php if ($musicUserLoggedIn) { ?>
+    <?php if ($musicEnabled) { ?>
     <script src="<?= ng_asset('/static/js/music-player.js') ?>"></script>
+    <?php } ?>
+    <?php if ($musicUserLoggedIn) { ?>
     <script src="<?= ng_asset('/static/js/routing.js') ?>"></script>
     <?php } ?>
     <script src="<?= ng_asset('/static/js/photo.js') ?>" data-restart></script>

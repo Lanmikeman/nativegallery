@@ -17,6 +17,10 @@ class Playlist
             echo Json::return(['errorcode' => 'NO_TABLES', 'error' => 1, 'message' => 'Примените миграцию sql_0010.sql']);
             return;
         }
+        if ($disabled = AudioLibrary::disabledResponse()) {
+            echo Json::return($disabled);
+            return;
+        }
 
         $action = trim((string) ($_POST['action'] ?? 'create'));
 

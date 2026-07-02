@@ -17,6 +17,7 @@ class AdminNav
                 ['type' => 'News', 'href' => '/admin?type=News', 'icon' => 'fa-bullhorn', 'label' => 'Новости сайта'],
                 ['type' => 'Chronology', 'href' => '/admin?type=Chronology', 'icon' => 'fa-clock', 'label' => 'Хронология'],
                 ['type' => 'Links', 'href' => '/admin?type=Links', 'icon' => 'fa-link', 'label' => 'Ссылки'],
+                ['type' => 'MusicSettings', 'href' => '/admin?type=MusicSettings', 'icon' => 'fa-music', 'label' => 'Музыка'],
                 ['type' => 'RadioStations', 'href' => '/admin?type=RadioStations', 'icon' => 'fa-broadcast-tower', 'label' => 'Радиостанции'],
                 ['type' => 'Contests', 'href' => '/admin?type=Contests', 'icon' => 'fa-trophy', 'label' => 'Фотоконкурсы'],
                 ['type' => 'Pages', 'href' => '/admin?type=Pages', 'icon' => 'fa-file-alt', 'label' => 'Страницы'],

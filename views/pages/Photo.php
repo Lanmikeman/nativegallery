@@ -186,8 +186,12 @@ if ($photo->i('id') !== null) {
 
                 </table>
                 <?php
-                    if ($photo->i('gallery_id') != 0 || $photo->i('gallery_id') != null) {
-                        echo '<div><a href="/articles/' . $photo->i('gallery_id') . '/">' . DB::query('SELECT title FROM galleries WHERE id=:id', array(':id' => $photo->i('gallery_id')))[0]['title'] . '</a></div>';
+                    $gid = (int) $photo->i('gallery_id');
+                    if ($gid > 0) {
+                        $galleryTitle = DB::query('SELECT title FROM galleries WHERE id=:id', [':id' => $gid])[0]['title'] ?? '';
+                        if ($galleryTitle !== '') {
+                            echo '<div><a href="/article/' . $gid . '/">' . htmlspecialchars($galleryTitle) . '</a></div>';
+                        }
                     }
                 ?>
             </div>

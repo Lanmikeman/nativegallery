@@ -44,27 +44,30 @@ use App\Models\{User, Vote, Comment, Photo};
     }
 </style>
 
-
-
-
-</head>
-
-
 <body>
     <div id="backgr"></div>
     <table class="tmain">
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php');
-        $gallery = DB::query('SELECT * FROM galleries WHERE id=:id', array(':id'=>explode('/', $_SERVER['REQUEST_URI'])[2]));
+        $galleryId = (int) (explode('/', strtok($_SERVER['REQUEST_URI'], '?'))[2] ?? 0);
+        $galleryRows = DB::query('SELECT * FROM galleries WHERE id=:id LIMIT 1', [':id' => $galleryId]);
+        $gallery = $galleryRows[0] ?? null;
         ?>
         <tr>
             <td class="main">
-                <h1><?=$gallery['title']?></h1>
+                <?php if ($gallery === null) { ?>
+                    <h1>Галерея не найдена</h1>
+                    <p><a href="/misc/galleries">← К списку галерей</a></p>
+                <?php } else { ?>
+                <h1><?= htmlspecialchars($gallery['title']) ?></h1>
                
              
                <?php
-               $photos = DB::query('SELECT * FROM photos WHERE gallery_id=:id ORDER BY id DESC LIMIT 100', array(':id'=>$gallery['id']));
+               $photos = DB::query(
+                   'SELECT * FROM photos WHERE gallery_id=:id AND moderated=1 ORDER BY id DESC LIMIT 100',
+                   [':id' => (int) $gallery['id']]
+               );
                foreach ($photos as $p) {
-                $photo = new Photo($p['photo_id']);
+                $photo = new Photo((int) $p['id']);
                 $user = new User($p['user_id']);
                 echo ' <div class="p20p" style="padding:0 5px">
                     <table>
@@ -84,11 +87,15 @@ use App\Models\{User, Vote, Comment, Photo};
                     </table>
                 </div><br>';
                }
+               if (empty($photos)) {
+                   echo '<p class="sm">В этой галерее пока нет опубликованных фотографий.</p>';
+               }
                ?>
 
              
                
                 <div id="scroll_anchor"></div>
+                <?php } ?>
             </td>
         </tr>
         <tr>

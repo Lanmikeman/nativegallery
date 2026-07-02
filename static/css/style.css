@@ -944,3 +944,23 @@ input.ml-button { height:22px; }
   0%   { background-position: -500px 0; }
   100% { background-position: 1000px 0; }
 }
+
+.site-page__head {
+    padding: 8px 0 14px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--theme-border-color);
+}
+
+.site-page__title {
+    margin: 0 0 8px;
+    color: var(--theme-text-color);
+}
+
+.site-page__meta {
+    margin: 0;
+    color: var(--theme-muted-color);
+}
+
+.site-page__body {
+    padding: 20px;
+}

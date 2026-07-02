@@ -11,7 +11,10 @@ if ($page === null) {
     return;
 }
 
-$title = (string) ($page['title'] ?? 'Страница');
+$pageTitle = trim((string) ($page['title'] ?? ''));
+if ($pageTitle === '') {
+    $pageTitle = 'Страница';
+}
 $body = (string) ($page['body'] ?? '');
 
 ?>
@@ -20,7 +23,7 @@ $body = (string) ($page['body'] ?? '');
 
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'; ?>
-    <title><?= htmlspecialchars($title) ?> — <?= htmlspecialchars(NGALLERY['root']['title']) ?></title>
+    <title><?= htmlspecialchars($pageTitle) ?> — <?= htmlspecialchars(NGALLERY['root']['title']) ?></title>
 </head>
 
 <body>
@@ -29,9 +32,11 @@ $body = (string) ($page['body'] ?? '');
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'; ?>
         <tr>
             <td class="main">
-                <h1><?= htmlspecialchars($title) ?></h1>
-                <?= SitePage::editNoticeHtml($page) ?>
-                <div class="p20 break-links" style="padding:20px">
+                <header class="site-page__head">
+                    <h1 class="site-page__title"><?= htmlspecialchars($pageTitle) ?></h1>
+                    <?= SitePage::editNoticeHtml($page) ?>
+                </header>
+                <div class="p20 break-links site-page__body">
                     <?= $body ?>
                 </div>
             </td>

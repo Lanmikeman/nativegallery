@@ -43,7 +43,7 @@ class SitePage
 
         $editorName = self::editorName($updatedBy);
 
-        return '<p class="sm" style="margin-top:12px; color:#888">'
+        return '<p class="sm site-page__meta">'
             . '<i>Редакция от ' . htmlspecialchars(Date::formatDate($updatedAt))
             . ($updatedBy > 0 ? ' — ' . htmlspecialchars($editorName) : '')
             . '</i></p>';

@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
-# NativeGallery — automated install for Ubuntu 24.04 + Apache + PHP-FPM
-# Alternative to install-ubuntu-24.04.sh (production uses Nginx).
-# Debian: use deploy/install-debian-12-apache.sh
+# NativeGallery — Debian 12/13 + Apache 2.4 + PHP-FPM (Sury 8.3)
 #
 # Usage:
-#   sudo bash deploy/install-ubuntu-apache.sh
-#
-# Optional: NG_DOMAIN, NG_DB_NAME, NG_DB_USER, NG_DB_PASS, NG_WEB_ROOT
+#   sudo bash deploy/install-debian-12-apache.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/install-common.sh
 source "${SCRIPT_DIR}/lib/install-common.sh"
+# shellcheck source=lib/debian-php83.sh
+source "${SCRIPT_DIR}/lib/debian-php83.sh"
 
 NG_DOMAIN="${NG_DOMAIN:-example.com}"
 NG_DB_NAME="${NG_DB_NAME:-ngallery}"
@@ -22,41 +20,36 @@ NG_WEB_ROOT="${NG_WEB_ROOT:-/var/www/nativegallery}"
 NG_SITE_TITLE="${NG_SITE_TITLE:-NativeGallery}"
 NG_ADMIN_EMAIL="${NG_ADMIN_EMAIL:-admin@${NG_DOMAIN}}"
 NG_WEB_USER="${NG_WEB_USER:-www-data}"
-NG_STACK_LABEL="Ubuntu 24.04 + Apache + PHP-FPM"
+NG_STACK_LABEL="Debian + Apache + PHP-FPM (Sury 8.3)"
 
 ng_require_root
+ng_debian_require
 
 echo "==> Updating system packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get upgrade -y -qq
 
-echo "==> Installing Apache, PHP 8.3, MySQL, Composer"
+ng_debian_enable_php83_repo
+
+echo "==> Installing Apache, PHP 8.3, MariaDB, Composer"
+mapfile -t NG_PHP_PKGS < <(ng_debian_php_packages)
 apt-get install -y -qq \
     apache2 \
-    mysql-server \
-    php8.3-fpm \
-    php8.3-cli \
-    php8.3-mysql \
-    php8.3-gd \
-    php8.3-curl \
-    php8.3-mbstring \
-    php8.3-xml \
-    php8.3-zip \
-    php8.3-exif \
-    php8.3-intl \
-    php8.3-bcmath \
-    php8.3-opcache \
+    libapache2-mod-fcgid \
+    default-mysql-server \
+    mariadb-client \
+    "${NG_PHP_PKGS[@]}" \
     composer \
     ffmpeg \
     unzip \
     git \
-    curl \
-    libapache2-mod-fcgid
+    curl
 
 ng_configure_php_ini "/etc/php/8.3/fpm/php.ini"
 ng_configure_php_ini "/etc/php/8.3/cli/php.ini"
 
+ng_debian_start_database
 ng_setup_mysql_db
 
 ng_deploy_app
@@ -74,7 +67,8 @@ a2ensite nativegallery.conf
 a2enmod rewrite proxy proxy_fcgi setenvif headers
 
 apachectl configtest
-systemctl enable --now apache2 php8.3-fpm mysql
+systemctl enable --now apache2 php8.3-fpm
+ng_debian_start_database
 systemctl reload apache2 php8.3-fpm
 
 echo "==> Setting up cron for contests"

@@ -22,6 +22,7 @@
 - История изменений: [CHANGELOG.md](../CHANGELOG.md)
 - Пример конфигурации: [ngallery-example.yaml](../ngallery-example.yaml)
 - Автоустановка (production): [deploy/install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh)
+- Debian 12/13: [deploy/install-debian-12.sh](../deploy/install-debian-12.sh), [install-debian-12-apache.sh](../deploy/install-debian-12-apache.sh)
 - Альтернативы: [deployment-alternatives.md](deployment-alternatives.md) — Apache, Rocky 9
 - Nginx: [deploy/nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf)
 - Apache: [deploy/apache/nativegallery.conf](../deploy/apache/nativegallery.conf)

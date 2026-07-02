@@ -8,12 +8,15 @@
 
 | Стек | ОС | Веб-сервер | Скрипт | Конфиг |
 |------|-----|------------|--------|--------|
-| **Production (рекомендуется)** | Ubuntu 24.04, Debian 12 | Nginx | [install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh) | [nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf) |
-| Apache на Debian/Ubuntu | Ubuntu 24.04, Debian 12 | Apache 2.4 | [install-ubuntu-apache.sh](../deploy/install-ubuntu-apache.sh) | [apache/nativegallery.conf](../deploy/apache/nativegallery.conf) |
+| **Production (рекомендуется)** | Ubuntu 24.04 | Nginx | [install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh) | [nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf) |
+| Debian + Nginx | Debian 12/13 (bookworm/trixie) | Nginx | [install-debian-12.sh](../deploy/install-debian-12.sh) | [nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf) |
+| Ubuntu + Apache | Ubuntu 24.04 | Apache 2.4 | [install-ubuntu-apache.sh](../deploy/install-ubuntu-apache.sh) | [apache/nativegallery.conf](../deploy/apache/nativegallery.conf) |
+| Debian + Apache | Debian 12/13 | Apache 2.4 | [install-debian-12-apache.sh](../deploy/install-debian-12-apache.sh) | [apache/nativegallery.conf](../deploy/apache/nativegallery.conf) |
 | RHEL-семейство + Nginx | Rocky 9, AlmaLinux 9, CentOS Stream 9 | Nginx | [install-rocky-9.sh](../deploy/install-rocky-9.sh) | [nginx/nativegallery-rocky.conf](../deploy/nginx/nativegallery-rocky.conf) |
 | RHEL-семейство + Apache | Rocky 9, AlmaLinux 9, CentOS Stream 9 | httpd | [install-rocky-9-apache.sh](../deploy/install-rocky-9-apache.sh) | [apache/nativegallery-rocky.conf](../deploy/apache/nativegallery-rocky.conf) |
 
-Общая логика (клон, Composer, миграции, `ngallery.yaml`, cron): [deploy/lib/install-common.sh](../deploy/lib/install-common.sh).
+Общая логика (клон, Composer, миграции, `ngallery.yaml`, cron): [deploy/lib/install-common.sh](../deploy/lib/install-common.sh).  
+PHP 8.3 на Debian: репозиторий [packages.sury.org](https://packages.sury.org/php/) — [deploy/lib/debian-php83.sh](../deploy/lib/debian-php83.sh).
 
 ## Переменные окружения (все скрипты)
 
@@ -34,7 +37,50 @@ sudo NG_DOMAIN=gallery.example.com NG_DB_PASS='secret' bash deploy/install-ubunt
 
 ---
 
-## Ubuntu / Debian + Apache
+## Debian 12 / 13 (bookworm / trixie)
+
+На Debian в стандартных репозиториях PHP 8.2; для NativeGallery нужен **PHP 8.3** — скрипты подключают репозиторий **Sury**. БД: **MariaDB** (`default-mysql-server`).
+
+### Nginx
+
+```bash
+git clone https://github.com/Lanmikeman/nativegallery.git /tmp/nativegallery
+cd /tmp/nativegallery
+sudo NG_DOMAIN=example.com bash deploy/install-debian-12.sh
+```
+
+### Apache
+
+```bash
+sudo NG_DOMAIN=example.com bash deploy/install-debian-12-apache.sh
+```
+
+Конфиги веб-сервера те же, что на Ubuntu: `deploy/nginx/nativegallery.conf`, `deploy/apache/nativegallery.conf`. PHP-FPM socket: `/run/php/php8.3-fpm.sock`. Пользователь: `www-data`.
+
+### Ручная установка PHP 8.3 на Debian
+
+```bash
+sudo apt install -y lsb-release ca-certificates curl apt-transport-https
+sudo curl -fsSL https://packages.sury.org/php/apt.gpg -o /usr/share/keyrings/deb.sury.org-php.gpg
+echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" \
+  | sudo tee /etc/apt/sources.list.d/php.list
+sudo apt update
+sudo apt install -y php8.3-fpm php8.3-cli php8.3-mysql php8.3-gd php8.3-curl \
+  php8.3-mbstring php8.3-xml php8.3-zip php8.3-exif php8.3-intl php8.3-bcmath
+```
+
+Далее — как в [README.md](../README.md#ручная-установка) (миграции, `ngallery.yaml`, nginx/apache).
+
+### SSL
+
+```bash
+sudo apt install certbot python3-certbot-nginx   # или python3-certbot-apache
+sudo certbot --nginx -d example.com
+```
+
+---
+
+## Ubuntu + Apache
 
 Движок из коробки поддерживает Apache через `.htaccess` (`mod_rewrite`). Для production на Apache лучше использовать VirtualHost с `AllowOverride All` и PHP-FPM.
 
@@ -46,7 +92,9 @@ cd /tmp/nativegallery
 sudo NG_DOMAIN=example.com bash deploy/install-ubuntu-apache.sh
 ```
 
-Скрипт ставит `apache2`, `php8.3-fpm`, MySQL, включает `rewrite`, `proxy_fcgi`, разворачивает vhost из `deploy/apache/nativegallery.conf`.
+На **Debian** используйте `deploy/install-debian-12-apache.sh`.
+
+Скрипт ставит `apache2`, `php8.3-fpm`, MySQL/MariaDB, включает `rewrite`, `proxy_fcgi`, разворачивает vhost из `deploy/apache/nativegallery.conf`.
 
 ### Ручная настройка Apache
 

@@ -2,6 +2,13 @@
 
 use \App\Services\{Auth, DB, Date};
 use \App\Models\{User};
+use \App\Controllers\Exec\Tasks\ExecContests;
+
+ExecContests::tick();
+
+$votingContest = DB::query('SELECT * FROM contests WHERE status=2 ORDER BY id DESC LIMIT 1');
+$votingContest = !empty($votingContest) ? $votingContest[0] : null;
+$contestKid = $votingContest ? (int) $votingContest['id'] : 0;
 
 ?>
 <!DOCTYPE html>
@@ -20,7 +27,7 @@ use \App\Models\{User};
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
         <script>
 
-var kid = <?=DB::query('SELECT id FROM contests WHERE status=2')[0]['id']?>;
+var kid = <?=$contestKid?>;
 var tipTimeout = null;
 
 
@@ -92,18 +99,10 @@ $(document).ready(function()
                     <p class="narrow" style="font-size:19px"><b>Голосование</b> &nbsp;&middot;&nbsp; <a href="/voting/results">Победители</a> &nbsp;&middot;&nbsp; <a href="/voting/rating">Рейтинг</a> &nbsp;&middot;&nbsp; <a href="/voting/waiting">Претенденты</a></p>
                     <div style="margin-top:20px">Чтобы проголосовать, отметьте одну, две или три фотографии, которые Вам понравились</div><br><br>
                     <?php
-                    if (DB::query('SELECT status FROM contests WHERE status=2')[0]['status'] != 2) {
-                        $contest = DB::query('SELECT * FROM contests WHERE status=1')[0];
-                        echo '<div class="p20">
-                        <h4>Сейчас конкурс не проводится. Пожалуйста, заходите позже.</h4>
-                    </div>
-                    <script>startCountdown(' . $contest['openpretendsdate'] . ');</script>
-    <h2>Следующий Фотоконкурс будет через:</h2>
-    <h1 id="countdown"></h1>';
-                    } else { ?>
+                    if ($votingContest) {
+                        $contest = $votingContest; ?>
                         <div id="tip" lock="0"><span id="img"></span></div>
                         <?php
-                        $contest = DB::query('SELECT * FROM contests WHERE status=2')[0];
                         $photos_contest = DB::query('SELECT * FROM photos WHERE on_contest=2 AND contest_id=:id', array(':id'=>$contest['id']));
 
                         foreach ($photos_contest as $pc) {
@@ -137,7 +136,32 @@ $(document).ready(function()
                 </center>
            
 
-    <?php }
+    <?php } else {
+                        $nextContest = DB::query('SELECT * FROM contests WHERE status IN (0, 1, 12) ORDER BY id ASC LIMIT 1');
+                        if (!empty($nextContest)) {
+                            $contest = $nextContest[0];
+                            $status = (int) $contest['status'];
+                            if ($status === 1) {
+                                $countdownTs = (int) $contest['closepretendsdate'];
+                                $message = 'Сейчас идёт отбор претендентов. Голосование за победителей начнётся позже.';
+                            } elseif ($status === ExecContests::STATUS_WAITING_OPEN) {
+                                $countdownTs = (int) $contest['opendate'];
+                                $message = 'Отбор претендентов завершён. Голосование за победителей скоро начнётся.';
+                            } else {
+                                $countdownTs = (int) $contest['openpretendsdate'];
+                                $message = 'Сейчас конкурс не проводится. Пожалуйста, заходите позже.';
+                            }
+                            echo '<div class="p20"><h4>' . $message . '</h4></div>';
+                            if ($status === 1) {
+                                echo '<p><a href="/voting/waiting">Перейти к голосованию за претендентов</a></p>';
+                            }
+                            echo '<h2>Следующий этап Фотоконкурса через:</h2>
+    <h1 id="countdown"></h1>
+    <script>startCountdown(' . $countdownTs . ');</script>';
+                        } else {
+                            echo '<div class="p20"><h4>Сейчас конкурс не проводится. Пожалуйста, заходите позже.</h4></div>';
+                        }
+                    }
     ?>
 
     <br>
@@ -151,36 +175,6 @@ $(document).ready(function()
 
     </tr>
     </table>
-    <script>
-        // Установите дату и время, до которого нужно отсчитывать
-        const countdownDate = new Date("Mar 1, 2025 00:00:00").getTime();
-
-        // Обновляем отсчет каждую секунду
-        const x = setInterval(function() {
-
-            // Получаем текущее время
-            const now = new Date().getTime();
-
-            // Вычисляем разницу между целевой датой и текущим временем
-            const distance = countdownDate - now;
-
-            // Вычисляем дни, часы, минуты и секунды
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // Отображаем результат в элементе с id "countdown"
-            document.getElementById("countdown").innerHTML =
-                days + ":" + hours + ":" + minutes + ":" + seconds;
-
-            // Если отсчет завершен, выводим сообщение
-            if (distance < 0) {
-                clearInterval(x);
-                document.getElementById("countdown").innerHTML = "Время истекло!";
-            }
-        }, 1000);
-    </script>
 </body>
 
 </html>

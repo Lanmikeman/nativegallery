@@ -80,6 +80,7 @@ class Routes
             Router::any('/vehicle/dbedit', 'VehicleController@dbedit');
             Router::any('/vehicle/$id', 'VehicleController@i');
             Router::post('/api/upload', 'ApiController@upload');
+            Router::post('/api/photo/edit', 'ApiController@photoedit');
             Router::post('/api/profile/update', 'ApiController@updateprofile');
             Router::post('/api/photo/comment', 'ApiController@photocomment');
             Router::get('/api/photo/loadmap', 'ApiController@photoloadmap');

@@ -2,6 +2,9 @@
 
 use App\Services\{DB, Auth, Date, Json};
 use App\Models\{User, Vote, Comment};
+use App\Controllers\Exec\Tasks\ExecContests;
+
+ExecContests::tick();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -130,8 +133,9 @@ LIMIT 10;');
                             </style>
                             
                             <?php
-                            if (DB::query('SELECT status FROM contests WHERE status=2')[0]['status'] === 2) {
-                                $contest = DB::query('SELECT * FROM contests WHERE status=2')[0];
+                            $activeVoting = DB::query('SELECT * FROM contests WHERE status=2 ORDER BY id DESC LIMIT 1');
+                            if (!empty($activeVoting)) {
+                                $contest = $activeVoting[0];
                                 $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0];
                                 echo ' <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
                                 <span id="timett">Закончится через:</span> <b id="countdown"></b><br>
@@ -139,14 +143,17 @@ LIMIT 10;');
                                 <b style="color: #412378;">Голосуйте за лучшие фотографии, которые должны стать победителями сегодняшнего конкурса!</b><br><br>
                                 <div id="contestBtns"><a href="/voting" style="background-color: #37009D; color: #fff;" type="button">Голосовать!</a></div>
                                 <script>startCountdown(' . $contest['closedate'] . ');</script>';
-                            } else if (DB::query('SELECT status FROM contests WHERE status=1')[0]['status'] === 1) {
-                                $contest = DB::query('SELECT * FROM contests WHERE status=1')[0];
+                            } else {
+                                $pretendContest = DB::query('SELECT * FROM contests WHERE status=1 ORDER BY id DESC LIMIT 1');
+                                if (!empty($pretendContest)) {
+                                $contest = $pretendContest[0];
                                 $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0];
                                 echo ' <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
                                 <span id="timett">Начнётся через:</span> <b id="countdown"></b><br>
                                 Тематика: <b>' . $theme['title'] . '</b><br>
                                 <b id="textContest" style="color: #412378;">Лучшие фотографии по мнению сообщества ' . NGALLERY['root']['title'] . ' будут отмечены</b><br><br>
                                 <div id="contestBtns"><a href="/voting/sendpretend" style="background-color: #37009D; color: #fff;" type="button">Участвовать!</a> <a href="/voting/waiting" style="background-color: #37009D; color: #fff;" type="button">Голосовать за претендентов</a></div>
+                                <script>startCountdown(' . $contest['closepretendsdate'] . ');</script>
                                 <script>
                                  $(document).ready(function () {
                                     let unixThreshold = '.$contest['closepretendsdate'].'; // Задайте нужное значение UNIX
@@ -190,6 +197,7 @@ LIMIT 10;');
 
 
                                 </script>';
+                                }
                             }
 
 

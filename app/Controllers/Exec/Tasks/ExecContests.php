@@ -1,20 +1,40 @@
 <?php
 
 namespace App\Controllers\Exec\Tasks;
-require_once __DIR__ . '/../../../../vendor/autoload.php';
-use Symfony\Component\Yaml\Yaml;
-define("NGALLERY", Yaml::parse(file_get_contents(__DIR__ . '/../../../../ngallery.yaml'))['ngallery']);
+
+require_once __DIR__ . '/../cli-bootstrap.php';
+
 use App\Services\{Router, Auth, DB, Json, Date};
 use App\Controllers\ExceptionRegister;
 use App\Core\Page;
 
 class ExecContests
 {
+    /** Ожидание начала голосования (отбор претендентов закрыт, opendate ещё не наступил). */
+    public const STATUS_WAITING_OPEN = 12;
+
+    public static function tick(): void
+    {
+        if (NGALLERY['root']['contests']['enabled'] != true) {
+            return;
+        }
+        if (php_sapi_name() === 'cli') {
+            self::run();
+            return;
+        }
+        ob_start();
+        self::run();
+        ob_end_clean();
+    }
+
     public static function run()
     {
         if (NGALLERY['root']['contests']['enabled'] != true) {
             echo "Contests on this server disabled. Skip...";
-            exit;
+            if (php_sapi_name() === 'cli') {
+                exit;
+            }
+            return;
         }
         $contests = DB::query('SELECT * FROM contests WHERE status < 3');
         foreach ($contests as $contest) {
@@ -26,7 +46,7 @@ class ExecContests
     {
         echo "Checking contest ID {$contest['id']}\n";
 
-        switch ($contest['status']) {
+        switch ((int) $contest['status']) {
             case 0:
                 self::handleOpenPretends($contest);
                 break;
@@ -36,7 +56,7 @@ class ExecContests
             case 2:
                 self::handleClosingContest($contest);
                 break;
-            case 02:
+            case self::STATUS_WAITING_OPEN:
                 self::handleClosePretendsByTime($contest);
                 break;
         }
@@ -59,7 +79,7 @@ class ExecContests
 
     private static function handleClosePretends(array $contest)
     {
-        if (self::isAnotherContestInStatus(2) || self::isAnotherContestInStatus(02)) {
+        if (self::isAnotherContestInStatus(2) || self::isAnotherContestInStatus(self::STATUS_WAITING_OPEN)) {
             echo "[{$contest['id']}] Waiting for another contest to end. Skip...\n";
             return;
         }
@@ -70,7 +90,7 @@ class ExecContests
                 DB::query('UPDATE contests SET status = 2 WHERE id = :id', [':id' => $contest['id']]);
                 echo "[{$contest['id']}] Opened.\n";
             } else {
-                DB::query('UPDATE contests SET status = 02 WHERE id = :id', [':id' => $contest['id']]);
+                DB::query('UPDATE contests SET status = :status WHERE id = :id', [':status' => self::STATUS_WAITING_OPEN, ':id' => $contest['id']]);
             }
             echo "[{$contest['id']}] Closed for pretends.\n";
         } else {
@@ -80,15 +100,13 @@ class ExecContests
 
     private static function handleClosePretendsByTime(array $contest)
     {
-        echo "[{$contest['id']}] Cheking for Open by time...\n";
+        echo "[{$contest['id']}] Checking for open by time...\n";
         if ($contest['opendate'] <= time()) {
             DB::query('UPDATE contests SET status = 2 WHERE id = :id', [':id' => $contest['id']]);
-            echo "[{$contest['id']}] .\n";
+            echo "[{$contest['id']}] Opened for voting.\n";
         } else {
-            echo "[{$contest['id']}] not opened by time. Skip...\n";
+            echo "[{$contest['id']}] Not opened by time. Skip...\n";
         }
-            echo "[{$contest['id']}] Opened.\n";
-    
     }
 
     private static function handleClosingContest(array $contest)
@@ -181,6 +199,6 @@ class ExecContests
     }
 }
 
-if (php_sapi_name() === 'cli') {
+if (php_sapi_name() === 'cli' && realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === __FILE__) {
     ExecContests::run();
 }

@@ -56,7 +56,7 @@ class Date
         }
     }
 
-    private static function formatDate($date)
+    public static function formatDate($date)
     {
         $formattedDate = date("j F Y в H:i", $date);
         $formattedDate = str_replace(

@@ -2,6 +2,9 @@
 
 use \App\Services\{Auth, DB, Date};
 use \App\Models\{User, VoteContest, Vote};
+use \App\Controllers\Exec\Tasks\ExecContests;
+
+ExecContests::tick();
 
 ?>
 <!DOCTYPE html>
@@ -29,8 +32,9 @@ use \App\Models\{User, VoteContest, Vote};
 					<p class="narrow" style="font-size:19px"><a href="/voting">Голосование</a> &nbsp;·&nbsp; <a href="/voting/results">Победители</a> &nbsp;·&nbsp; <a href="/voting/rating">Рейтинг</a> &nbsp;·&nbsp; <b>Претенденты</b></p>
 					<p style="margin:20px">На этой странице собраны фотографии, предложенные для участия в конкурсе их авторами либо пользователями сайта, для того, чтобы Вы проголосовали за их участие или против. Снимки отсортированы по времени публикации.<br><br>Пожалуйста, не стесняйтесь нажимать синюю кнопку.</p>
 					<?php
-					if (DB::query('SELECT status FROM contests WHERE status=1')[0]['status'] === 1) {
-						$contest = DB::query('SELECT * FROM contests WHERE status=1')[0];
+					$pretendContest = DB::query('SELECT * FROM contests WHERE status=1 ORDER BY id DESC LIMIT 1');
+					if (!empty($pretendContest)) {
+						$contest = $pretendContest[0];
 						$photos_contest = DB::query('SELECT p.*, COUNT(prc.photo_id) AS rates_count
 						FROM photos p
 						LEFT JOIN photos_rates_contest prc ON p.id = prc.photo_id
@@ -105,36 +109,7 @@ use \App\Models\{User, VoteContest, Vote};
 
 		</tr>
 	</table>
-	<script>
-		// Установите дату и время, до которого нужно отсчитывать
-		const countdownDate = new Date("Mar 1, 2025 00:00:00").getTime();
 
-		// Обновляем отсчет каждую секунду
-		const x = setInterval(function() {
-
-			// Получаем текущее время
-			const now = new Date().getTime();
-
-			// Вычисляем разницу между целевой датой и текущим временем
-			const distance = countdownDate - now;
-
-			// Вычисляем дни, часы, минуты и секунды
-			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-			const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-			const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-			// Отображаем результат в элементе с id "countdown"
-			document.getElementById("countdown").innerHTML =
-				days + ":" + hours + ":" + minutes + ":" + seconds;
-
-			// Если отсчет завершен, выводим сообщение
-			if (distance < 0) {
-				clearInterval(x);
-				document.getElementById("countdown").innerHTML = "Время истекло!";
-			}
-		}, 1000);
-	</script>
 </body>
 
 </html>

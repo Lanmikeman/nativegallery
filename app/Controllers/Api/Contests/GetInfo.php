@@ -19,7 +19,7 @@ class GetInfo
 
     private function fetchContest(): void
     {
-        $statuses = [0, 1, 2];
+        $statuses = [2, 1, 12, 0];
         foreach ($statuses as $status) {
             $contest = DB::query('SELECT * FROM contests WHERE status = :status', [':status' => $status]);
             if (!empty($contest)) {
@@ -32,7 +32,7 @@ class GetInfo
     private function setStatuses(): void
     {
         $time = time();
-        $status = $this->contest['status'] ?? null;
+        $status = isset($this->contest['status']) ? (int) $this->contest['status'] : null;
         
         if ($status === 0) {
             $this->pretendsStatus = ($this->contest['openpretendsdate'] > $time) ? 'waiting' : 'waitingforserver';
@@ -40,6 +40,9 @@ class GetInfo
         } elseif ($status === 1) {
             $this->pretendsStatus = ($this->contest['closepretendsdate'] > $time) ? 'opened' : 'waitingforserver';
             $this->publicStatus = 'closed';
+        } elseif ($status === 12) {
+            $this->pretendsStatus = 'closed';
+            $this->publicStatus = ($this->contest['opendate'] > $time) ? 'waiting' : 'waitingforserver';
         } elseif ($status === 2) {
             $this->pretendsStatus = 'closed';
             $this->publicStatus = ($this->contest['closedate'] <= $time) ? 'waitingforserver' : 'opened';

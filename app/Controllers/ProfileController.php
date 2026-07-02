@@ -65,9 +65,32 @@ class ProfileController
     {
        Page::set('Profile/LK/Profile');
     }
+    public static function editimage()
+    {
+        $photoId = (int) ($_GET['id'] ?? 0);
+        if ($photoId <= 0) {
+            ExceptionRegister::notfound();
+            return;
+        }
+
+        $rows = DB::query('SELECT user_id FROM photos WHERE id = :id', [':id' => $photoId]);
+        if (empty($rows)) {
+            ExceptionRegister::notfound();
+            return;
+        }
+
+        $user = new \App\Models\User(Auth::userid());
+        if ((int) $rows[0]['user_id'] !== Auth::userid() && (int) $user->i('admin') <= 0) {
+            ExceptionRegister::notfound();
+            return;
+        }
+
+        Page::set('Profile/LK/EditImage');
+    }
+
     public static function editphoto()
     {
-       Page::set('Profile/LK/EditImage');
+        self::editimage();
     }
 
 

@@ -56,15 +56,16 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                         $themes = DB::query('SELECT * FROM contests ORDER BY id DESC');
                         foreach ($themes as $t) {
                             $themetitle = DB::query('SELECT title FROM contests_themes WHERE id=:id', array(':id' => $t['themeid']))[0]['title'];
-                            if ($t['status'] === 0) {
+                            $contestStatus = (int) $t['status'];
+                            if ($contestStatus === 0) {
                                 $status = 'Ещё не проведён';
-                            } else if ($t['status'] === 1) {
+                            } else if ($contestStatus === 1) {
                                 $status = 'Отбор кандидатов';
-                            } else if ($t['status'] === 02) {
-                                $status = 'Ещё не открыт для отбора победителей';
-                            } else if ($t['status'] === 2) {
+                            } else if ($contestStatus === 12) {
+                                $status = 'Ожидание начала голосования';
+                            } else if ($contestStatus === 2) {
                                 $status = 'Отбор победителей';
-                            } else if ($t['status'] === 3) {
+                            } else if ($contestStatus === 3) {
                                 $status = 'Завершён';
                             } else {
                                 $status = 'Сбой';
@@ -72,10 +73,10 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                             echo '<tr class="' . $color . '">
                             <td>' . $t['id'] . '</td>
                             <td>' . $themetitle . '</td>
-                            <td>' . Date::zmdate($t['openpretendsdate']) . '</td>
-                            <td>' . Date::zmdate($t['closepretendsdate']) . '</td>
-                            <td>' . Date::zmdate($t['opendate']) . '</td>
-                            <td>' . Date::zmdate($t['closedate']) . '</td>
+                            <td>' . Date::formatDate((int) $t['openpretendsdate']) . '</td>
+                            <td>' . Date::formatDate((int) $t['closepretendsdate']) . '</td>
+                            <td>' . Date::formatDate((int) $t['opendate']) . '</td>
+                            <td>' . Date::formatDate((int) $t['closedate']) . '</td>
                             <td>' . $status . '</td>
                             </tr>';
                         }
@@ -99,7 +100,7 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                         <?php
                         $themes = DB::query('SELECT * FROM contests_themes');
                         foreach ($themes as $t) {
-                            if ($t['status'] === 1) {
+                            if ((int) $t['status'] === 1) {
                                 $auto = 'Да';
                             } else {
                                 $auto = 'Нет';

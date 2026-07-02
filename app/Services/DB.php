@@ -17,6 +17,30 @@ class DB
     private static $connectionPool = [];
     private static $poolSize = 5;
 
+    public static function isInitialized(): bool
+    {
+        return !empty(self::$config['driver']);
+    }
+
+    public static function ensureInitialized(): void
+    {
+        if (self::isInitialized()) {
+            return;
+        }
+
+        if (!defined('NGALLERY')) {
+            throw new RuntimeException('Database is not configured. Load ngallery.yaml before calling DB::ensureInitialized().');
+        }
+
+        self::init([
+            'driver' => 'mysql',
+            'host' => NGALLERY['root']['db']['host'],
+            'database' => NGALLERY['root']['db']['name'],
+            'username' => NGALLERY['root']['db']['login'],
+            'password' => NGALLERY['root']['db']['password'],
+        ]);
+    }
+
     /* Инициализация и конфигурация */
     public static function init(array $config): void
     {

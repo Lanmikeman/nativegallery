@@ -195,10 +195,7 @@ systemctl enable --now nginx php8.3-fpm mysql
 systemctl reload nginx php8.3-fpm
 
 echo "==> Setting up cron for contests"
-CRON_LINE="*/5 * * * * www-data php ${NG_WEB_ROOT}/app/Controllers/Exec/Tasks/ExecContests.php >> ${NG_WEB_ROOT}/logs/cron.log 2>&1"
-CRON_FILE="/etc/cron.d/nativegallery"
-echo "$CRON_LINE" > "$CRON_FILE"
-chmod 644 "$CRON_FILE"
+NG_WEB_ROOT="${NG_WEB_ROOT}" bash "${NG_WEB_ROOT}/deploy/setup-cron.sh"
 
 echo ""
 echo "============================================"

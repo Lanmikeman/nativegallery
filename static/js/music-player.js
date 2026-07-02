@@ -1,12 +1,34 @@
 (function (window) {
     'use strict';
 
-    var STORAGE_KEY = 'ng_music_player_v1';
-    var audio = null;
+    var STORAGE_KEY = 'ng_music_player_v2';
     var queue = [];
     var index = -1;
     var volume = 0.8;
     var barEl = null;
+    var audio = null;
+
+    function getAudio() {
+        if (!window.__ngMusicAudio) {
+            audio = new Audio();
+            audio.preload = 'metadata';
+            window.__ngMusicAudio = audio;
+            audio.addEventListener('ended', function () {
+                NgMusicPlayer.next();
+            });
+            audio.addEventListener('play', function () { updateBar(); });
+            audio.addEventListener('pause', function () { updateBar(); });
+            audio.addEventListener('error', function () {
+                if (typeof Notify !== 'undefined') {
+                    Notify.noty('danger', 'Не удалось воспроизвести трек');
+                }
+            });
+        } else {
+            audio = window.__ngMusicAudio;
+        }
+        audio.volume = volume;
+        return audio;
+    }
 
     function loadState() {
         try {
@@ -45,56 +67,62 @@
     }
 
     function updateBar() {
+        if (!barEl) {
+            barEl = document.getElementById('ng-music-bar');
+        }
         if (!barEl) return;
-        var track = currentTrack();
-        var titleEl = barEl.querySelector('.ng-music-bar__title');
-        var artistEl = barEl.querySelector('.ng-music-bar__artist');
-        var playBtn = barEl.querySelector('[data-action="play"]');
 
-        if (!track) {
-            barEl.classList.add('ng-music-hidden');
-            document.body.classList.remove('ng-music-bar-visible');
-            return;
+        var track = currentTrack();
+        var titleEl = barEl.querySelector('.ng-music-nav__title') || barEl.querySelector('#ng-music-title-link');
+        var artistEl = barEl.querySelector('.ng-music-nav__artist') || barEl.querySelector('#ng-music-artist');
+        var playBtn = barEl.querySelector('[data-action="play"]');
+        var a = window.__ngMusicAudio;
+        var playing = a && !a.paused && track;
+
+        barEl.classList.toggle('ng-music-idle', !track);
+        barEl.classList.toggle('ng-music-playing', !!playing);
+
+        if (titleEl) {
+            titleEl.textContent = track ? track.title : 'Музыка';
+            titleEl.setAttribute('href', '/music');
+            titleEl.setAttribute('title', track ? track.title + ' — открыть библиотеку' : 'Открыть библиотеку');
         }
 
-        barEl.classList.remove('ng-music-hidden');
-        document.body.classList.add('ng-music-bar-visible');
-        if (titleEl) titleEl.textContent = track.title;
-        if (artistEl) artistEl.textContent = track.artist || (track.type === 'stream' ? 'Поток' : '');
+        if (artistEl) {
+            if (track) {
+                artistEl.textContent = track.artist || (track.type === 'stream' ? 'Поток' : '');
+            } else {
+                artistEl.textContent = '';
+            }
+        }
+
         if (playBtn) {
-            playBtn.innerHTML = audio && !audio.paused
+            playBtn.innerHTML = playing
                 ? '<i class="fas fa-pause"></i>'
                 : '<i class="fas fa-play"></i>';
         }
+
         var volInput = barEl.querySelector('[data-action="volume"]');
         if (volInput) volInput.value = Math.round(volume * 100);
-    }
 
-    function ensureAudio() {
-        if (!audio) {
-            audio = new Audio();
-            audio.preload = 'metadata';
-            audio.addEventListener('ended', function () {
-                NgMusicPlayer.next();
-            });
-            audio.addEventListener('play', updateBar);
-            audio.addEventListener('pause', updateBar);
-            audio.addEventListener('error', function () {
-                if (typeof Notify !== 'undefined') {
-                    Notify.noty('danger', 'Не удалось воспроизвести трек');
-                }
-            });
+        var muteBtn = barEl.querySelector('[data-action="mute"]');
+        if (muteBtn) {
+            var icon = muteBtn.querySelector('i');
+            if (icon) {
+                icon.className = volume === 0 ? 'fas fa-volume-mute' : (volume < 0.45 ? 'fas fa-volume-down' : 'fas fa-volume-up');
+            }
         }
-        audio.volume = volume;
-        return audio;
     }
 
     function playAt(i) {
         if (i < 0 || i >= queue.length) return;
         index = i;
         var track = queue[index];
-        var a = ensureAudio();
-        a.src = track.src;
+        var a = getAudio();
+        var cur = a.src || '';
+        if (!cur || cur.indexOf(track.src) < 0) {
+            a.src = track.src;
+        }
         a.play().catch(function () {
             updateBar();
         });
@@ -103,31 +131,55 @@
         window.dispatchEvent(new CustomEvent('ngmusic:change', { detail: { track: track, index: index } }));
     }
 
+    function bindBarEvents() {
+        if (!barEl || barEl.__ngMusicBound) return;
+        barEl.__ngMusicBound = true;
+
+        barEl.addEventListener('click', function (e) {
+            if (!e.target.closest('[data-action="volume"]')) {
+                e.stopPropagation();
+            }
+            var btn = e.target.closest('[data-action]');
+            if (!btn || btn.getAttribute('data-action') === 'volume') return;
+            e.preventDefault();
+            var action = btn.getAttribute('data-action');
+            if (action === 'play') NgMusicPlayer.toggle();
+            if (action === 'prev') NgMusicPlayer.prev();
+            if (action === 'next') NgMusicPlayer.next();
+            if (action === 'mute') NgMusicPlayer.toggleMute();
+        });
+
+        var volInput = barEl.querySelector('[data-action="volume"]');
+        if (volInput) {
+            volInput.addEventListener('input', function (e) {
+                e.stopPropagation();
+                volume = parseInt(volInput.value, 10) / 100;
+                if (audio) audio.volume = volume;
+                saveState();
+                updateBar();
+            });
+            volInput.addEventListener('click', function (e) { e.stopPropagation(); });
+        }
+    }
+
     var NgMusicPlayer = {
-        init: function (barSelector) {
+        init: function () {
             loadState();
-            barEl = document.querySelector(barSelector || '#ng-music-bar');
+            barEl = document.getElementById('ng-music-bar');
             if (!barEl) return;
 
-            barEl.addEventListener('click', function (e) {
-                var btn = e.target.closest('[data-action]');
-                if (!btn) return;
-                var action = btn.getAttribute('data-action');
-                if (action === 'play') NgMusicPlayer.toggle();
-                if (action === 'prev') NgMusicPlayer.prev();
-                if (action === 'next') NgMusicPlayer.next();
-            });
-
-            var volInput = barEl.querySelector('[data-action="volume"]');
-            if (volInput) {
-                volInput.addEventListener('input', function () {
-                    volume = parseInt(volInput.value, 10) / 100;
-                    if (audio) audio.volume = volume;
-                    saveState();
-                });
-            }
-
+            getAudio();
+            bindBarEvents();
             updateBar();
+
+            if (!window.__ngMusicPlayerReady) {
+                window.__ngMusicPlayerReady = true;
+                var track = currentTrack();
+                var a = getAudio();
+                if (track && a.src && a.src.indexOf(track.src) >= 0 && !a.paused) {
+                    updateBar();
+                }
+            }
         },
 
         setQueue: function (items, startIndex) {
@@ -137,10 +189,9 @@
                 index = -1;
                 if (audio) {
                     audio.pause();
-                    audio.src = '';
                 }
             } else {
-                playAt(Math.min(index, queue.length - 1));
+                playAt(Math.min(Math.max(index, 0), queue.length - 1));
             }
             saveState();
             updateBar();
@@ -171,8 +222,12 @@
         },
 
         toggle: function () {
-            if (!currentTrack()) return;
-            var a = ensureAudio();
+            if (!currentTrack()) {
+                if (window.ngSpaNavigate) window.ngSpaNavigate('/music');
+                else window.location.href = '/music';
+                return;
+            }
+            var a = getAudio();
             if (a.paused) {
                 if (!a.src) playAt(index);
                 else a.play();
@@ -182,9 +237,16 @@
             updateBar();
         },
 
+        toggleMute: function () {
+            volume = volume > 0 ? 0 : 0.8;
+            if (audio) audio.volume = volume;
+            saveState();
+            updateBar();
+        },
+
         prev: function () {
             if (queue.length === 0) return;
-            var a = ensureAudio();
+            var a = getAudio();
             if (a.currentTime > 3) {
                 a.currentTime = 0;
                 return;
@@ -214,7 +276,7 @@
             index = -1;
             if (audio) {
                 audio.pause();
-                audio.src = '';
+                audio.removeAttribute('src');
             }
             saveState();
             updateBar();
@@ -223,7 +285,18 @@
 
     window.NgMusicPlayer = NgMusicPlayer;
 
-    document.addEventListener('DOMContentLoaded', function () {
-        NgMusicPlayer.init('#ng-music-bar');
+    function boot() {
+        NgMusicPlayer.init();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+
+    window.addEventListener('ng:navigate', function () {
+        barEl = null;
+        NgMusicPlayer.init();
     });
 })(window);

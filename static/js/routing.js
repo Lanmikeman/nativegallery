@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const CACHE_TTL = 300000; // 5 минут
   let loadingTimeout;
 
+  const PERMANENT_SCRIPTS = [
+    "/static/js/jquery.js",
+    "/static/js/music-player.js",
+    "/static/js/routing.js",
+  ];
+
   const loadedScriptSrcs = new Set();
 
   function reloadExternalScripts(doc) {
@@ -16,6 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const script = scripts[index];
       const src = script.src;
+
+      const srcPath = (() => {
+        try { return new URL(src).pathname; } catch { return src; }
+      })();
+      if (PERMANENT_SCRIPTS.some((p) => srcPath.endsWith(p))) {
+        loadScript(index + 1);
+        return;
+      }
 
       if (!loadedUrls.has(src)) {
         const newScript = document.createElement("script");
@@ -63,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function initNavigation() {
     document.body.addEventListener("click", handleClick);
     window.addEventListener("popstate", handlePopState);
+    window.ngSpaNavigate = (url) => navigateTo(url, false);
   }
 
   function handleClick(e) {
@@ -79,10 +94,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function shouldIntercept(link) {
     try {
-      const url = new URL(link.href);
-      return (
-        url.origin === location.origin && !link.dataset.noAjax && !link.hash
-      );
+      if (link.dataset.noAjax) return false;
+      if (link.target === "_blank" || link.hasAttribute("download")) return false;
+      if (link.getAttribute("href") === "#" || link.href.endsWith("#")) return false;
+
+      const url = new URL(link.href, location.origin);
+      if (url.origin !== location.origin) return false;
+      if (url.hash && url.pathname === location.pathname) return false;
+
+      const path = url.pathname;
+      if (path === "/logout" || path.startsWith("/api/") || path.startsWith("/auth/")) return false;
+
+      return true;
     } catch {
       return false;
     }
@@ -196,6 +219,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     lastPath = newPath;
+
+    window.dispatchEvent(
+      new CustomEvent("ng:navigate", { detail: { path: newPath, url: url } })
+    );
   }
 
   const executedInlineScripts = new Set();

@@ -12,7 +12,6 @@ $tablesExist = AudioLibrary::tablesExist();
 
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'; ?>
-    <link rel="stylesheet" href="/static/css/music-player.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>">
 </head>
 
 <body>
@@ -23,7 +22,7 @@ $tablesExist = AudioLibrary::tablesExist();
             <td class="main">
                 <div class="ng-music-page">
                     <h1>Музыка</h1>
-                    <p>Личная библиотека: загрузка файлов, HTTP-потоки и плейлисты M3U. Мини-плеер доступен внизу страницы на всех разделах сайта.</p>
+                    <p>Личная библиотека: загрузка файлов, HTTP-потоки и плейлисты M3U. Компактный плеер — в верхней панели рядом с вашим ником; при переходе по меню музыка не прерывается.</p>
 
                     <div id="ng-music-migration-hint" class="alert alert-warning" style="display:<?= $tablesExist ? 'none' : 'block' ?>;">
                         Для работы раздела примените миграцию <code>sqlcore/sql_0010.sql</code>.

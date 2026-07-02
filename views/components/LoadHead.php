@@ -1,9 +1,10 @@
 <?php
-use \App\Services\ThemeManager;
+use \App\Services\{ThemeManager, Auth};
 $themeManager = new ThemeManager();
 $themeManager->loadThemes();
 
 $stylesheet = $themeManager->getThemeStylesheet();
+$musicUserLoggedIn = Auth::userid() > 0;
 ?>
 
 <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -25,6 +26,9 @@ $stylesheet = $themeManager->getThemeStylesheet();
     <?php } ?>
     <link rel="stylesheet" href="/static/css/map.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
     <link rel="stylesheet" href="/static/css/jquery-ui-1.8.20.custom.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <?php if ($musicUserLoggedIn) { ?>
+    <link rel="stylesheet" href="/static/css/music-player.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <?php } ?>
     <script src="/static/js/jquery.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/jquery.form.min.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/core.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
@@ -35,7 +39,10 @@ $stylesheet = $themeManager->getThemeStylesheet();
     <script src="/static/js/imageupload.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/progress.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/notie.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <!--script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" defer></!--script-->
+    <?php if ($musicUserLoggedIn) { ?>
+    <script src="/static/js/music-player.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>"></script>
+    <script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" defer></script>
+    <?php } ?>
     <script src="/static/js/photo.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/newcore.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/act.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>

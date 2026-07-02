@@ -61,6 +61,11 @@ class ProfileController
     {
        Page::set('Profile/LK/History');
     }
+
+    public static function lkticket()
+    {
+        Page::set('Profile/LK/Ticket');
+    }
     public static function lkprofile()
     {
        Page::set('Profile/LK/Profile');

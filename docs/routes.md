@@ -82,6 +82,7 @@
 | `/lk/upload` | Загрузка медиа |
 | `/lk/editimage?id=` | Редактирование фото |
 | `/lk/profile?type=OpenVK` | Привязка OpenVK |
+| `/lk/ticket.php` | Мои заявки на изменение БД (как на transphoto.org) |
 | `/vehicle/dbedit` | Заявка на изменение БД сущностей |
 
 ## Администрирование

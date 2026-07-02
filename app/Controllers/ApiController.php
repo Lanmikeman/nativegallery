@@ -66,12 +66,6 @@ use \App\Controllers\Api\Messages\UploadFile as MSGUpload;
 use \App\Controllers\Api\Messages\GetUsers as MSGGetUsers;
 use \App\Controllers\Api\Messages\CreateChat as MSGCreateChat;
 use \App\Controllers\Api\Emoji\Load as EmojiLoad;
-use \App\Controllers\Api\Audio\Upload as AudioUpload;
-use \App\Controllers\Api\Audio\CreateStream as AudioCreateStream;
-use \App\Controllers\Api\Audio\AddUrl as AudioAddUrl;
-use \App\Controllers\Api\Audio\Library as AudioLibraryApi;
-use \App\Controllers\Api\Audio\Delete as AudioDelete;
-use \App\Controllers\Api\Audio\Playlist as AudioPlaylist;
 
 class ApiController
 {
@@ -272,25 +266,5 @@ class ApiController
     public static function adminmodelsrequesthandler() {
         return new AdminModelsRequestHandler();
     }
-
-    public static function audioupload() {
-        return new AudioUpload();
-    }
-    public static function audiostream() {
-        return new AudioCreateStream();
-    }
-    public static function audiourl() {
-        return new AudioAddUrl();
-    }
-    public static function audiolibrary() {
-        return new AudioLibraryApi();
-    }
-    public static function audiodelete() {
-        return new AudioDelete();
-    }
-    public static function audioplaylist() {
-        return new AudioPlaylist();
-    }
-
 
 }

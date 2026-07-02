@@ -66,6 +66,11 @@ class ProfileController
     {
         Page::set('Profile/LK/Ticket');
     }
+
+    public static function lkkonkurs()
+    {
+        Page::set('Profile/LK/Konkurs');
+    }
     public static function lkprofile()
     {
        Page::set('Profile/LK/Profile');

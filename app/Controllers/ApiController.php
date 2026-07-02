@@ -44,6 +44,8 @@ use \App\Controllers\Api\Admin\GeoDB\Load as AdminGeoDBLoad;
 use \App\Controllers\Api\Admin\GeoDB\Delete as AdminGeoDBDelete;
 use \App\Controllers\Api\Admin\Contests\CreateTheme as AdminContestsCreateTheme;
 use \App\Controllers\Api\Admin\Contests\Create as AdminContestsCreate;
+use \App\Controllers\Api\Admin\Contests\ForceClose as AdminContestsForceClose;
+use \App\Controllers\Api\Admin\Contests\Cancel as AdminContestsCancel;
 use \App\Controllers\Api\Admin\Settings\TaskManager as AdminTaskManager;
 use \App\Controllers\Api\Messages\GetChats as MSGGetChats;
 use \App\Controllers\Api\Messages\UploadFile as MSGUpload;
@@ -156,6 +158,12 @@ class ApiController
     }
     public static function admincontestscreate() {
         return new AdminContestsCreate();
+    }
+    public static function admincontestsforceclose() {
+        return new AdminContestsForceClose();
+    }
+    public static function admincontestscancel() {
+        return new AdminContestsCancel();
     }
     public static function admingeodbcreate() {
         return new AdminGeoDBCreate();

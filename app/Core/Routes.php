@@ -118,6 +118,8 @@ class Routes
                 Router::any('/api/admin/geodb/load', 'ApiController@admingeodbload');
                 Router::any('/api/admin/contests/createtheme', 'ApiController@admincontestscreatetheme');
                 Router::any('/api/admin/contests/create', 'ApiController@admincontestscreate');
+                Router::post('/api/admin/contests/forceclose', 'ApiController@admincontestsforceclose');
+                Router::post('/api/admin/contests/cancel', 'ApiController@admincontestscancel');
                 Router::any('/api/admin/settings/taskmanager', 'ApiController@admintaskmanager');
             }
             Router::get('/logout', 'MainController@logout');

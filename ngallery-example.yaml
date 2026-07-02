@@ -13,6 +13,7 @@ ngallery:
     logslocation: '/logs'
     encryptionkey: ''
     footerslogan: 'Aloha, Hawaii!'
+    timezone: 'Europe/Moscow'
     access:
       type: 'allow'
       countries: ''

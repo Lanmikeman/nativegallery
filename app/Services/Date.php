@@ -1,9 +1,66 @@
 <?php
 namespace App\Services;
+use DateTime;
+use DateTimeZone;
 use InvalidArgumentException;
 
 class Date
 {
+    public static function getSiteTimezoneName(): string
+    {
+        if (defined('NGALLERY') && !empty(NGALLERY['root']['timezone'])) {
+            return (string) NGALLERY['root']['timezone'];
+        }
+        return 'Europe/Moscow';
+    }
+
+    public static function applySiteTimezone(): void
+    {
+        date_default_timezone_set(self::getSiteTimezoneName());
+    }
+
+    public static function parseDateTimeLocal(?string $value): int|false
+    {
+        if (!$value) {
+            return false;
+        }
+        $value = trim($value);
+        $tz = new DateTimeZone(self::getSiteTimezoneName());
+        $dt = DateTime::createFromFormat('Y-m-d\TH:i', $value, $tz);
+        if (!$dt) {
+            $dt = DateTime::createFromFormat('Y-m-d\TH:i:s', $value, $tz);
+        }
+        return $dt ? $dt->getTimestamp() : false;
+    }
+
+    public static function formatDateTimeLocal(int $timestamp): string
+    {
+        $dt = new DateTime('@' . $timestamp);
+        $dt->setTimezone(new DateTimeZone(self::getSiteTimezoneName()));
+        return $dt->format('Y-m-d\TH:i');
+    }
+
+    public static function formatLocalizedDateTime(int $timestamp, string $pattern = 'd MMMM yyyy года в H:mm'): string
+    {
+        $dt = new DateTime('@' . $timestamp);
+        $dt->setTimezone(new DateTimeZone(self::getSiteTimezoneName()));
+        if (class_exists(IntlDateFormatter::class)) {
+            $formatter = new \IntlDateFormatter(
+                'ru_RU',
+                \IntlDateFormatter::LONG,
+                \IntlDateFormatter::SHORT,
+                self::getSiteTimezoneName(),
+                \IntlDateFormatter::GREGORIAN,
+                $pattern
+            );
+            $formatted = $formatter->format($dt);
+            if ($formatted !== false) {
+                return $formatted;
+            }
+        }
+        return self::formatDate($timestamp);
+    }
+
     public static function zmdate($date)
     {
         $currentTime = time();

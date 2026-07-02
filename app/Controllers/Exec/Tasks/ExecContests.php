@@ -4,7 +4,7 @@ namespace App\Controllers\Exec\Tasks;
 
 require_once __DIR__ . '/../cli-bootstrap.php';
 
-use App\Services\{Router, Auth, DB, Json, Date};
+use App\Services\{Router, Auth, DB, Json, Date, ContestClosure};
 use App\Controllers\ExceptionRegister;
 use App\Core\Page;
 
@@ -117,9 +117,7 @@ class ExecContests
         }
 
         echo "[{$contest['id']}] Ready for closing!\n";
-        self::processVotes($contest);
-        DB::query('UPDATE contests SET status = 3 WHERE id = :id', [':id' => $contest['id']]);
-        DB::query('UPDATE photos SET contest_id = 0, on_contest = 0 WHERE contest_id = :id', [':id' => $contest['id']]);
+        ContestClosure::finishNormally($contest);
         echo "[{$contest['id']}] Closed.\n";
         if (NGALLERY['root']['contests']['autonew']['enabled'] === true) {
             echo "Creating new contest...";
@@ -148,50 +146,6 @@ class ExecContests
             echo "Contest created! Continue...";
         }
      }
-
-    private static function processVotes(array $contest)
-    {
-        $votes = DB::query(
-            'SELECT user_id, photo_id, COUNT(*) AS vote_count 
-             FROM contests_rates WHERE contest_id = :id 
-             GROUP BY user_id ORDER BY vote_count DESC LIMIT 10',
-            [':id' => $contest['id']]
-        );
-
-        $place = 1;
-        foreach ($votes as $vote) {
-            self::updatePhotoContent($vote, $contest, $place);
-            $place++;
-        }
-    }
-
-    private static function updatePhotoContent(array $vote, array $contest, int $place)
-    {
-        $photo = DB::query('SELECT * FROM photos WHERE id = :id', [':id' => $vote['photo_id']])[0];
-        $photoData = json_decode($photo['content'], true);
-
-        if (!isset($photoData['contests']) || !is_array($photoData['contests'])) {
-            $photoData['contests'] = [];
-        }
-
-        $theme = DB::query('SELECT title FROM contests_themes WHERE id = :id', [':id' => $contest['themeid']])[0]['title'];
-
-        $photoData['contests'][] = [
-            'id' => $contest['id'],
-            'contesttheme' => $theme,
-            'votenum' => $vote['vote_count'],
-            'place' => $place
-        ];
-
-
-        DB::query('INSERT INTO contests_winners VALUES (\'0\', :photo_id, :place, :contest_id, :date)', array(':photo_id'=>$vote['photo_id'], ':place'=>$place, ':contest_id'=>$contest['id'], ':date'=>time()));
-
-        DB::query('UPDATE photos SET content = :content, on_contest=0, contest_id=0 WHERE id = :id', [
-            ':id' => $vote['photo_id'],
-            ':content' => json_encode($photoData, JSON_UNESCAPED_UNICODE)
-        ]);
-
-    }
 
     private static function isAnotherContestInStatus(int $status): bool
     {

@@ -22,4 +22,5 @@ if (empty($_SERVER['DOCUMENT_ROOT'])) {
     $_SERVER['DOCUMENT_ROOT'] = $projectRoot;
 }
 
+\App\Services\Date::applySiteTimezone();
 DB::ensureInitialized();

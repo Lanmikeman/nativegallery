@@ -4,7 +4,7 @@ namespace App\Controllers\Api\Admin\Contests;
 
 
 
-use App\Services\{Auth, Router, GenerateRandomStr, DB, Json, EXIF};
+use App\Services\{Auth, Router, GenerateRandomStr, DB, Json, EXIF, Date};
 use App\Models\{User, Vote, Photo};
 
 
@@ -12,10 +12,10 @@ class Create
 {
     public function __construct()
     {
-        $openprdate = strtotime($_POST['openpretendsdate'] ?? '');
-        $closeprdate = strtotime($_POST['closepretendsdate'] ?? '');
-        $opendate = strtotime($_POST['opendate'] ?? '');
-        $closedate = strtotime($_POST['closedate'] ?? '');
+        $openprdate = Date::parseDateTimeLocal($_POST['openpretendsdate'] ?? '');
+        $closeprdate = Date::parseDateTimeLocal($_POST['closepretendsdate'] ?? '');
+        $opendate = Date::parseDateTimeLocal($_POST['opendate'] ?? '');
+        $closedate = Date::parseDateTimeLocal($_POST['closedate'] ?? '');
 
         if ($_POST['startContestNow'] === "1") {
             $opendate = $closeprdate;

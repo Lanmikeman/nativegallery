@@ -1,6 +1,6 @@
 <?php
 
-use \App\Services\{Auth, DB, Date, TaskScheduler};
+use \App\Services\{Auth, DB, Date, TaskScheduler, ContestClosure};
 use \App\Models\User;
 
 $task = new TaskScheduler();
@@ -15,6 +15,7 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
 <tr>
     <td class="main">
         <h1><b>Фотоконкурсы</b></h1>
+        <p class="sm text-muted">Часовой пояс сайта: <b><?= htmlspecialchars(Date::getSiteTimezoneName()) ?></b>. Даты в формах указываются в этом поясе.</p>
         <div class="v-header__tabs">
             <div class="v-tabs">
                 <div class="v-tabs__scroll">
@@ -50,7 +51,7 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                             <th>Дата начала</th>
                             <th>Дата конца</th>
                             <th>Статус</th>
-                            <th></th>
+                            <th>Действия</th>
                         </tr>
                         <?php
                         $themes = DB::query('SELECT * FROM contests ORDER BY id DESC');
@@ -67,8 +68,25 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                                 $status = 'Отбор победителей';
                             } else if ($contestStatus === 3) {
                                 $status = 'Завершён';
+                            } else if ($contestStatus === 4) {
+                                $status = 'Отменён';
                             } else {
                                 $status = 'Сбой';
+                            }
+                            $closure = ContestClosure::decodeMeta($t['closure_meta'] ?? null);
+                            $closureLabel = ContestClosure::closureLabel($closure);
+                            if ($closureLabel !== '') {
+                                $status .= '<br><span class="sm">' . htmlspecialchars($closureLabel) . '</span>';
+                            }
+                            if ($closure && !empty($closure['reason'])) {
+                                $status .= '<br><span class="sm text-muted">' . htmlspecialchars($closure['reason']) . '</span>';
+                            }
+                            $actions = '';
+                            if ($contestStatus < 3) {
+                                $actions = '<button type="button" class="btn btn-sm btn-warning me-1" onclick="openForceClose(' . $t['id'] . ', \'' . htmlspecialchars($themetitle, ENT_QUOTES) . '\')">Завершить</button>'
+                                    . '<button type="button" class="btn btn-sm btn-danger" onclick="openCancelContest(' . $t['id'] . ', \'' . htmlspecialchars($themetitle, ENT_QUOTES) . '\')">Отменить</button>';
+                            } else {
+                                $actions = '<span class="sm text-muted">—</span>';
                             }
                             echo '<tr class="' . $color . '">
                             <td>' . $t['id'] . '</td>
@@ -78,6 +96,7 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                             <td>' . Date::formatDate((int) $t['opendate']) . '</td>
                             <td>' . Date::formatDate((int) $t['closedate']) . '</td>
                             <td>' . $status . '</td>
+                            <td>' . $actions . '</td>
                             </tr>';
                         }
                         ?>
@@ -211,6 +230,57 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
     </div>
 </div>
 
+<div class="modal fade" id="forceCloseContest" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5"><b>Принудительное завершение</b></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Конкурс: <b id="forceCloseTitle"></b></p>
+                <input type="hidden" id="forceCloseId" value="0">
+                <div class="mb-3">
+                    <label class="form-label">Причина</label>
+                    <textarea id="forceCloseReason" class="form-control" rows="4" placeholder="Например: технический сбой, досрочное закрытие голосования"></textarea>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="forceCloseWinners" checked>
+                    <label class="form-check-label" for="forceCloseWinners">Подвести итоги и записать победителей по текущим голосам</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-warning" onclick="submitForceClose()">Завершить сейчас</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelContest" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5"><b>Отмена конкурса</b></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Конкурс: <b id="cancelContestTitle"></b></p>
+                <input type="hidden" id="cancelContestId" value="0">
+                <div class="alert alert-warning">Конкурс будет отменён без победителей. Фото снимутся с конкурса.</div>
+                <div class="mb-3">
+                    <label class="form-label">Причина отмены</label>
+                    <textarea id="cancelContestReason" class="form-control" rows="4" placeholder="Например: ошибка в теме, дублирование конкурса"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Назад</button>
+                <button type="button" class="btn btn-danger" onclick="submitCancelContest()">Отменить конкурс</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 <script>
@@ -247,15 +317,62 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
             data: formData,
             success: function(response) {
                 var jsonData = JSON.parse(response);
-
-                Notify.noty('success', 'OK!');
-
-
+                if (jsonData.errorcode === 0) {
+                    Notify.noty('success', 'Конкурс создан');
+                    location.reload();
+                } else {
+                    Notify.noty('danger', jsonData.error || 'Ошибка');
+                }
             },
             cache: false,
             contentType: false,
             processData: false
         });
+    }
 
+    function openForceClose(id, title) {
+        $('#forceCloseId').val(id);
+        $('#forceCloseTitle').text(title);
+        $('#forceCloseReason').val('');
+        $('#forceCloseWinners').prop('checked', true);
+        new bootstrap.Modal(document.getElementById('forceCloseContest')).show();
+    }
+
+    function openCancelContest(id, title) {
+        $('#cancelContestId').val(id);
+        $('#cancelContestTitle').text(title);
+        $('#cancelContestReason').val('');
+        new bootstrap.Modal(document.getElementById('cancelContest')).show();
+    }
+
+    function submitForceClose() {
+        $.post('/api/admin/contests/forceclose', {
+            id: $('#forceCloseId').val(),
+            reason: $('#forceCloseReason').val(),
+            process_winners: $('#forceCloseWinners').is(':checked') ? '1' : '0'
+        }, function(response) {
+            var data = typeof response === 'string' ? JSON.parse(response) : response;
+            if (data.errorcode === 0) {
+                Notify.noty('success', 'Конкурс завершён');
+                location.reload();
+            } else {
+                Notify.noty('danger', data.error || 'Ошибка');
+            }
+        });
+    }
+
+    function submitCancelContest() {
+        $.post('/api/admin/contests/cancel', {
+            id: $('#cancelContestId').val(),
+            reason: $('#cancelContestReason').val()
+        }, function(response) {
+            var data = typeof response === 'string' ? JSON.parse(response) : response;
+            if (data.errorcode === 0) {
+                Notify.noty('success', 'Конкурс отменён');
+                location.reload();
+            } else {
+                Notify.noty('danger', data.error || 'Ошибка');
+            }
+        });
     }
 </script>

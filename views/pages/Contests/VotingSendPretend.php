@@ -5,23 +5,7 @@ use \App\Models\{Vehicle, User};
 
 function convertUnixToRussianDateTime($unixTime)
 {
-    // Создаем объект DateTime из Unix-времени
-    $dateTime = new DateTime("@$unixTime");
-
-    // Устанавливаем временную зону (можно изменить на нужную)
-    $dateTime->setTimezone(new DateTimeZone('Europe/Moscow'));
-
-    // Форматируем дату и время с использованием IntlDateFormatter
-    $formatter = new IntlDateFormatter(
-        'ru_RU',
-        IntlDateFormatter::LONG,
-        IntlDateFormatter::NONE,
-        'Europe/Moscow',
-        IntlDateFormatter::GREGORIAN,
-        'd MMMM yyyy года в H:mm'
-    );
-
-    return $formatter->format($dateTime);
+    return Date::formatLocalizedDateTime((int) $unixTime);
 }
 ?>
 

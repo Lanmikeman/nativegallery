@@ -2,6 +2,9 @@
 
 Актуально для форка **v1.7**.
 
+**Production:** Ubuntu 24.04 + Nginx (`deploy/install-ubuntu-24.04.sh`).  
+**Альтернативы** (Apache, Rocky/AlmaLinux/CentOS): [deployment-alternatives.md](deployment-alternatives.md).
+
 ## Обновление между версиями форка
 
 | С версии | Действия |
@@ -42,11 +45,12 @@ mysql -u USER -p DATABASE < sqlcore/sql_0011.sql   # общие радиоста
 
 ## Каталоги и права
 
-PHP-FPM (обычно `www-data`) должен иметь запись в:
+PHP-FPM должен иметь запись в каталоги ниже. Пользователь: **`www-data`** (Ubuntu/Debian) или **`apache`** (Rocky/AlmaLinux/CentOS):
 
 ```bash
+WEB_USER=www-data   # apache на Rocky/AlmaLinux
 mkdir -p uploads cdn/temp cdn/previews cdn/image cdn/video logs storage/locks
-chown -R www-data:www-data uploads cdn logs storage
+chown -R ${WEB_USER}:${WEB_USER} uploads cdn logs storage
 chmod -R 775 uploads cdn logs storage
 ```
 
@@ -96,8 +100,9 @@ UPDATE users SET admin = 4 WHERE username = 'ваш_ник';
 ## Cron фотоконкурсов
 
 ```bash
-sudo NG_WEB_ROOT=/var/www/nativegallery bash deploy/setup-cron.sh
+sudo NG_WEB_ROOT=/var/www/nativegallery NG_WEB_USER=www-data bash deploy/setup-cron.sh
 sudo -u www-data php app/Controllers/Exec/Tasks/ExecContests.php
+# на Rocky/AlmaLinux: NG_WEB_USER=apache, sudo -u apache php ...
 ```
 
 Статус задач отображается в **Админка → Настройки** (`/admin?type=Settings`).

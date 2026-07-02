@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# NativeGallery — automated install for Ubuntu Server 24.04 (recommended production stack)
-# Stack: nginx + PHP 8.3 + MySQL 8 + Composer
+# NativeGallery — automated install for Ubuntu/Debian + Apache + PHP-FPM
+# Alternative to install-ubuntu-24.04.sh (production uses Nginx).
 #
 # Usage:
-#   sudo bash deploy/install-ubuntu-24.04.sh
+#   sudo bash deploy/install-ubuntu-apache.sh
 #
-# Optional environment variables:
-#   NG_DOMAIN, NG_DB_NAME, NG_DB_USER, NG_DB_PASS, NG_WEB_ROOT
+# Optional: NG_DOMAIN, NG_DB_NAME, NG_DB_USER, NG_DB_PASS, NG_WEB_ROOT
 
 set -euo pipefail
 
@@ -22,7 +21,7 @@ NG_WEB_ROOT="${NG_WEB_ROOT:-/var/www/nativegallery}"
 NG_SITE_TITLE="${NG_SITE_TITLE:-NativeGallery}"
 NG_ADMIN_EMAIL="${NG_ADMIN_EMAIL:-admin@${NG_DOMAIN}}"
 NG_WEB_USER="${NG_WEB_USER:-www-data}"
-NG_STACK_LABEL="Ubuntu 24.04 + Nginx + PHP-FPM"
+NG_STACK_LABEL="Ubuntu/Debian + Apache + PHP-FPM"
 
 ng_require_root
 
@@ -31,9 +30,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get upgrade -y -qq
 
-echo "==> Installing nginx, PHP 8.3, MySQL, Composer dependencies"
+echo "==> Installing Apache, PHP 8.3, MySQL, Composer"
 apt-get install -y -qq \
-    nginx \
+    apache2 \
     mysql-server \
     php8.3-fpm \
     php8.3-cli \
@@ -51,9 +50,11 @@ apt-get install -y -qq \
     ffmpeg \
     unzip \
     git \
-    curl
+    curl \
+    libapache2-mod-fcgid
 
 ng_configure_php_ini "/etc/php/8.3/fpm/php.ini"
+ng_configure_php_ini "/etc/php/8.3/cli/php.ini"
 
 ng_setup_mysql_db
 
@@ -63,18 +64,20 @@ ng_create_writable_dirs
 ng_import_migrations
 ng_generate_config
 
-echo "==> Configuring nginx"
+echo "==> Configuring Apache"
 sed "s|example.com|${NG_DOMAIN}|g; s|/var/www/nativegallery|${NG_WEB_ROOT}|g" \
-    deploy/nginx/nativegallery.conf > /etc/nginx/sites-available/nativegallery
-ln -sf /etc/nginx/sites-available/nativegallery /etc/nginx/sites-enabled/nativegallery
-rm -f /etc/nginx/sites-enabled/default
+    deploy/apache/nativegallery.conf > /etc/apache2/sites-available/nativegallery.conf
 
-nginx -t
-systemctl enable --now nginx php8.3-fpm mysql
-systemctl reload nginx php8.3-fpm
+a2dissite 000-default.conf 2>/dev/null || true
+a2ensite nativegallery.conf
+a2enmod rewrite proxy proxy_fcgi setenvif headers
+
+apachectl configtest
+systemctl enable --now apache2 php8.3-fpm mysql
+systemctl reload apache2 php8.3-fpm
 
 echo "==> Setting up cron for contests"
 ng_setup_cron
 
 ng_print_footer
-echo " SSL hint: sudo apt install certbot python3-certbot-nginx && sudo certbot --nginx -d ${NG_DOMAIN}"
+echo " SSL hint: sudo apt install certbot python3-certbot-apache && sudo certbot --apache -d ${NG_DOMAIN}"

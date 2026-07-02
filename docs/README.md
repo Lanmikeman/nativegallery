@@ -10,6 +10,7 @@
 |----------|----------|
 | [configuration.md](configuration.md) | Параметры `ngallery.yaml`, overlay `storage/*.json`, роли, OpenVK |
 | [deployment.md](deployment.md) | Обновление, миграции, права, cron, legacy-заглушки Nginx |
+| [deployment-alternatives.md](deployment-alternatives.md) | Apache, Rocky/AlmaLinux/CentOS — альтернативные скрипты установки |
 | [routes.md](routes.md) | Публичные URL, ЛК, конкурсы, OpenVK, API админки |
 | [releases/1.7.md](releases/1.7.md) | Заметки к релизу 1.7 — музыка, SPA, общие радиостанции |
 | [releases/1.6.md](releases/1.6.md) | Заметки к релизу 1.6 — OpenVK, конкурсы, владелец сервера |
@@ -20,8 +21,10 @@
 - Установка: [README.md](../README.md#установка)
 - История изменений: [CHANGELOG.md](../CHANGELOG.md)
 - Пример конфигурации: [ngallery-example.yaml](../ngallery-example.yaml)
-- Автоустановка: [deploy/install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh)
+- Автоустановка (production): [deploy/install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh)
+- Альтернативы: [deployment-alternatives.md](deployment-alternatives.md) — Apache, Rocky 9
 - Nginx: [deploy/nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf)
+- Apache: [deploy/apache/nativegallery.conf](../deploy/apache/nativegallery.conf)
 - Cron конкурсов: [deploy/setup-cron.sh](../deploy/setup-cron.sh)
 
 ## История версий форка

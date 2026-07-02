@@ -8,6 +8,7 @@
 set -euo pipefail
 
 NG_WEB_ROOT="${NG_WEB_ROOT:-/var/www/nativegallery}"
+NG_WEB_USER="${NG_WEB_USER:-www-data}"
 CRON_FILE="/etc/cron.d/nativegallery"
 LOG_DIR="${NG_WEB_ROOT}/logs"
 TASK_SCRIPT="${NG_WEB_ROOT}/app/Controllers/Exec/Tasks/ExecContests.php"
@@ -28,9 +29,9 @@ if [[ ! -f "${TASK_SCRIPT}" ]]; then
 fi
 
 mkdir -p "${LOG_DIR}"
-chown www-data:www-data "${LOG_DIR}"
+chown "${NG_WEB_USER}:${NG_WEB_USER}" "${LOG_DIR}"
 
-CRON_LINE="*/5 * * * * www-data php ${TASK_SCRIPT} >> ${LOG_DIR}/cron.log 2>&1"
+CRON_LINE="*/5 * * * * ${NG_WEB_USER} php ${TASK_SCRIPT} >> ${LOG_DIR}/cron.log 2>&1"
 echo "${CRON_LINE}" > "${CRON_FILE}"
 chmod 644 "${CRON_FILE}"
 
@@ -45,11 +46,11 @@ cat > "${MARKER_FILE}" <<EOF
     }
 }
 EOF
-chown www-data:www-data "${MARKER_FILE}"
+chown "${NG_WEB_USER}:${NG_WEB_USER}" "${MARKER_FILE}"
 chmod 664 "${MARKER_FILE}"
 
 echo "Cron installed:"
 cat "${CRON_FILE}"
 echo ""
 echo "Test run:"
-echo "  sudo -u www-data php ${TASK_SCRIPT}"
+echo "  sudo -u ${NG_WEB_USER} php ${TASK_SCRIPT}"

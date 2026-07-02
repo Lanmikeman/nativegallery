@@ -146,7 +146,7 @@ if ($photo->i('id') !== null) {
 
                                         <?php }
 
-                                        foreach ($photo->content('contests') as $c) {
+                                        foreach ((array) ($photo->content('contests') ?? []) as $c) {
                                             if ($c['place'] === 1) {
                                                 $img = '3';
                                             }
@@ -374,7 +374,8 @@ if ($photo->i('id') !== null) {
     <?php } ?>
     <div id="pp-item-vdata">
         <?php
-                    if (($photo->content('type') != 'none') && (json_decode($photo->i('exif'), true)['type'] != 'none') && ($photo->content('rating') != 'disabled') && ($photo->i('exif') != NULL)) {
+                    $exif = json_decode((string) $photo->i('exif'), true) ?: [];
+                    if (($photo->content('type') ?? 'none') != 'none' && ($exif['type'] ?? 'none') != 'none' && ($photo->content('rating') ?? '') != 'disabled' && $photo->i('exif') != null) {
         ?>
             <div class="p0" id="pp-item-exif">
                 <div class="header-container">
@@ -608,7 +609,8 @@ if ($photo->i('id') !== null) {
                         $comments = DB::query('SELECT * FROM photos_comments WHERE photo_id=:pid ORDER BY CASE WHEN id = :pinnedid THEN 0 ELSE 1 END, id ASC', array(':pid' => $id, ':pinnedid' => $photo->i('pinnedcomment_id')));
                         $commcount = 0;
                         foreach ($comments as $c) {
-                            if (json_decode($c['content'], true)['deleted'] != 'true') {
+                            $commentMeta = json_decode((string) ($c['content'] ?? ''), true) ?: [];
+                            if (($commentMeta['deleted'] ?? '') != 'true') {
                                 $commcount++;
                             }
                         }

@@ -21,8 +21,11 @@ class Comment
     }
     public function content($table)
     {
-        $content = json_decode($this->c['content'], true);
-        return $content[$table];
+        $content = json_decode((string) ($this->c['content'] ?? ''), true);
+        if (!is_array($content)) {
+            return null;
+        }
+        return $content[$table] ?? null;
     }
 
 
@@ -144,10 +147,13 @@ class Comment
     public function i()
     {
         $user = new User($this->c['user_id']);
-        $content = json_decode($this->c['content'], true);
+        $content = json_decode((string) ($this->c['content'] ?? ''), true) ?: [];
         $photo = new \App\Models\Photo($this->c['photo_id']);
 
         $pinc = 'Закрепить';
+        $symb = '';
+        $commclass = '';
+        $admintype = '';
         echo '<div class="' . $this->class . ' comment" wid="' . $this->c['id'] . '">';
         if ($photo->i('pinnedcomment_id') === $this->c['id']) {
             echo '<i style="margin-bottom: 1px;">Комментарий закреплён</i><br>';
@@ -170,7 +176,7 @@ class Comment
         if (json_decode($user->i('content'), true)['aboutlive']['value'] != null) {
             echo ' ' . htmlspecialchars(json_decode($user->i('content'), true)['aboutlive']['value']);
         }
-        if ($content['edited'] === 'true') {
+        if (($content['edited'] ?? '') === 'true') {
             echo '<br>(отредактировано)';
         }
         if ($user->i('admin') === 1) {
@@ -203,11 +209,11 @@ class Comment
             ?>
         </div> <?php
 
-                if ($content['filetype'] === 'img') {
-                    echo '<div class="message-text"><img src="' . $content['src'] . '" width="250"></div>';
+                if (($content['filetype'] ?? '') === 'img') {
+                    echo '<div class="message-text"><img src="' . ($content['src'] ?? '') . '" width="250"></div>';
                 }
-                if ($content['filetype'] === 'video') {
-                    echo '<div class="message-text"><video controls src="' . $content['src'] . '" width="250"></div>';
+                if (($content['filetype'] ?? '') === 'video') {
+                    echo '<div class="message-text"><video controls src="' . ($content['src'] ?? '') . '" width="250"></div>';
                 }
                 echo '
                                 <div class="comment-votes-block">

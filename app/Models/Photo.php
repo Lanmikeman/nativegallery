@@ -9,7 +9,8 @@ class Photo {
         $this->photoid = $user_id;
     }
     public function i($table) {
-        return DB::query("SELECT * FROM photos WHERE id=:id", array(':id'=>$this->photoid))[0][$table];
+        $row = DB::query("SELECT * FROM photos WHERE id=:id", array(':id'=>$this->photoid))[0] ?? [];
+        return $row[$table] ?? null;
     }
     public static function fetchAll($user_id = NULL) {
         if ($user_id != NULL) {
@@ -17,8 +18,11 @@ class Photo {
         }
     }
     public function content($table) {
-        $content = json_decode(self::i('content'), true);
-        return $content[$table];
+        $content = json_decode((string) self::i('content'), true);
+        if (!is_array($content)) {
+            return null;
+        }
+        return $content[$table] ?? null;
     }
     public function declineReason($number) {
         switch ($number) {

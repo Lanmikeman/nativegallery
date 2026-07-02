@@ -9,6 +9,7 @@
 | [configuration.md](configuration.md) | Параметры `ngallery.yaml` — база данных, хранилище, регистрация, фото, конкурсы |
 | [deployment.md](deployment.md) | Обновление установки, миграции, права на каталоги, cron |
 | [routes.md](routes.md) | Основные публичные URL и параметры страницы обновлений |
+| [releases/1.4.md](releases/1.4.md) | Заметки к релизу 1.4 |
 
 ## Быстрые ссылки
 

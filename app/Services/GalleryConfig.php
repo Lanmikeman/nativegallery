@@ -167,19 +167,22 @@ class GalleryConfig
             $ngallery['root']['openvk'] = [];
         }
 
-        if (array_key_exists('enabled', $overlay['openvk'] ?? null)) {
-            $ngallery['root']['openvk']['enabled'] = (bool) $overlay['openvk']['enabled'];
+        $overlayOpenvk = $overlay['openvk'] ?? null;
+        if (is_array($overlayOpenvk)) {
+            if (array_key_exists('enabled', $overlayOpenvk)) {
+                $ngallery['root']['openvk']['enabled'] = (bool) $overlayOpenvk['enabled'];
+            }
+            if (array_key_exists('auto_register', $overlayOpenvk)) {
+                $ngallery['root']['openvk']['auto_register'] = (bool) $overlayOpenvk['auto_register'];
+            }
         }
 
-        if (array_key_exists('auto_register', $overlay['openvk'] ?? null)) {
-            $ngallery['root']['openvk']['auto_register'] = (bool) $overlay['openvk']['auto_register'];
-        }
-
-        if (array_key_exists('enabled', $overlay['audio'] ?? null)) {
+        $overlayAudio = $overlay['audio'] ?? null;
+        if (is_array($overlayAudio) && array_key_exists('enabled', $overlayAudio)) {
             if (!isset($ngallery['root']['audio']) || !is_array($ngallery['root']['audio'])) {
                 $ngallery['root']['audio'] = [];
             }
-            $ngallery['root']['audio']['enabled'] = (bool) $overlay['audio']['enabled'];
+            $ngallery['root']['audio']['enabled'] = (bool) $overlayAudio['enabled'];
         }
 
         if (!empty($overlay['openvk']['providers']) && is_array($overlay['openvk']['providers'])) {

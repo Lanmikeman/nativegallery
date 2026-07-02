@@ -24,7 +24,12 @@ class AudioLibrary
 
     public static function isEnabled(): bool
     {
-        return (NGALLERY['root']['audio']['enabled'] ?? true) === true;
+        $audio = NGALLERY['root']['audio'] ?? null;
+        if (!is_array($audio)) {
+            return true;
+        }
+
+        return ($audio['enabled'] ?? true) === true;
     }
 
     /** @return array<string, mixed>|null */
@@ -37,19 +42,37 @@ class AudioLibrary
         return ['errorcode' => 'DISABLED', 'error' => 1, 'message' => 'Раздел музыки отключён'];
     }
 
+    /** @return array<string, mixed> */
+    private static function audioConfig(): array
+    {
+        $audio = NGALLERY['root']['audio'] ?? null;
+        return is_array($audio) ? $audio : [];
+    }
+
     public static function uploadAllowed(): bool
     {
-        return self::isEnabled() && (NGALLERY['root']['audio']['upload']['allow'] ?? true) === true;
+        $upload = self::audioConfig()['upload'] ?? null;
+        $allow = is_array($upload) ? ($upload['allow'] ?? true) : true;
+
+        return self::isEnabled() && $allow === true;
     }
 
     public static function streamsAllowed(): bool
     {
-        return self::isEnabled() && (NGALLERY['root']['audio']['streams']['allow'] ?? true) === true;
+        $streams = self::audioConfig()['streams'] ?? null;
+        $allow = is_array($streams) ? ($streams['allow'] ?? true) : true;
+
+        return self::isEnabled() && $allow === true;
     }
 
     public static function maxUploadBytes(): int
     {
-        return (int) (NGALLERY['root']['audio']['upload']['maxsize'] ?? 52428800);
+        $upload = self::audioConfig()['upload'] ?? null;
+        if (!is_array($upload)) {
+            return 52428800;
+        }
+
+        return (int) ($upload['maxsize'] ?? 52428800);
     }
 
     public static function allowedMimeTypes(): array

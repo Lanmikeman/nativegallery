@@ -10,41 +10,38 @@
 
 ## [Unreleased]
 
-## [1.5] — 2026-07-02
+## [1.6] — 2026-07-02
+
+Актуальное состояние `main`. Заменяет промежуточный тег `release-1.5`.
 
 ### Добавлено
 
-- **Вход через OpenVK** (openvk.org и vepurovk.xyz — второй инстанс OVK на production-сервере):
-  - Кнопки на `/login` и `/register`
-  - Маршруты `/auth/openvk/start`, `/auth/callback`, API `POST /api/auth/openvk`
-  - Автоматическая регистрация (`openvk.auto_register`) или привязка к существующему аккаунту
-  - Вкладка привязки в `/lk/profile?type=OpenVK`
-  - Ссылки на профиль OpenVK в личном кабинете и публичном профиле
-  - Настройка в `ngallery.yaml` → `openvk` (см. [docs/configuration.md](docs/configuration.md))
-- **Редактирование новостей сайта** в админке (`/admin?type=News`):
-  - Кнопка «Редактировать» и модальное окно для правки текста (орфография и др.)
-  - Дата публикации (`time`) не меняется; фиксируются `edited_at` и `edited_by`
-  - На `/news2` и главной: подпись «Отредактировано {дата} — {ник}»
-  - API: `GET /api/admin/news/{id}`, `POST /api/admin/news/{id}/edit`
-  - Сервис `App\Services\SiteNews`
-  - Миграция `sqlcore/sql_0008.sql`
-- Страницы админки:
-  - `/admin?type=Galleries` — управление тематическими галереями (CRUD)
-  - `/admin?type=EntityEdit` — редактирование типов сущностей и моделей
+- **Вход через OpenVK** (openvk.org, vepurovk.xyz и произвольные инстансы):
+  - Кнопки на `/login` и `/register`, привязка в `/lk/profile?type=OpenVK`
+  - Overlay `storage/auth-settings.json` — CRUD инстансов OpenVK в админке
+- **Редактирование новостей** в админке (`/admin?type=News`), миграция `sql_0008.sql`
+- **Роль владельца** (`admin = 4`): раздел «Сервер» в админке, переключатель Debug (Tracy), редактирование конфига через `storage/server-settings.json`
+- **Редактор прав пользователей** (`/admin?type=UserEdit`), настройки авторизации (`AuthSettings`)
+- **Фотоконкурс** — `/voting/rating`, `/pk.php` (отчёт по конкурсу), навигация `ContestNav`
+- **Личный кабинет** — `/lk/ticket.php` (заявки БД), `/lk/konkurs.php` (участие в конкурсе)
+- **Страница помощи** — `/help/`
+- Страницы админки: `Galleries`, `EntityEdit`
 
 ### Изменено
 
-- `AdminController`: маршрутизация по `?type=` через `resolvePage()` (раньше конструктор не вызывался)
-- Боковое меню админки: счётчики непромодерированных фото и заявок на изменение БД
+- Подвал сайта читает `footerslogan` из конфига (вместо захардкоженного текста)
+- `GalleryConfig`: overlay серверных настроек поверх `ngallery.yaml`
+- Детекция cron для фотоконкурсов (`TaskScheduler`, `setup-cron.sh`, `storage/cron-tasks.json`)
+- Создание конкурса в админке: именованные колонки SQL, автодата закрытия, ошибки в модалке
 
 ### Исправлено
 
-- Пустая страница тематической галереи `/article/{id}` — корректный доступ к строке БД и ID фото
-- Проверка токена OpenVK: API-хост `https://api.openvk.org`, `user_id` из callback
-- Предупреждения PHP 8.3 в `User::content` и cookies сессии (`AuthSession`)
-- Предупреждения PHP в страницах админки (`$nonr`, `$nonr_e`, неопределённые переменные)
-- Кнопка редактирования новости: загрузка текста из data-атрибутов, порядок скриптов
-- Неиспользуемый импорт `UserAgentParser` в `Register`
+- ExecContests: детекция cron, обратная связь в менеджере задач
+- Голосование на конкурсе: предупреждения PHP, пустая вкладка при превью, API rate
+- `VotingSendPretend`, `VotingResults` (пустое состояние), 404 на legacy URL (`ticket.php`, `konkurs.php`, `pk.php`, `/help/`)
+- OpenVK: проверка токена, обновление ссылок при смене домена инстанса
+- Пустая галерея `/article/{id}`, предупреждения PHP 8.3 в админке и сессии
+- Кнопка редактирования новости, захардкоженная ссылка на отчёт конкурса в `Photo.php`
 
 ## [1.4] — 2026-07-02
 

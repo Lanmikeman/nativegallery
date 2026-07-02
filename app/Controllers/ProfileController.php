@@ -26,18 +26,17 @@ class ProfileController
         }
     }
     
-     public static function loadContent()
+    public static function loadContent()
     {
-        $fileName = $_GET['type'];
+        $type = trim((string) ($_GET['type'] ?? ''));
 
-
-        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/views/pages/Profile/LK/Profile/' . $fileName . '.php';
-
-        if (file_exists($filePath)) {
-            Page::set('Profile/LK/Profile/' . self::$file);
+        if ($type !== '' && Page::exists('Profile/LK/Profile/' . $type)) {
+            self::$file = $type;
         } else {
-            Page::set('Profile/LK/Profile/Index');
+            self::$file = 'Index';
         }
+
+        Page::set('Profile/LK/Profile/' . self::$file);
     }
   
     public static function lk()

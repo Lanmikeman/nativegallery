@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 use \App\Services\{Auth, DB, ThemeManager};
 use \App\Models\User;
@@ -8,7 +7,7 @@ $themeManager = new ThemeManager();
 $themeManager->loadThemes();
 
 $themesList = $themeManager->getAllThemes();
-$selectedTheme = $_SESSION['selected_theme'];
+$selectedTheme = $themeManager->getCurrentThemeId();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['theme_id'])) {
   try {

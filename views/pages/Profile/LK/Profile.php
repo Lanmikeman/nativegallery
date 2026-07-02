@@ -22,12 +22,13 @@ $lkActive = 'profile';
         <tr>
             <td class="main">
                 <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
+                <?php $profileTab = (string) ($_GET['type'] ?? ''); ?>
                 <center>
                     <div class="tabs">
                         <nav class="tab-nav">
-                            <a href="/lk/profile" class="tab-item <?php if ($_GET['type'] === null) { ?> active <?php } ?>">Профиль</a>
-                            <a href="?type=OpenVK" class="tab-item <?php if (($_GET['type'] ?? '') === 'OpenVK') { ?> active <?php } ?>">OpenVK</a>
-                            <a href="?type=Personalization" class="tab-item <?php if ($_GET['type'] === 'Personalization') { ?> active <?php } ?>">Внешний вид</a>
+                            <a href="/lk/profile" class="tab-item<?= $profileTab === '' ? ' active' : '' ?>">Профиль</a>
+                            <a href="?type=OpenVK" class="tab-item<?= $profileTab === 'OpenVK' ? ' active' : '' ?>">OpenVK</a>
+                            <a href="?type=Personalization" class="tab-item<?= $profileTab === 'Personalization' ? ' active' : '' ?>">Внешний вид</a>
                         </nav>
                         <div class="tab-content">
                             <?=\App\Controllers\ProfileController::loadContent();?> 

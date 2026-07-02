@@ -28,10 +28,18 @@ $linkedNotice = !empty($_GET['linked']);
                  onerror="this.onerror=null;this.src='/static/img/avatar.png';">
             <div style="flex:1">
                 <div style="font-weight:600"><?= $label ?></div>
-                <?php if (is_array($link)) { ?>
+                <?php if (is_array($link)) {
+                    $profileUrl = OpenVKAuth::profileUrl($link);
+                    $profileName = OpenVKAuth::profileDisplayName($link);
+                    ?>
                     <div class="sm">
-                        Привязан: <b><?= htmlspecialchars((string) ($link['screen_name'] ?: trim(($link['first_name'] ?? '') . ' ' . ($link['last_name'] ?? '')))) ?></b>
+                        Привязан: <b><?= htmlspecialchars($profileName) ?></b>
                         (ID <?= (int) ($link['id'] ?? 0) ?>)
+                    </div>
+                    <div class="sm" style="margin-top:4px">
+                        <a href="<?= htmlspecialchars($profileUrl) ?>" target="_blank" rel="noopener noreferrer" style="color:<?= $accent ?>">
+                            <?= htmlspecialchars($profileUrl) ?>
+                        </a>
                     </div>
                 <?php } else { ?>
                     <div class="sm" style="color:#888">Не привязан</div>

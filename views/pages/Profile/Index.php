@@ -1,6 +1,6 @@
 <?php
 
-use \App\Services\{Auth, DB, Date};
+use \App\Services\{Auth, DB, Date, OpenVKAuth};
 use \App\Models\{User, UserCTTC};
 
 
@@ -118,6 +118,17 @@ $birthdate = json_decode($userprofile->i('content'), true)['aboutbirthday']['val
                                             <tr>
                                                 <td class="sm" style="padding:3px 10px 3px 0"><b>ВКонтакте:</b></td>
                                                 <td><?= htmlspecialchars(json_decode($userprofile->i('content'), true)['aboutvk']['value']) ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                        <?php
+                                        foreach (OpenVKAuth::linkedProfilesForUser((int) $userprofile->i('id')) as $ovkProfile) {
+                                            $providerLabel = htmlspecialchars((string) ($ovkProfile['provider']['label'] ?? 'OpenVK'));
+                                            $profileUrl = htmlspecialchars($ovkProfile['url']);
+                                            $profileName = htmlspecialchars($ovkProfile['name']);
+                                            ?>
+                                            <tr>
+                                                <td class="sm" style="padding:3px 10px 3px 0"><b><?= $providerLabel ?>:</b></td>
+                                                <td><a href="<?= $profileUrl ?>" target="_blank" rel="noopener noreferrer"><?= $profileName ?></a></td>
                                             </tr>
                                         <?php } ?>
                                         <?php

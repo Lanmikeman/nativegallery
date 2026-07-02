@@ -172,16 +172,24 @@ class OpenVKAuth
             return self::error('ID пользователя OpenVK не совпадает с токеном.');
         }
 
+        $screenName = (string) ($profile['screen_name'] ?? '');
+        $ovkDomain = (string) ($profile['domain'] ?? '');
+        if ($screenName === '' && $ovkDomain !== '') {
+            $screenName = $ovkDomain;
+        }
+
         $linkPayload = [
             'id' => $ovkUserId,
             'domain' => $provider['domain'],
             'label' => $provider['label'],
-            'screen_name' => (string) ($profile['screen_name'] ?? $profile['domain'] ?? ''),
+            'screen_name' => $screenName,
+            'ovk_domain' => $ovkDomain,
             'first_name' => (string) ($profile['first_name'] ?? ''),
             'last_name' => (string) ($profile['last_name'] ?? ''),
             'photo' => (string) ($profile['photo_200'] ?? $profile['photo_100'] ?? ''),
             'linked_at' => time(),
         ];
+        $linkPayload['profile_url'] = self::profileUrl($linkPayload);
 
         $existingUserId = self::findUserIdByLink($providerId, $ovkUserId);
         $currentUserId = Auth::userid();
@@ -278,6 +286,66 @@ class OpenVKAuth
         }
 
         return $content['openvk'];
+    }
+
+    /** @return list<array{provider: array<string, mixed>, link: array<string, mixed>, url: string, name: string}> */
+    public static function linkedProfilesForUser(int $userId): array
+    {
+        $links = self::linksForUser($userId);
+        $providers = self::providers();
+        $result = [];
+
+        foreach ($links as $providerId => $link) {
+            if (!is_array($link) || !isset($providers[$providerId])) {
+                continue;
+            }
+
+            $result[] = [
+                'provider' => $providers[$providerId],
+                'link' => $link,
+                'url' => self::profileUrl($link),
+                'name' => self::profileDisplayName($link),
+            ];
+        }
+
+        return $result;
+    }
+
+    public static function profileUrl(array $link): string
+    {
+        if (!empty($link['profile_url'])) {
+            return (string) $link['profile_url'];
+        }
+
+        $site = rtrim((string) ($link['domain'] ?? ''), '/');
+        $id = (int) ($link['id'] ?? 0);
+        $slug = trim((string) ($link['ovk_domain'] ?? $link['screen_name'] ?? ''));
+
+        if ($slug !== '' && !preg_match('/^id\d+$/i', $slug)) {
+            return $site . '/' . $slug;
+        }
+
+        if ($id > 0) {
+            return $site . '/id' . $id;
+        }
+
+        return $site;
+    }
+
+    public static function profileDisplayName(array $link): string
+    {
+        $screenName = trim((string) ($link['screen_name'] ?? ''));
+        if ($screenName !== '') {
+            return $screenName;
+        }
+
+        $fullName = trim(((string) ($link['first_name'] ?? '')) . ' ' . ((string) ($link['last_name'] ?? '')));
+        if ($fullName !== '') {
+            return $fullName;
+        }
+
+        $id = (int) ($link['id'] ?? 0);
+        return $id > 0 ? 'id' . $id : 'Профиль';
     }
 
     private static function defaultApiDomain(string $domain): string

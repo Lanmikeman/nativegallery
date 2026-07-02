@@ -6,42 +6,56 @@
 
 ## О форке
 
-Форк [Lanmikeman/nativegallery](https://github.com/Lanmikeman/nativegallery) основан на upstream-проекте [claradex/nativegallery](https://github.com/claradex/nativegallery). Точка ответвления — коммит `7975610` (merge PR #17, 2026-03-06). Собственные изменения форка — 32 коммита (2026-07-02), ориентированы на production-развёртывание Ubuntu 24.04 + Nginx + PHP 8.3 + MariaDB и функциональный паритет с [transphoto.org](https://transphoto.org).
+Форк [Lanmikeman/nativegallery](https://github.com/Lanmikeman/nativegallery) основан на upstream-проекте [claradex/nativegallery](https://github.com/claradex/nativegallery). Точка ответвления — коммит `7975610` (merge PR #17, 2026-03-06). Собственные изменения форка — 55 коммитов (2026-07-02), ориентированы на production-развёртывание Ubuntu 24.04 + Nginx + PHP 8.3 + MariaDB и функциональный паритет с [transphoto.org](https://transphoto.org).
 
 ## [Unreleased]
 
 ## [1.6] — 2026-07-02
 
-Актуальное состояние `main`. Заменяет промежуточный тег `release-1.5`.
+Актуальное состояние `main`. Тег `release-1.6` заменяет промежуточный `release-1.5`.
 
 ### Добавлено
 
 - **Вход через OpenVK** (openvk.org, vepurovk.xyz и произвольные инстансы):
   - Кнопки на `/login` и `/register`, привязка в `/lk/profile?type=OpenVK`
-  - Overlay `storage/auth-settings.json` — CRUD инстансов OpenVK в админке
-- **Редактирование новостей** в админке (`/admin?type=News`), миграция `sql_0008.sql`
-- **Роль владельца** (`admin = 4`): раздел «Сервер» в админке, переключатель Debug (Tracy), редактирование конфига через `storage/server-settings.json`
-- **Редактор прав пользователей** (`/admin?type=UserEdit`), настройки авторизации (`AuthSettings`)
-- **Фотоконкурс** — `/voting/rating`, `/pk.php` (отчёт по конкурсу), навигация `ContestNav`
-- **Личный кабинет** — `/lk/ticket.php` (заявки БД), `/lk/konkurs.php` (участие в конкурсе)
-- **Страница помощи** — `/help/`
+  - Overlay `storage/auth-settings.json` — CRUD инстансов OpenVK в админке (`/admin?type=AuthSettings`)
+  - API: `POST /api/admin/settings/auth`, `POST /api/admin/settings/auth/providers`, `POST /api/admin/settings/auth/providers/{id}`, `POST /api/admin/settings/auth/providers/{id}/delete`
+- **Редактирование новостей** в админке (`/admin?type=News`), миграция `sql_0008.sql` (поля `edited_at`, `edited_by`)
+- **Роль владельца сервера** (`users.admin = 4`):
+  - Раздел **Админка → Сервер** (`/admin?type=ServerSettings`) — только для владельца
+  - Переключатель Debug (Tracy) через `POST /api/admin/settings/debug`
+  - Редактирование параметров `root` через overlay `storage/server-settings.json` (`POST /api/admin/settings/server`)
+  - Базовый `ngallery.yaml` на диске не изменяется
+- **Редактор прав пользователей** (`/admin?type=UserEdit&user_id=`), API `POST /api/admin/users/{id}/edit`
+- **Фотоконкурс** (полный цикл на production):
+  - `/voting`, `/voting/waiting`, `/voting/results`, `/voting/rating` — голосование, претенденты, победители, рейтинг авторов
+  - `/voting/sendpretend` — подача фото на конкурс (требуется вход)
+  - `/pk.php?pid={id}&type=d` и `/voting/report` — отчёт по конкурсу для фото-победителя
+  - Навигация `ContestNav`, API `POST /api/photo/contests/sendpretend`, `GET /api/photo/contests/rate`
+- **Личный кабинет** (legacy URL как на transphoto.org):
+  - `/lk/ticket.php`, `/lk/ticket` — мои заявки на изменение БД
+  - `/lk/konkurs.php`, `/lk/konkurs` — участие в фотоконкурсе
+- **Страница помощи** — `/help/` и `/help` (правила, конкурс, ссылки на ЛК)
 - Страницы админки: `Galleries`, `EntityEdit`
+- Legacy-заглушки для Nginx: `pk.php`, `help/index.php`, `lk/ticket.php`, `lk/konkurs.php`
 
 ### Изменено
 
-- Подвал сайта читает `footerslogan` из конфига (вместо захардкоженного текста)
-- `GalleryConfig`: overlay серверных настроек поверх `ngallery.yaml`
+- Подвал сайта читает `footerslogan` из конфига (вместо захардкоженного «Aloha, Hawaii!»)
+- `GalleryConfig`: overlay `storage/server-settings.json` поверх `ngallery.yaml` (применяется в `index.php`)
 - Детекция cron для фотоконкурсов (`TaskScheduler`, `setup-cron.sh`, `storage/cron-tasks.json`)
 - Создание конкурса в админке: именованные колонки SQL, автодата закрытия, ошибки в модалке
+- Ссылка на отчёт конкурса на странице фото — динамический `pid` вместо захардкоженного ID
 
 ### Исправлено
 
 - ExecContests: детекция cron, обратная связь в менеджере задач
-- Голосование на конкурсе: предупреждения PHP, пустая вкладка при превью, API rate
-- `VotingSendPretend`, `VotingResults` (пустое состояние), 404 на legacy URL (`ticket.php`, `konkurs.php`, `pk.php`, `/help/`)
+- Голосование на конкурсе: предупреждения PHP в `VotingSendPretend`, пустая вкладка при превью (`prev('img')`), безопасный JSON в API rate (`Rate.php`)
+- `VotingResults` — корректное пустое состояние
+- 404 на legacy URL: `ticket.php`, `konkurs.php`, `pk.php`, `/help/`
 - OpenVK: проверка токена, обновление ссылок при смене домена инстанса
 - Пустая галерея `/article/{id}`, предупреждения PHP 8.3 в админке и сессии
-- Кнопка редактирования новости, захардкоженная ссылка на отчёт конкурса в `Photo.php`
+- Кнопка редактирования новости в админке
 
 ## [1.4] — 2026-07-02
 

@@ -1,5 +1,7 @@
 # Маршруты и URL
 
+Актуально для форка **v1.6**.
+
 ## Публичные разделы
 
 | URL | Описание |
@@ -13,15 +15,21 @@
 | `/news2` | Новости сайта (с пометкой об исправлениях) |
 | `/misc` | Список тематических галерей |
 | `/links` | Внешние ссылки |
+| `/help/` | Помощь по сайту (правила, конкурс, ссылки) |
+| `/help` | То же (маршрут роутера) |
 | `/voting` | Фотоконкурс (голосование) |
+| `/voting/waiting` | Претенденты |
 | `/voting/results` | Победители |
 | `/voting/rating` | Рейтинг авторов-победителей |
-| `/voting/waiting` | Претенденты |
+| `/pk.php?pid={id}&type=d` | Отчёт по конкурсу для фото-победителя |
+| `/voting/report` | Алиас отчёта конкурса |
 | `/comments` | Лента комментариев |
 | `/feed` | Лента обновлений |
-| `/mapmedia` | Карта медиа (требуется вход) |
 | `/login` | Вход (логин/пароль + OpenVK) |
 | `/register` | Регистрация (+ OpenVK) |
+| `/about` | О сервере |
+| `/tour` | Обзор возможностей |
+| `/rules`, `/rules/pub`, `/rules/photo`, `/rules/video` | Правила сайта |
 
 ## Авторизация OpenVK
 
@@ -30,7 +38,7 @@
 | URL | Метод | Описание |
 |-----|-------|----------|
 | `/auth/openvk/start?provider=openvk_org` | GET | Старт OAuth на openvk.org |
-| `/auth/openvk/start?provider=vepurovk` | GET | Старт OAuth на vepurovk.xyz (второй инстанс на сервере) |
+| `/auth/openvk/start?provider=vepurovk` | GET | Старт OAuth на vepurovk.xyz |
 | `/auth/callback` | GET | Callback после авторизации |
 | `/api/auth/openvk` | POST | Обмен токена на локальную сессию |
 | `/lk/profile?type=OpenVK` | GET | Привязка OpenVK к существующему аккаунту |
@@ -77,7 +85,7 @@
 | `/authors` | Поиск авторов |
 | `/search?id=USER_ID` | Быстрый поиск фото пользователя |
 
-## Личный кабинет и заявки
+## Личный кабинет и заявки (требуется авторизация)
 
 | URL | Описание |
 |-----|----------|
@@ -85,15 +93,28 @@
 | `/lk/upload` | Загрузка медиа |
 | `/lk/editimage?id=` | Редактирование фото |
 | `/lk/profile?type=OpenVK` | Привязка OpenVK |
-| `/lk/ticket.php` | Мои заявки на изменение БД (как на transphoto.org) |
-| `/lk/konkurs.php` | Фотоконкурс в личном кабинете (как на transphoto.org) |
+| `/lk/ticket.php` | Мои заявки на изменение БД (legacy URL) |
+| `/lk/ticket` | То же (маршрут роутера) |
+| `/lk/konkurs.php` | Фотоконкурс в личном кабинете (legacy URL) |
+| `/lk/konkurs` | То же (маршрут роутера) |
 | `/vehicle/dbedit` | Заявка на изменение БД сущностей |
+| `/mapmedia` | Карта медиа |
+| `/fav_authors` | Фото избранных авторов |
+| `/voting/sendpretend` | Подать фото на конкурс |
 
-## Администрирование
+## Фотоконкурс — API (требуется авторизация)
+
+| URL | Метод | Описание |
+|-----|-------|----------|
+| `/api/photo/contests/sendpretend` | POST | Подать фото на конкурс |
+| `/api/photo/contests/rate` | GET | Голосование за претендента |
+| `/api/contests/getinfo` | GET | Информация о текущем конкурсе |
+
+## Администрирование (требуется `admin ≥ 1`)
 
 | URL | Описание |
 |-----|----------|
-| `/admin` | Пользователи |
+| `/admin` | Список пользователей |
 | `/admin?type=Photo` | Модерация фотографий |
 | `/admin?type=News` | Новости сайта (создание, редактирование, удаление) |
 | `/admin?type=Chronology` | Хронология |
@@ -104,14 +125,12 @@
 | `/admin?type=Models` | Заявки на изменение БД |
 | `/admin?type=Contests` | Фотоконкурсы |
 | `/admin?type=GeoDB` | GeoDB |
-| `/admin?type=AuthSettings` | Регистрация, OpenVK, управление инстансами (добавление, редактирование, удаление) |
-| `POST /api/admin/settings/auth/providers` | Добавить инстанс OpenVK |
-| `POST /api/admin/settings/auth/providers/{id}` | Изменить инстанс (yaml или из админки); обновляет привязки пользователей при смене домена |
-| `POST /api/admin/settings/auth/providers/{id}/delete` | Удалить инстанс (`replace_with` — перенос привязок на другой узел) |
+| `/admin?type=AuthSettings` | Регистрация, OpenVK, управление инстансами |
 | `/admin?type=UserEdit&user_id=` | Права пользователя |
-| `/admin?type=Settings` | Настройки |
+| `/admin?type=Settings` | Менеджер задач (cron) |
+| `/admin?type=ServerSettings` | **Только владелец (`admin = 4`)** — Debug и конфиг сервера |
 
-### API админки (новости)
+### API админки — новости
 
 | URL | Метод | Описание |
 |-----|-------|----------|
@@ -120,6 +139,49 @@
 | `/api/admin/news/{id}/edit` | POST | Сохранить правки (фиксирует `edited_at`, `edited_by`) |
 | `/api/admin/news/{id}/delete` | POST | Удалить новость |
 
+### API админки — авторизация
+
+| URL | Метод | Описание |
+|-----|-------|----------|
+| `/api/admin/settings/auth` | POST | Настройки регистрации |
+| `/api/admin/settings/auth/providers` | POST | Добавить инстанс OpenVK |
+| `/api/admin/settings/auth/providers/{id}` | POST | Изменить инстанс; при смене домена обновляет привязки |
+| `/api/admin/settings/auth/providers/{id}/delete` | POST | Удалить инстанс (`replace_with` — перенос привязок) |
+
+### API админки — пользователи и конкурсы
+
+| URL | Метод | Описание |
+|-----|-------|----------|
+| `/api/admin/users/{id}/edit` | POST | Изменить права пользователя |
+| `/api/admin/contests/create` | POST | Создать конкурс |
+| `/api/admin/contests/forceclose` | POST | Принудительно завершить конкурс |
+| `/api/admin/contests/cancel` | POST | Отменить конкурс |
+| `/api/admin/settings/taskmanager` | ANY | Управление cron-задачами |
+
+### API админки — только владелец (`admin = 4`)
+
+| URL | Метод | Описание |
+|-----|-------|----------|
+| `/api/admin/settings/debug` | POST | Включить/выключить Tracy (`debug=1` / `debug=0`) |
+| `/api/admin/settings/server` | POST | Сохранить параметры `root` в `storage/server-settings.json` |
+
 ## Обратная совместимость
 
-Старые `.php` URL перенаправляются на новые маршруты, например: `/news.php`, `/news2.php`, `/links.php`, `/search.php`, `/update.php`.
+Старые `.php` URL перенаправляются на новые маршруты:
+
+| Legacy URL | Современный маршрут |
+|------------|---------------------|
+| `/news.php` | `/news` |
+| `/news2.php` | `/news2` |
+| `/links.php` | `/links` |
+| `/search.php` | `/search` |
+| `/vsearch.php` | `/vsearch` |
+| `/csearch.php` | `/csearch` |
+| `/authors.php` | `/authors` |
+| `/update.php` | `/update` |
+| `/pk.php` | `/voting/report` (через заглушку `pk.php`) |
+| `/help/` | `/help` (через `help/index.php`) |
+| `/lk/ticket.php` | `/lk/ticket` |
+| `/lk/konkurs.php` | `/lk/konkurs` |
+
+Физические заглушки в корне репозитория нужны для Nginx, когда запрос идёт напрямую к `.php`-файлу.

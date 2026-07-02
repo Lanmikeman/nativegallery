@@ -23,7 +23,11 @@ class Rate
         if ($photo->i('on_contest') != 1 && $photo->i('contest_id') != $_GET['kid']) {
             exit;
         }
-        if ((int)DB::query('SELECT photo_id FROM contests_rates WHERE photo_id=:pid AND user_id=:uid AND contest_id=:cid', array(':uid' => Auth::userid(), ':pid' => $_GET['pid'], ':cid' => $_GET['kid']))[0]['photo_id'] === (int)$_GET['pid']) {
+        $existingRate = DB::query(
+            'SELECT photo_id FROM contests_rates WHERE photo_id=:pid AND user_id=:uid AND contest_id=:cid',
+            [':uid' => Auth::userid(), ':pid' => $_GET['pid'], ':cid' => $_GET['kid']]
+        );
+        if (!empty($existingRate)) {
             DB::query('DELETE FROM contests_rates WHERE user_id=:uid AND photo_id=:pid AND contest_id=:cid', array(':pid' => $_GET['pid'], ':uid' => Auth::userid(), ':cid' => $_GET['kid']));
             $status = 0;
             $newval = $countvotes + 1;

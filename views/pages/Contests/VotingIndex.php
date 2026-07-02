@@ -108,7 +108,11 @@ $(document).ready(function()
                         foreach ($photos_contest as $pc) {
                             $user = new User($pc['user_id']);
                             $class = '';
-                            if ((int)DB::query('SELECT photo_id FROM contests_rates WHERE photo_id=:pid AND user_id=:uid AND contest_id=:cid', array(':uid' => Auth::userid(), ':pid' => $pc['id'], ':cid' => $contest['id']))[0]['photo_id'] === (int)$pc['id']) {
+                            $userRate = DB::query(
+                                'SELECT photo_id FROM contests_rates WHERE photo_id=:pid AND user_id=:uid AND contest_id=:cid',
+                                [':uid' => Auth::userid(), ':pid' => $pc['id'], ':cid' => $contest['id']]
+                            );
+                            if (!empty($userRate)) {
                                 $class = ' voted';
                             }
                             echo '<img pid="'.$pc['id'].'" src="'.$pc['photourl'].'" style="display:none">

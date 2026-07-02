@@ -1,5 +1,3 @@
-$(document).ready(function() { $('head').append('<link rel="stylesheet" href="/css/progress.css?160120" />'); });
-
 (function($){
 
 	// Creating a number of jQuery plugins that you can use to

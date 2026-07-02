@@ -26,6 +26,7 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <?php } ?>
     <link rel="stylesheet" href="/static/css/map.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
     <link rel="stylesheet" href="/static/css/jquery-ui-1.8.20.custom.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <link rel="stylesheet" href="/static/css/progress.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
     <?php if ($musicUserLoggedIn) { ?>
     <link rel="stylesheet" href="/static/css/music-player.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
     <?php } ?>

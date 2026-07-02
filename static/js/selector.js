@@ -7,9 +7,6 @@ function hlText(text, val)
 }
 
 
-$(document).ready(function() { $('head').append('<link rel="stylesheet" href="/css/ui-lightness/jquery-ui-1.8.20.custom.css">'); });
-
-
 (function($)
 {
     $.fn.autocompleteSelector = function(valfield, query, options)

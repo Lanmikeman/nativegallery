@@ -1,6 +1,3 @@
-ar1 = new Image();
-ar1.src = '/img/ar1.gif';
-
 $(document).ready(function()
 {
 	$('.ix-country > a[href="#"]').on('click', function(e)
@@ -24,8 +21,13 @@ $(document).ready(function()
 	$(window).on('load resize', function()
 	{
 		var list = $('#idx-regions-list');
-		var h = list.closest('table').height() - list.position().top + 40;
-		list.css('height', h + 'px');
+		if (!list.length) return;
+
+		var table = list.closest('table');
+		if (!table.length) return;
+
+		var h = table.height() - list.position().top + 40;
+		if (h > 0) list.css('height', h + 'px');
 	});
 
 
@@ -98,7 +100,7 @@ $(document).ready(function()
 
 function searchVehicles()
 {
-	$('#cars_list').html('<img src="/img/wait.gif" style="display:block; padding:2px">').show();
+	$('#cars_list').html('<img src="/static/img/loader_wb.gif" style="display:block; padding:2px" alt="">').show();
 	$.get('/api.php', { action: 'index-qsearch', cid: $('#cid').val(), type: $('#type').val(), num: $('#num').val() }, function (r) { $('#cars_list').html(r); });
     return false;
 }

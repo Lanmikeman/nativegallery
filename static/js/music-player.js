@@ -8,6 +8,8 @@
     var volume = 0.8;
     var barEl = null;
     var audio = null;
+    var loadGeneration = 0;
+    var playRequestId = 0;
 
     function savePlaybackState() {
         if (!audio) return;
@@ -25,18 +27,88 @@
         return track.type === 'stream' || track.source_type === 'stream';
     }
 
+    function isPlaying(a) {
+        return a && !a.paused && !a.ended;
+    }
+
+    function requestPlay(a, opts) {
+        opts = opts || {};
+        var gen = loadGeneration;
+        var reqId = ++playRequestId;
+        var showError = opts.showError !== false;
+        var seekTime = typeof opts.seekTime === 'number' ? opts.seekTime : null;
+
+        function attemptPlay() {
+            if (gen !== loadGeneration || reqId !== playRequestId) return;
+            if (seekTime !== null && !isLiveStream(currentTrack())) {
+                try { a.currentTime = seekTime; } catch (e) { /* ignore */ }
+            }
+            var p = a.play();
+            if (!p || typeof p.then !== 'function') {
+                updateBar();
+                return;
+            }
+            p.then(function () {
+                if (gen !== loadGeneration) return;
+                updateBar();
+            }).catch(function (err) {
+                if (gen !== loadGeneration || reqId !== playRequestId) return;
+                if (err && err.name === 'AbortError') return;
+                setTimeout(function () {
+                    if (gen !== loadGeneration || reqId !== playRequestId) return;
+                    if (isPlaying(a)) return;
+                    console.error('NgMusicPlayer play failed:', err);
+                    if (showError && typeof Notify !== 'undefined') {
+                        Notify.noty('danger', 'Не удалось начать воспроизведение');
+                    }
+                    updateBar();
+                }, 900);
+            });
+        }
+
+        function onReady() {
+            a.removeEventListener('canplay', onReady);
+            a.removeEventListener('error', onLoadError);
+            attemptPlay();
+        }
+
+        function onLoadError() {
+            a.removeEventListener('canplay', onReady);
+            a.removeEventListener('error', onLoadError);
+            if (gen !== loadGeneration) return;
+            setTimeout(function () {
+                if (gen !== loadGeneration) return;
+                if (isPlaying(a)) return;
+                if (showError && typeof Notify !== 'undefined') {
+                    Notify.noty('danger', 'Не удалось воспроизвести трек');
+                }
+            }, 900);
+        }
+
+        if (a.readyState >= 2) {
+            attemptPlay();
+        } else {
+            a.addEventListener('canplay', onReady);
+            a.addEventListener('error', onLoadError);
+            a.load();
+        }
+    }
+
+    function setAudioSrc(a, resolved) {
+        loadGeneration += 1;
+        playRequestId += 1;
+        a.pause();
+        a.src = resolved;
+    }
+
     function reconnectStream() {
         var track = currentTrack();
         if (!track || !isLiveStream(track)) return;
         var a = getAudio();
         var resolved = resolveAudioSrc(track.src);
         if (!resolved) return;
-        a.pause();
-        a.src = resolved;
-        a.load();
-        a.play().catch(function (err) {
-            console.error('NgMusicPlayer stream reconnect failed:', err);
-        });
+        setAudioSrc(a, resolved);
+        requestPlay(a);
         updateBar();
     }
 
@@ -63,9 +135,14 @@
                 updateBar();
             });
             audio.addEventListener('error', function () {
-                if (typeof Notify !== 'undefined') {
-                    Notify.noty('danger', 'Не удалось воспроизвести трек');
-                }
+                var gen = loadGeneration;
+                setTimeout(function () {
+                    if (gen !== loadGeneration) return;
+                    if (isPlaying(audio)) return;
+                    if (typeof Notify !== 'undefined') {
+                        Notify.noty('danger', 'Не удалось воспроизвести трек');
+                    }
+                }, 900);
             });
             var lastSave = 0;
             audio.addEventListener('timeupdate', function () {
@@ -180,21 +257,16 @@
         var a = getAudio();
         var resolved = resolveAudioSrc(track.src);
         if (!resolved) return;
-        a.src = resolved;
+        var seekTime = null;
         try {
             var pb = JSON.parse(sessionStorage.getItem(PLAYBACK_KEY) || 'null');
-            if (pb && pb.src && a.src && a.src.indexOf(pb.src) >= 0 && !isLiveStream(track) && pb.time > 1 && !pb.paused) {
-                a.currentTime = pb.time;
+            if (pb && pb.src && resolved.indexOf(pb.src) >= 0 && !isLiveStream(track) && pb.time > 1 && !pb.paused) {
+                seekTime = pb.time;
             }
         } catch (e) { /* ignore */ }
 
-        a.play().catch(function (err) {
-            console.error('NgMusicPlayer play failed:', err);
-            if (typeof Notify !== 'undefined') {
-                Notify.noty('danger', 'Не удалось начать воспроизведение');
-            }
-            updateBar();
-        });
+        setAudioSrc(a, resolved);
+        requestPlay(a, { seekTime: seekTime });
         saveState();
         updateBar();
         window.dispatchEvent(new CustomEvent('ngmusic:change', { detail: { track: track, index: index } }));
@@ -297,7 +369,7 @@
             var a = getAudio();
             if (a.paused) {
                 if (!a.src) playAt(index);
-                else a.play();
+                else requestPlay(a);
             } else {
                 a.pause();
             }

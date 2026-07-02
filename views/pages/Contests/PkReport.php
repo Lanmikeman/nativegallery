@@ -20,7 +20,11 @@ if ($photo->i('id') === null) {
     $notFound();
 }
 
+$contentContests = (array) ($photo->content('contests') ?? []);
+
 $contestId = 0;
+$photoContestMeta = null;
+
 $winnerRows = DB::query(
     'SELECT contest_id FROM contests_winners WHERE photo_id = :pid ORDER BY date DESC LIMIT 1',
     [':pid' => $photoId]
@@ -30,11 +34,23 @@ if (!empty($winnerRows)) {
 }
 
 if ($contestId <= 0) {
-    foreach ((array) ($photo->content('contests') ?? []) as $entry) {
-        if (!empty($entry['id'])) {
-            $contestId = (int) $entry['id'];
+    foreach ($contentContests as $entry) {
+        $entryContestId = (int) ($entry['id'] ?? $entry['contest_id'] ?? 0);
+        if ($entryContestId > 0) {
+            $contestId = $entryContestId;
+            $photoContestMeta = $entry;
             break;
         }
+    }
+}
+
+if ($contestId <= 0) {
+    $rateContestRows = DB::query(
+        'SELECT contest_id FROM contests_rates WHERE photo_id = :pid ORDER BY contest_id DESC LIMIT 1',
+        [':pid' => $photoId]
+    );
+    if (!empty($rateContestRows)) {
+        $contestId = (int) $rateContestRows[0]['contest_id'];
     }
 }
 
@@ -43,13 +59,25 @@ if ($contestId <= 0) {
 }
 
 $contestRows = DB::query('SELECT * FROM contests WHERE id = :id', [':id' => $contestId]);
-if (empty($contestRows)) {
-    $notFound();
-}
-$contest = $contestRows[0];
+$contest = $contestRows[0] ?? null;
 
-$themeRows = DB::query('SELECT title FROM contests_themes WHERE id = :id', [':id' => (int) $contest['themeid']]);
-$themeTitle = ($themeRows[0] ?? [])['title'] ?? '';
+if ($photoContestMeta === null) {
+    foreach ($contentContests as $entry) {
+        if ((int) ($entry['id'] ?? $entry['contest_id'] ?? 0) === $contestId) {
+            $photoContestMeta = $entry;
+            break;
+        }
+    }
+}
+
+$themeTitle = '';
+if ($contest !== null) {
+    $themeRows = DB::query('SELECT title FROM contests_themes WHERE id = :id', [':id' => (int) $contest['themeid']]);
+    $themeTitle = ($themeRows[0] ?? [])['title'] ?? '';
+}
+if ($themeTitle === '' && is_array($photoContestMeta)) {
+    $themeTitle = (string) ($photoContestMeta['contesttheme'] ?? $photoContestMeta['theme'] ?? '');
+}
 
 $entries = DB::query(
     'SELECT cw.place, cw.photo_id, cw.date,
@@ -64,10 +92,82 @@ $entries = DB::query(
 );
 
 if ($entries === []) {
+    $rateRows = DB::query(
+        'SELECT p.id AS photo_id, p.place AS photo_place, p.photourl, p.postbody, p.posted_at, p.user_id, p.content,
+                COUNT(cr.id) AS vote_count,
+                COALESCE(MAX(cw.place), 0) AS place,
+                COALESCE(MAX(cw.date), 0) AS date
+         FROM contests_rates cr
+         INNER JOIN photos p ON p.id = cr.photo_id
+         LEFT JOIN contests_winners cw ON cw.photo_id = p.id AND cw.contest_id = cr.contest_id
+         WHERE cr.contest_id = :cid
+         GROUP BY p.id
+         ORDER BY vote_count DESC, p.id ASC
+         LIMIT 10',
+        [':cid' => $contestId]
+    );
+
+    $nextPlace = 1;
+    $lastVotes = null;
+    $assignedPlace = 0;
+    foreach ($rateRows as $row) {
+        $votes = (int) $row['vote_count'];
+        $place = (int) $row['place'];
+        if ($place <= 0) {
+            if ($lastVotes !== $votes) {
+                $assignedPlace = $nextPlace;
+                $lastVotes = $votes;
+            }
+            $place = $assignedPlace;
+            $nextPlace++;
+        }
+        $entries[] = [
+            'place' => $place,
+            'photo_id' => (int) $row['photo_id'],
+            'date' => (int) $row['date'],
+            'photo_place' => $row['photo_place'],
+            'photourl' => $row['photourl'],
+            'postbody' => $row['postbody'],
+            'posted_at' => $row['posted_at'],
+            'user_id' => $row['user_id'],
+            'content' => $row['content'],
+            'vote_count' => $votes,
+        ];
+    }
+}
+
+if ($entries === [] && is_array($photoContestMeta)) {
+    $entries[] = [
+        'place' => (int) ($photoContestMeta['place'] ?? 0),
+        'photo_id' => $photoId,
+        'date' => (int) ($photoContestMeta['date'] ?? $photo->i('posted_at') ?? time()),
+        'photo_place' => $photo->i('place'),
+        'photourl' => $photo->i('photourl'),
+        'postbody' => $photo->i('postbody'),
+        'posted_at' => $photo->i('posted_at'),
+        'user_id' => $photo->i('user_id'),
+        'content' => $photo->i('content'),
+        'vote_count' => (int) ($photoContestMeta['votenum'] ?? $photoContestMeta['votes'] ?? 0),
+    ];
+}
+
+if ($entries === []) {
     $notFound();
 }
 
-$contestDate = (int) ($entries[0]['date'] ?? $contest['closedate'] ?? time());
+$contestDate = 0;
+foreach ($entries as $entry) {
+    $entryDate = (int) ($entry['date'] ?? 0);
+    if ($entryDate > $contestDate) {
+        $contestDate = $entryDate;
+    }
+}
+if ($contestDate <= 0 && $contest !== null) {
+    $contestDate = (int) ($contest['closedate'] ?? $contest['opendate'] ?? 0);
+}
+if ($contestDate <= 0) {
+    $contestDate = (int) ($photo->i('posted_at') ?? time());
+}
 
 $stats = DB::query(
     'SELECT COUNT(*) AS votes, COUNT(DISTINCT user_id) AS voters
@@ -96,8 +196,9 @@ $voteCountForEntry = static function (array $entry) use ($contestId): int {
     }
 
     foreach ($content['contests'] as $contestEntry) {
-        if ((int) ($contestEntry['id'] ?? 0) === $contestId) {
-            return (int) ($contestEntry['votenum'] ?? 0);
+        $entryContestId = (int) ($contestEntry['id'] ?? $contestEntry['contest_id'] ?? 0);
+        if ($entryContestId === $contestId) {
+            return (int) ($contestEntry['votenum'] ?? $contestEntry['votes'] ?? 0);
         }
     }
 
@@ -140,7 +241,9 @@ $voteCountForEntry = static function (array $entry) use ($contestId): int {
                                 <table width="100%">
                                     <tr>
                                         <td style="width:70px; vertical-align:top; font-size:21px; padding-right:12px">
-                                            <b><?= $place ?></b><br>
+                                            <?php if ($place > 0) { ?>
+                                                <b><?= $place ?></b><br>
+                                            <?php } ?>
                                             <span class="sm"><?= $votes ?></span>
                                             <?php if ($icon !== null) { ?>
                                                 <br><img src="/static/img/<?= $icon ?>.png" alt="">

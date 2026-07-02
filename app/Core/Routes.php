@@ -47,6 +47,7 @@ class Routes
         Router::get('/voting/rating', 'ContestsController@rating');
         Router::get('/voting/waiting', 'ContestsController@waiting');
         Router::get('/pk.php', 'ContestsController@pk');
+        Router::get('/voting/report', 'ContestsController@pk');
         Router::get('/comments', 'MainController@comments');
         Router::get('/news', 'MainController@chronology');
         Router::get('/news.php', 'MainController@chronology');

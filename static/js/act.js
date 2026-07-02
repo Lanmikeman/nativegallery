@@ -405,6 +405,7 @@ const showEditPageModal = (pageId, title, body) => {
   }
   $("#edit-page-id").val(pageId);
   $("#edit-page-url").text("/page/" + pageId);
+  $("#edit-page-open").attr("href", "/page/" + pageId);
   $("#edit-page-title").val(title || "");
   $("#edit-page-body").val(body || "");
   if (typeof bootstrap === "undefined" || !bootstrap.Modal) {

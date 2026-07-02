@@ -23,30 +23,50 @@ class Page
         return $this->table->$key ?? null;
     }
 
+    private function updatedLabel(): string
+    {
+        if (!empty($this->table->updated_at)) {
+            return 'Обновлено '
+                . Date::formatDate((int) $this->table->updated_at)
+                . ' — '
+                . SitePage::editorName((int) ($this->table->updated_by ?? 0));
+        }
+
+        return 'Создано ' . Date::formatDate((int) ($this->table->created_at ?? 0));
+    }
+
+    private function bodySizeLabel(): string
+    {
+        $plain = trim(strip_tags((string) ($this->table->body ?? '')));
+        $len = mb_strlen($plain);
+        if ($len === 0) {
+            return 'пусто';
+        }
+        return $len . ' симв.';
+    }
+
     public function view(): void
+    {
+        $this->viewRow();
+    }
+
+    public function viewRow(): void
     {
         $title = htmlspecialchars((string) ($this->table->title ?? 'Без названия'));
         $pageId = (int) $this->id;
-        echo '<div class="card mb-3" id="page' . $pageId . '"><div class="card-body">';
-        echo '<div class="d-flex justify-content-between align-items-start gap-3">';
-        echo '<div><b>#' . $pageId . '</b> — ' . $title;
-        echo '<div class="sm text-muted mt-1"><a href="/page/' . $pageId . '" target="_blank">/page/' . $pageId . '</a></div>';
-        if (!empty($this->table->updated_at)) {
-            echo '<div class="sm text-muted" style="margin-top:4px">Обновлено '
-                . htmlspecialchars(Date::formatDate((int) $this->table->updated_at))
-                . ' — ' . htmlspecialchars(SitePage::editorName((int) ($this->table->updated_by ?? 0)))
-                . '</div>';
-        } else {
-            echo '<div class="sm text-muted" style="margin-top:4px">Создано '
-                . htmlspecialchars(Date::formatDate((int) ($this->table->created_at ?? 0)))
-                . '</div>';
-        }
-        echo '</div>';
-        echo '<div class="text-nowrap">';
-        echo '<a class="btn btn-secondary btn-sm me-2 edit-page-btn" href="#" data-id="' . $pageId . '">Редактировать</a>';
-        echo '<a class="btn btn-danger btn-sm" href="#" onclick="deletePage(' . $pageId . '); return false;">Удалить</a>';
-        echo '</div></div>';
-        echo '<div class="mt-3 break-links">' . ($this->table->body ?? '') . '</div>';
-        echo '</div></div>';
+        $updated = htmlspecialchars($this->updatedLabel());
+        $size = htmlspecialchars($this->bodySizeLabel());
+
+        echo '<tr id="page' . $pageId . '">';
+        echo '<td class="admin-pages-table__id"><b>' . $pageId . '</b></td>';
+        echo '<td class="admin-pages-table__title">' . $title . '</td>';
+        echo '<td><a href="/page/' . $pageId . '" target="_blank" rel="noopener">/page/' . $pageId . '</a></td>';
+        echo '<td class="admin-pages-table__meta sm text-muted">' . $updated . '<br><span class="admin-pages-table__size">' . $size . '</span></td>';
+        echo '<td class="admin-pages-table__actions text-nowrap">';
+        echo '<a class="btn btn-sm btn-secondary edit-page-btn" href="#" data-id="' . $pageId . '">Редактировать</a> ';
+        echo '<a class="btn btn-sm btn-outline-primary" href="/page/' . $pageId . '" target="_blank" rel="noopener">Открыть</a> ';
+        echo '<a class="btn btn-sm btn-danger" href="#" onclick="deletePage(' . $pageId . '); return false;">Удалить</a>';
+        echo '</td>';
+        echo '</tr>';
     }
 }

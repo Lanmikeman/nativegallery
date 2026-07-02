@@ -4,8 +4,11 @@ use App\Services\DB;
 
 ?>
 <h1><b>Информационные страницы</b></h1>
-<p class="text-muted">Публичный адрес: <code>/page/ID</code> (как на transphoto.org). HTML в теле страницы разрешён.</p>
-<a data-bs-toggle="modal" data-bs-target="#createPageModal" href="#" class="btn btn-primary mb-3">Создать страницу</a>
+<p class="admin-pages-hint text-muted">Публичный адрес: <code>/page/ID</code> (как на transphoto.org). HTML в теле страницы разрешён.</p>
+
+<div class="admin-pages-toolbar">
+    <a data-bs-toggle="modal" data-bs-target="#createPageModal" href="#" class="btn btn-primary">Создать страницу</a>
+</div>
 
 <div class="modal fade" id="createPageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -26,12 +29,12 @@ use App\Services\DB;
                 </div>
                 <div class="mb-3">
                     <label for="page-create-body" class="form-label">Содержание (HTML)</label>
-                    <textarea class="form-control" id="page-create-body" rows="12"></textarea>
+                    <textarea class="form-control admin-pages-editor" id="page-create-body" rows="14" spellcheck="false"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</a>
-                <a href="#" onclick="createPage(); return false;" class="btn btn-primary">Создать</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="createPage(); return false;">Создать</button>
             </div>
         </div>
     </div>
@@ -48,7 +51,7 @@ use App\Services\DB;
                 <input type="hidden" id="edit-page-id" value="">
                 <div class="mb-3">
                     <label class="form-label">Публичный URL</label>
-                    <div><code id="edit-page-url"></code></div>
+                    <div><code id="edit-page-url"></code> <a href="#" id="edit-page-open" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary ms-2">Открыть на сайте</a></div>
                 </div>
                 <div class="mb-3">
                     <label for="edit-page-title" class="form-label">Заголовок</label>
@@ -56,25 +59,39 @@ use App\Services\DB;
                 </div>
                 <div class="mb-3">
                     <label for="edit-page-body" class="form-label">Содержание (HTML)</label>
-                    <textarea class="form-control" id="edit-page-body" rows="14"></textarea>
+                    <textarea class="form-control admin-pages-editor" id="edit-page-body" rows="16" spellcheck="false"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</a>
-                <a href="#" onclick="updatePage(); return false;" class="btn btn-primary">Сохранить</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="updatePage(); return false;">Сохранить</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="pages-list">
-    <?php
-    $pages = DB::query('SELECT id FROM pages ORDER BY id');
-    if ($pages === []) {
-        echo '<div class="alert alert-secondary">Страниц пока нет. Создайте первую или примените миграцию <code>sql_0009.sql</code>.</div>';
-    }
-    foreach ($pages as $row) {
-        (new \App\Models\Admin\Page((int) $row['id']))->view();
-    }
-    ?>
+<div class="table-responsive admin-pages-table-wrap">
+    <table class="table table-striped admin-pages-table">
+        <thead>
+            <tr>
+                <th class="admin-pages-table__id">ID</th>
+                <th>Заголовок</th>
+                <th>Адрес</th>
+                <th>Изменения</th>
+                <th class="admin-pages-table__actions">Действия</th>
+            </tr>
+        </thead>
+        <tbody id="pages-list">
+            <?php
+            $pages = DB::query('SELECT id FROM pages ORDER BY id');
+            if ($pages === []) {
+                echo '<tr><td colspan="5" class="admin-pages-table__empty">Страниц пока нет. Создайте первую или примените миграцию <code>sql_0009.sql</code>.</td></tr>';
+            } else {
+                foreach ($pages as $row) {
+                    (new \App\Models\Admin\Page((int) $row['id']))->viewRow();
+                }
+            }
+            ?>
+        </tbody>
+    </table>
 </div>

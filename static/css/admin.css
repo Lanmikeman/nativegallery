@@ -335,6 +335,65 @@ body.admin-page {
     font-family: var(--default-font);
 }
 
+.admin-pages-hint {
+    margin: 4px 0 12px;
+    font-size: 14px;
+}
+
+.admin-pages-toolbar {
+    margin-bottom: 12px;
+}
+
+.admin-pages-table-wrap {
+    margin-top: 4px;
+}
+
+.admin-pages-table {
+    margin-top: 0;
+}
+
+.admin-pages-table__id {
+    width: 56px;
+    white-space: nowrap;
+}
+
+.admin-pages-table__title {
+    min-width: 180px;
+    max-width: 320px;
+}
+
+.admin-pages-table__meta {
+    min-width: 160px;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.admin-pages-table__size {
+    opacity: 0.85;
+}
+
+.admin-pages-table__actions {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.admin-pages-table__actions .btn {
+    margin-bottom: 2px;
+}
+
+.admin-pages-table__empty {
+    padding: 18px 12px !important;
+    text-align: center;
+    color: var(--theme-muted-color);
+}
+
+.admin-pages-editor {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    min-height: 280px;
+}
+
 @media screen and (max-width: 900px) {
     .admin-layout {
         flex-direction: column;

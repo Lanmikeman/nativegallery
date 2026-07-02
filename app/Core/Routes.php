@@ -131,6 +131,11 @@ class Routes
                 Router::post('/api/admin/news/$id/edit', 'ApiController@admineditnews');
                 Router::any('/api/admin/news/$id/delete', 'ApiController@admindeletenews');
                 Router::any('/api/admin/loadnews', 'ApiController@adminloadnews');
+                Router::any('/api/admin/loadpages', 'ApiController@adminloadpages');
+                Router::post('/api/admin/pages/create', 'ApiController@admincreatepage');
+                Router::get('/api/admin/pages/$id', 'ApiController@admingetpage');
+                Router::post('/api/admin/pages/$id/edit', 'ApiController@admineditpage');
+                Router::post('/api/admin/pages/$id/delete', 'ApiController@admindeletepage');
                 Router::post('/api/admin/chronology/create', 'ApiController@admincreatechronology');
                 Router::post('/api/admin/chronology/$id/delete', 'ApiController@admindeletechronology');
                 Router::post('/api/admin/links/create', 'ApiController@admincreatelink');

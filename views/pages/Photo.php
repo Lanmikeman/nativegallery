@@ -27,8 +27,19 @@ if ($photo->i('id') !== null) {
         }
     } else if ($photo->i('moderated') === 1) {
         $moderated = true;
-        if (DB::query('SELECT * FROM photos_views WHERE user_id=:uid AND photo_id=:pid ORDER BY id DESC LIMIT 1', array(':uid' => Auth::userid(), ':pid' => $id))[0]['time'] <= time() - 86400) {
-            DB::query('INSERT INTO photos_views VALUES (\'0\', :uid, :pid, :time)', array(':uid' => Auth::userid(), ':pid' => $id, ':time' => time()));
+        $viewerId = Auth::userid();
+        if ($viewerId > 0) {
+            $viewRows = DB::query(
+                'SELECT time FROM photos_views WHERE user_id = :uid AND photo_id = :pid ORDER BY id DESC LIMIT 1',
+                [':uid' => $viewerId, ':pid' => $id]
+            );
+            $lastViewTime = (int) ($viewRows[0]['time'] ?? 0);
+            if ($lastViewTime <= time() - 86400) {
+                DB::query(
+                    'INSERT INTO photos_views VALUES (\'0\', :uid, :pid, :time)',
+                    [':uid' => $viewerId, ':pid' => $id, ':time' => time()]
+                );
+            }
         }
     }
 }

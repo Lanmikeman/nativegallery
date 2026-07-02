@@ -1,146 +1,160 @@
 <?php
 
-use \App\Services\{Auth, DB, Date};
-use \App\Models\{Vehicle, User};
+use App\Services\{Auth, DB, Date};
 
-function convertUnixToRussianDateTime($unixTime)
+function convertUnixToRussianDateTime(int $unixTime): string
 {
-    return Date::formatLocalizedDateTime((int) $unixTime);
+    return Date::formatLocalizedDateTime($unixTime);
 }
-?>
 
+$contests = DB::query(
+    'SELECT * FROM contests WHERE closepretendsdate >= :now ORDER BY openpretendsdate ASC',
+    [':now' => time()]
+);
+
+$photos = DB::query(
+    'SELECT * FROM photos WHERE user_id = :uid AND on_contest = 0 ORDER BY id DESC',
+    [':uid' => Auth::userid()]
+);
+
+$eligiblePhotos = [];
+foreach ($photos as $photo) {
+    if ((int) ($photo['moderated'] ?? 0) !== 1) {
+        continue;
+    }
+
+    $content = json_decode((string) ($photo['content'] ?? ''), true);
+    if (!is_array($content)) {
+        $content = [];
+    }
+
+    $isVideo = ($content['type'] ?? '') === 'video' || !empty($content['video']);
+    if (!$isVideo) {
+        $eligiblePhotos[] = $photo;
+    }
+}
+
+?>
 <!DOCTYPE html>
 <html lang="ru">
 
 <head>
-    <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'); ?>
-
-
+    <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'; ?>
 </head>
-
 
 <body>
     <div id="backgr"></div>
     <table class="tmain">
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
+        <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'; ?>
         <tr>
             <td class="main">
                 <h1>Принять участие в Фотоконкурсе</h1>
-                <script src="/js/jquery-ui.js?1633005526"></script>
-                <script src="/js/selector.js?1730197663"></script>
 
-                <form id="sendForm" method="post" id="mform">
-
+                <form id="sendForm" method="post">
                     <h4>В каком Фотоконкурсе вы хотите принять участие?</h4>
                     <div class="p20w">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <th></th>
-                                    <th>Тематика</th>
-                                    <th>Старт набора претендентов</th>
-                                    <th>Закрытие набора претендентов</th>
-                                    <th>Начало проведения</th>
-                                    <th>Итоги и победители</th>
-                                </tr>
-
-                                <?php
-                                $entities = DB::query('SELECT * FROM contests WHERE closepretendsdate>=:id', array(':id' => time()));
-                                foreach ($entities as $e) {
-                                    $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $e['themeid']))[0];
-                                    echo '<tr>
-                                    <td class="ds"><input type="radio" name="cid" id="n' . $e['id'] . '" value="' . $e['id'] . '" onclick="fillFields(' . $e['id'] . ')"></td>
-                                    <td class="n">' . $theme['title'] . '</td>
-                                    <td class="ds">' . convertUnixToRussianDateTime($e['openpretendsdate']) . '</td>
-                                    <td class="ds">' . convertUnixToRussianDateTime($e['closepretendsdate']) . '</td>
-                                    <td class="ds">' . convertUnixToRussianDateTime($e['opendate']) . '</td>
-                                    <td class="ds">' . convertUnixToRussianDateTime($e['closedate']) . '</td>
-                                </tr>';
-                                }
-                                ?>
-
-
-                            </tbody>
-                        </table>
+                        <?php if ($contests === []) { ?>
+                            <div class="p20">Сейчас нет открытых конкурсов для подачи фотографий.</div>
+                        <?php } else { ?>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th></th>
+                                        <th>Тематика</th>
+                                        <th>Старт набора претендентов</th>
+                                        <th>Закрытие набора претендентов</th>
+                                        <th>Начало проведения</th>
+                                        <th>Итоги и победители</th>
+                                    </tr>
+                                    <?php foreach ($contests as $contest) {
+                                        $themeRows = DB::query(
+                                            'SELECT title FROM contests_themes WHERE id = :id',
+                                            [':id' => (int) $contest['themeid']]
+                                        );
+                                        $themeTitle = $themeRows[0]['title'] ?? '—';
+                                        ?>
+                                        <tr>
+                                            <td class="ds">
+                                                <input type="radio" name="cid" id="n<?= (int) $contest['id'] ?>"
+                                                       value="<?= (int) $contest['id'] ?>">
+                                            </td>
+                                            <td class="n"><?= htmlspecialchars($themeTitle) ?></td>
+                                            <td class="ds"><?= convertUnixToRussianDateTime((int) $contest['openpretendsdate']) ?></td>
+                                            <td class="ds"><?= convertUnixToRussianDateTime((int) $contest['closepretendsdate']) ?></td>
+                                            <td class="ds"><?= convertUnixToRussianDateTime((int) $contest['opendate']) ?></td>
+                                            <td class="ds"><?= convertUnixToRussianDateTime((int) $contest['closedate']) ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        <?php } ?>
                     </div>
                     <br clear="all"><br>
 
                     <div class="p20" style="padding-left:5px; margin-bottom:15px">
                         <table class="nospaces" width="100%">
                             <tbody>
-                                <?php
-                                $vehicle = DB::query('SELECT * FROM entities WHERE id=:id', array(':id' => $_GET['type']))[0];
-                                $data = json_decode($vehicle['sampledata'], true);
-                                $count = 1;
-                                foreach ($data as $d) {
-
-                                    if ($d['important'] === "1") {
-                                        $imp = 'required';
-                                    }
-                                    echo '
-                                <tr>
-                                    <td class="lcol">' . $d['name'] . '</td>
-                                    <td style="padding-bottom:15px"><input type="text" name="modelinput_' . $count . '" id="num" style="width:80px" maxlength="21" value=""></td>
-                                </tr>';
-                                    $count++;
-                                }
-                                ?>
-                                <tr>
-                                    <td style="width: 10%"></td>
-
-
-                                </tr>
-                                <tr>
                                 <tr>
                                     <td class="lcol">Фотография, которую вы хотите отправить на Фотоконкурс</td>
                                     <td style="padding-bottom:15px">
-                                        <select id="photoId" name="photo_id">
-                                            <option value="'.$p['id'].'" disabled selected>Выберите фотографию</option>
-                                            <?php
-                                            $photos = DB::query('SELECT * FROM photos WHERE user_id=:uid AND on_contest=0', array(':uid' => Auth::userid()));
-                                            foreach ($photos as $p) {
-                                                $content = json_decode($p['content'], true);
-                                                if (($content['video'] === null || $content['type'] === 'image') && $p['moderated'] === 1) {
-                                                    echo '<option photourl="/api/photo/compress?url=' . $p['photourl'] . '" value="' . $p['id'] . '">[ID: ' . $p['id'] . '] ' . $p['place'] . '</option>';
-                                                }
-                                            }
-                                            ?>
+                                        <select id="photoId" name="photo_id" required>
+                                            <option value="" disabled selected>Выберите фотографию</option>
+                                            <?php foreach ($eligiblePhotos as $photo) { ?>
+                                                <option
+                                                    photourl="/api/photo/compress?url=<?= htmlspecialchars($photo['photourl'], ENT_QUOTES) ?>"
+                                                    value="<?= (int) $photo['id'] ?>">
+                                                    [ID: <?= (int) $photo['id'] ?>] <?= htmlspecialchars((string) $photo['place']) ?>
+                                                </option>
+                                            <?php } ?>
                                         </select>
+                                        <?php if ($eligiblePhotos === []) { ?>
+                                            <div class="form-text">Нет опубликованных фото, которые ещё не участвуют в конкурсе.</div>
+                                        <?php } ?>
                                     </td>
                                 </tr>
-
-
-                                <td>
-                                    <div id="result"></div>
-                                </td>
-                                <td>
-                                    <br>
-                                    <input type="submit" value="&nbsp; &nbsp; &nbsp; Отправить &nbsp; &nbsp; &nbsp;">
-                                </td>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <div id="result"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <br>
+                                        <input type="submit" value="&nbsp; &nbsp; &nbsp; Отправить &nbsp; &nbsp; &nbsp;"
+                                               <?= ($contests === [] || $eligiblePhotos === []) ? 'disabled' : '' ?>>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </td>
         </tr>
-        </tbody>
+        <tr>
+            <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'; ?>
+        </tr>
     </table>
-    </div>
-    </form>
 
-    </td>
-    </tr>
     <script>
-
-    $('#sendForm').submit(function(e) {
+        $('#sendForm').submit(function(e) {
             e.preventDefault();
             $.ajax({
-                type: "POST",
+                type: 'POST',
                 url: '/api/photo/contests/sendpretend',
                 data: $(this).serialize(),
                 success: function(response) {
-                    var jsonData = JSON.parse(response);
+                    const jsonData = typeof response === 'string' ? JSON.parse(response) : response;
                     if (jsonData.errorcode === 0) {
                         alert('Фотография успешно отправлена на претенденты на Фотоконкурс');
-                    } else {
-                        alert('Пожалуйста, выберите Фотоконкурс на который вы хотите отправить фотографию!');
+                        window.location.href = '/lk/konkurs.php';
+                        return;
                     }
-                    
+                    alert('Пожалуйста, выберите Фотоконкурс и фотографию');
+                },
+                error: function() {
+                    alert('Ошибка сети');
                 }
             });
         });
@@ -148,27 +162,20 @@ function convertUnixToRussianDateTime($unixTime)
         document.getElementById('photoId').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const photoUrl = selectedOption.getAttribute('photourl');
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
 
-            if (photoUrl) {
-                const imgElement = document.createElement('img');
-                imgElement.src = photoUrl;
-                imgElement.alt = 'Изображение';
-                imgElement.style.maxWidth = '500px';
-
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = '';
-                resultDiv.appendChild(imgElement);
+            if (!photoUrl) {
+                return;
             }
+
+            const imgElement = document.createElement('img');
+            imgElement.src = photoUrl;
+            imgElement.alt = 'Изображение';
+            imgElement.style.maxWidth = '500px';
+            resultDiv.appendChild(imgElement);
         });
     </script>
-    <tr>
-
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>
-
-
-    </tr>
-    </table>
-
 </body>
 
 </html>

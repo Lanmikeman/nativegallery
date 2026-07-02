@@ -68,6 +68,10 @@
   }
 
   function handleClick(e) {
+    if (e.target.closest("#ng-music-bar, .ng-music-page, #prev, #next, #photobar")) {
+      return;
+    }
+
     const link = e.target.closest("a");
     if (!link || !shouldIntercept(link, e)) return;
     e.preventDefault();

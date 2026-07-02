@@ -128,15 +128,21 @@
         }
     }
 
+    function resolveAudioSrc(src) {
+        if (!src) return '';
+        if (/^https?:\/\//i.test(src)) return src;
+        if (src.charAt(0) === '/') return src;
+        return '/' + src;
+    }
+
     function playAt(i) {
         if (i < 0 || i >= queue.length) return;
         index = i;
         var track = queue[index];
         var a = getAudio();
-        var cur = a.src || '';
-        if (!cur || cur.indexOf(track.src) < 0) {
-            a.src = track.src;
-        }
+        var resolved = resolveAudioSrc(track.src);
+        if (!resolved) return;
+        a.src = resolved;
         var resumed = false;
         try {
             var pb = JSON.parse(sessionStorage.getItem(PLAYBACK_KEY) || 'null');
@@ -160,9 +166,7 @@
         barEl.__ngMusicBound = true;
 
         barEl.addEventListener('click', function (e) {
-            if (!e.target.closest('[data-action="volume"]')) {
-                e.stopPropagation();
-            }
+            e.stopPropagation();
             var btn = e.target.closest('[data-action]');
             if (!btn || btn.getAttribute('data-action') === 'volume') return;
             e.preventDefault();

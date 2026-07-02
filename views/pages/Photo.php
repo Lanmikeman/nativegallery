@@ -13,6 +13,10 @@ if (isset($GLOBALS['id'])) {
         $id = (int) $parts[1];
     }
 }
+$navVid = (int) ($_GET['vid'] ?? 0);
+$navGid = (int) ($_GET['gid'] ?? 0);
+$navAid = (int) ($_GET['aid'] ?? 0);
+$navUpd = isset($_GET['upd']) ? 1 : 0;
 $photo = new \App\Models\Photo($id);
 if ($photo->i('id') !== null) {
     if ($photo->content('video') != null) {
@@ -138,6 +142,44 @@ if ($photo->i('id') !== null) {
                 <?php
                 if ($photo->i('id') !== null && $moderated === true) {
                 ?>
+                    <script>
+                        var pid = <?= (int) $id ?>;
+                        var video = <?= $photo->content('videourl') != null ? 1 : 0 ?>;
+                        var self_p = <?= ($photo->i('user_id') === Auth::userid() && Auth::userid() > 0) ? 1 : 0 ?>;
+                        var subscr_pro = 0;
+                        var subscr_fav = 0;
+                        addTexts({
+                            'P_CURRENT': 'Это — текущая фотография.',
+                            'P_MOVE_FIRST': 'Это самое первое фото',
+                            'P_MOVE_LAST': 'Это самое новое фото',
+                            'P_MOVE_ALONE_V': 'Это единственное фото ТС',
+                            'P_MOVE_ALONE_G': 'Это единственное фото в галерее',
+                            'P_QUOTE_MSG': 'Нет смысла цитировать последнее сообщение целиком.<br />Если Вы хотите процитировать часть сообщения, выделите часть текста и нажмите на ссылку ещё раз.',
+                            'P_QUOTE_LEN': 'Слишком длинная цитата. Пользователям будет неудобно читать такой комментарий.<br>Пожалуйста, выделите конкретное предложение, на которое вы отвечаете, и нажмите на ссылку еще раз.',
+                            'P_QUOTE_TXT': 'Цитата',
+                            'P_DEL_CONF': 'Вы действительно хотите удалить свой комментарий?',
+                            'P_WAIT': 'Пожалуйста, подождите...',
+                            'P_ADDFAV': 'Добавить фото в Избранное',
+                            'P_DELFAV': 'Удалить фото из Избранного',
+                            'P_ENTERTEXT': 'Введите текст комментария',
+                            'LOADING': 'Загрузка...',
+                            'NO_VOTES': 'Нет голосов'
+                        });
+                        var showmap = false;
+                        var vid = <?= $navVid ?>;
+                        var gid = <?= $navGid ?>;
+                        var aid = <?= $navAid ?>;
+                        var upd = <?= $navUpd ?>;
+                        <?php if ($photo->content('lat') != null && $photo->content('lng') != null) { ?>
+                        var lat = <?= (float) $photo->content('lat') ?>;
+                        var lng = <?= (float) $photo->content('lng') ?>;
+                        var dir = <?= (int) ($photo->content('dir') ?? 0) ?>;
+                        <?php } else { ?>
+                        var lat = 0;
+                        var lng = 0;
+                        var dir = 0;
+                        <?php } ?>
+                    </script>
                     <center>
 
 

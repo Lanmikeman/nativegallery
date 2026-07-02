@@ -12,6 +12,7 @@ use \App\Controllers\Api\Images\Compress as PhotoCompress;
 use \App\Controllers\Api\Images\CheckAll as PhotoCheckAll;
 use \App\Controllers\Api\Images\LoadRecent as PhotoLoadRecent;
 use \App\Controllers\Api\Images\LoadRandom as PhotoLoadRandom;
+use \App\Controllers\Api\Images\Move as PhotoMove;
 use \App\Controllers\Api\Images\LoadMap as PhotoLoadMap;
 use \App\Controllers\Api\Images\Favorite as PhotoFavorite;
 use \App\Controllers\Api\Images\Stats as PhotoStats;
@@ -144,6 +145,9 @@ class ApiController
     }
     public static function randomphotos() {
         return new PhotoLoadRandom();
+    }
+    public static function photomove() {
+        return new PhotoMove();
     }
     public static function sendpretendphoto() {
         return new PhotoContestsSendPretend();

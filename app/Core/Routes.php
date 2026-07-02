@@ -40,6 +40,7 @@ class Routes
         Router::get('/api/photo/compress', 'ApiController@photocompress');
         Router::get('/api/photo/loadrecent', 'ApiController@recentphotos');
         Router::get('/api/photo/random', 'ApiController@randomphotos');
+        Router::get('/api/photo/move', 'ApiController@photomove');
         Router::get('/api/users/load/$id', 'ApiController@loaduser');
         Router::get('/api/users/emailverify', 'ApiController@emailverify');
         Router::get('/api/users/search', 'ApiController@userssearch');

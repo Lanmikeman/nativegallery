@@ -100,10 +100,10 @@ if ($nonreviewedentities > 0) {
                             <i class="bx bx-world nav__icon"></i>
                             <span class="nav__name">GeoDB<span class="badge text-bg-warning">BETA</span></span>
                         </a>
-                        <!--a href="/admin?type=Pages" class="nav__link">
+                        <a href="/admin?type=Pages" class="nav__link">
                             <i class="bx bx-file-blank nav__icon"></i>
                             <span class="nav__name">Страницы</span>
-                        </!--a-->
+                        </a>
                         <a href="/admin?type=AuthSettings" class="nav__link">
                             <i class="bx bx-key nav__icon"></i>
                             <span class="nav__name">Авторизация</span>

@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\User;
+
+class SitePage
+{
+    /** @return array<string, mixed>|null */
+    public static function findById(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        $rows = DB::query('SELECT * FROM pages WHERE id = :id', [':id' => $id]);
+        return $rows[0] ?? null;
+    }
+
+    public static function editNoticeHtml(array $row): string
+    {
+        $updatedAt = (int) ($row['updated_at'] ?? 0);
+        $updatedBy = (int) ($row['updated_by'] ?? 0);
+        if ($updatedAt <= 0) {
+            return '';
+        }
+
+        $editorName = self::editorName($updatedBy);
+
+        return '<p class="sm" style="margin-top:12px; color:#888">'
+            . '<i>Редакция от ' . htmlspecialchars(Date::formatDate($updatedAt))
+            . ($updatedBy > 0 ? ' — ' . htmlspecialchars($editorName) : '')
+            . '</i></p>';
+    }
+
+    public static function editorName(int $userId): string
+    {
+        return SiteNews::editorName($userId);
+    }
+}

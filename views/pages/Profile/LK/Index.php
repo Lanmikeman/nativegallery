@@ -51,7 +51,7 @@ $lkActive = 'info';
                 <h4>Индекс загрузки</h4>
                 <p>
                     Текущее значение
-                    <a href="/page/111" class="und">индекса загрузки</a>:
+                    <a href="/page/1" class="und">индекса загрузки</a>:
                     <b><?= $uploadIndex ?></b>
                 </p>
                 <div class="p20" style="float:left; padding:15px 15px 20px; width:240px">

@@ -35,6 +35,11 @@ use \App\Controllers\Api\Admin\News\Get as AdminGetNews;
 use \App\Controllers\Api\Admin\News\Update as AdminUpdateNews;
 use \App\Controllers\Api\Admin\News\Load as AdminLoadNews;
 use \App\Controllers\Api\Admin\News\Delete as AdminDeleteNews;
+use \App\Controllers\Api\Admin\Pages\Create as AdminCreatePage;
+use \App\Controllers\Api\Admin\Pages\Get as AdminGetPage;
+use \App\Controllers\Api\Admin\Pages\Update as AdminUpdatePage;
+use \App\Controllers\Api\Admin\Pages\Load as AdminLoadPages;
+use \App\Controllers\Api\Admin\Pages\Delete as AdminDeletePage;
 use \App\Controllers\Api\Admin\Chronology\Create as AdminCreateChronology;
 use \App\Controllers\Api\Admin\Chronology\Delete as AdminDeleteChronology;
 use \App\Controllers\Api\Admin\Links\Create as AdminCreateLink;
@@ -153,6 +158,21 @@ class ApiController
     }
     public static function adminloadnews() {
         return new AdminLoadNews();
+    }
+    public static function admincreatepage() {
+        return new AdminCreatePage();
+    }
+    public static function admingetpage() {
+        return new AdminGetPage();
+    }
+    public static function admineditpage() {
+        return new AdminUpdatePage();
+    }
+    public static function adminloadpages() {
+        return new AdminLoadPages();
+    }
+    public static function admindeletepage() {
+        return new AdminDeletePage();
     }
     public static function admincreatechronology() {
         return new AdminCreateChronology();

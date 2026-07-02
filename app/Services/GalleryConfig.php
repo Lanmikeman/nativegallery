@@ -219,6 +219,10 @@ class GalleryConfig
             return ['ok' => false, 'message' => self::writableErrorMessage()];
         }
 
+        if ($existingId !== null) {
+            self::refreshUserOpenVKLinksForProvider($saveId, self::providerForRuntime($provider));
+        }
+
         return ['ok' => true, 'message' => 'Инстанс сохранён', 'id' => $saveId];
     }
 
@@ -332,6 +336,29 @@ class GalleryConfig
         }
 
         return ['ok' => true, 'message' => 'Настройки сохранены в storage/auth-settings.json'];
+    }
+
+    /** @param array<string, mixed> $runtime */
+    private static function refreshUserOpenVKLinksForProvider(string $providerId, array $runtime): void
+    {
+        $rows = DB::query("SELECT id, content FROM users WHERE content LIKE '%\"openvk\"%'");
+        foreach ($rows as $row) {
+            $content = json_decode((string) $row['content'], true);
+            if (!is_array($content) || empty($content['openvk'][$providerId]) || !is_array($content['openvk'][$providerId])) {
+                continue;
+            }
+
+            $link = $content['openvk'][$providerId];
+            $link['domain'] = (string) $runtime['domain'];
+            $link['label'] = (string) $runtime['label'];
+            $link['profile_url'] = OpenVKAuth::profileUrl($link);
+            $content['openvk'][$providerId] = $link;
+
+            DB::query('UPDATE users SET content = :content WHERE id = :id', [
+                ':content' => json_encode($content, JSON_UNESCAPED_UNICODE),
+                ':id' => (int) $row['id'],
+            ]);
+        }
     }
 
     private static function migrateUserOpenVKLinks(string $fromId, string $toId): void

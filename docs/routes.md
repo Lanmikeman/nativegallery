@@ -99,10 +99,10 @@
 | `/admin?type=Models` | Заявки на изменение БД |
 | `/admin?type=Contests` | Фотоконкурсы |
 | `/admin?type=GeoDB` | GeoDB |
-| `/admin?type=AuthSettings` | Регистрация, OpenVK, добавление кастомных инстансов |
+| `/admin?type=AuthSettings` | Регистрация, OpenVK, управление инстансами (добавление, редактирование, удаление) |
 | `POST /api/admin/settings/auth/providers` | Добавить инстанс OpenVK |
-| `POST /api/admin/settings/auth/providers/{id}` | Изменить кастомный инстанс |
-| `POST /api/admin/settings/auth/providers/{id}/delete` | Удалить инстанс (`replace_with` — перенос привязок) |
+| `POST /api/admin/settings/auth/providers/{id}` | Изменить инстанс (yaml или из админки); обновляет привязки пользователей при смене домена |
+| `POST /api/admin/settings/auth/providers/{id}/delete` | Удалить инстанс (`replace_with` — перенос привязок на другой узел) |
 | `/admin?type=UserEdit&user_id=` | Права пользователя |
 | `/admin?type=Settings` | Настройки |
 

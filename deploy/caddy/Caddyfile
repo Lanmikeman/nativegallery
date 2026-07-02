@@ -1,0 +1,26 @@
+# NativeGallery — Caddy 2
+# Замените example.com и root на свои пути.
+#
+#   sudo cp deploy/caddy/Caddyfile /etc/caddy/Caddyfile.d/nativegallery.caddy
+#   sudo systemctl reload caddy
+#
+# По умолчанию (скрипты):  /var/www/nativegallery
+# Production (пример):     /mnt/win/nativegallery
+
+example.com {
+    root * /var/www/nativegallery
+    encode gzip
+
+    @blocked path /vendor/* /app/* /sqlcore/* /config/* /views/* /ngallery.yaml /.git/*
+    respond @blocked 404
+
+    request_body {
+        max_size 128MB
+    }
+
+    @notPhp not path *.php
+    rewrite @notPhp {file_not_ exists} /index.php?q={path}
+
+    php_fastcgi unix//run/php/php8.3-fpm.sock
+    file_server
+}

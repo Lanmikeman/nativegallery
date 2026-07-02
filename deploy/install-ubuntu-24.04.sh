@@ -6,8 +6,11 @@
 # Usage:
 #   sudo bash deploy/install-ubuntu-24.04.sh
 #
-# Optional environment variables:
-#   NG_DOMAIN, NG_DB_NAME, NG_DB_USER, NG_DB_PASS, NG_WEB_ROOT
+# Defaults: NG_WEB_ROOT=/var/www/nativegallery  NG_DOMAIN=example.com
+# Production: NG_WEB_ROOT=/mnt/win/nativegallery  NG_DOMAIN=cttc.fetbuk.ru
+# See docs/paths.md
+#
+# Optional: NG_DOMAIN, NG_DB_NAME, NG_DB_USER, NG_DB_PASS, NG_WEB_ROOT
 
 set -euo pipefail
 

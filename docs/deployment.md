@@ -3,8 +3,9 @@
 Актуально для форка **v1.7**.
 
 **Production:** Ubuntu 24.04 + Nginx (`deploy/install-ubuntu-24.04.sh`).  
-**Альтернативы** (Debian, Apache, Rocky/CentOS, Docker, Pterodactyl): [deployment-alternatives.md](deployment-alternatives.md).  
-**Ручная установка** (все пакеты по стекам): [manual-install.md](manual-install.md).
+**Пути:** [paths.md](paths.md) — `/var/www/nativegallery` (default), `/mnt/win/nativegallery` (production).  
+**Альтернативы** (Debian, Apache, Rocky, Windows IIS, Caddy, Docker, Pterodactyl): [deployment-alternatives.md](deployment-alternatives.md).  
+**Ручная установка:** [manual-install.md](manual-install.md).
 
 ## Обновление между версиями форка
 
@@ -20,7 +21,9 @@
 ## Обновление с GitHub
 
 ```bash
-cd /var/www/nativegallery   # или /mnt/win/nativegallery
+# По умолчанию: /var/www/nativegallery
+# Production:    /mnt/win/nativegallery  (см. docs/paths.md)
+cd /mnt/win/nativegallery
 git fetch --tags
 git pull origin main        # или git checkout release-1.7
 composer install --no-dev --optimize-autoloader

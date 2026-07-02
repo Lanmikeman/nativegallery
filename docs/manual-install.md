@@ -2,9 +2,10 @@
 
 Пошаговая установка **без автоскриптов**: все зависимости, пакеты и настройка веб-сервера для каждого поддерживаемого стека.
 
-**Production форка:** Ubuntu 24.04 + Nginx. Остальные стеки — альтернативы.
+**Production форка:** Ubuntu 24.04 + Nginx, путь **`/mnt/win/nativegallery`**, домен **`cttc.fetbuk.ru`**.  
+**Пути по умолчанию в скриптах:** `/var/www/nativegallery`, `example.com` — см. [paths.md](paths.md).
 
-См. также: [deployment.md](deployment.md), [deployment-alternatives.md](deployment-alternatives.md), [docker.md](docker.md), [pterodactyl.md](pterodactyl.md).
+См. также: [deployment.md](deployment.md), [deployment-alternatives.md](deployment-alternatives.md), [windows-iis.md](windows-iis.md), [docker.md](docker.md), [pterodactyl.md](pterodactyl.md).
 
 ---
 
@@ -48,7 +49,11 @@ date.timezone = UTC
 ### Каталоги и права (после клона)
 
 ```bash
-cd /var/www/nativegallery   # путь к проекту
+# По умолчанию в документации и скриптах:
+cd /var/www/nativegallery
+
+# Production форка (смонтированный диск):
+# cd /mnt/win/nativegallery
 
 mkdir -p uploads cdn/temp cdn/previews cdn/image cdn/video logs storage/locks
 chown -R www-data:www-data uploads cdn logs storage    # apache на Rocky
@@ -302,9 +307,31 @@ sudo apachectl configtest && sudo systemctl enable --now httpd php-fpm mariadb
 
 ---
 
-## 8. Docker
+## 8. Windows — IIS
 
-Образ включает nginx, PHP 8.3-FPM, supervisor, cron. БД — отдельный контейнер MariaDB.
+| Параметр | По умолчанию |
+|----------|--------------|
+| Корень | `C:\inetpub\nativegallery` |
+| Конфиг URL | `web.config` (в корне репозитория) |
+| Cron | Task Scheduler — `deploy\windows\setup-task-scheduler.ps1` |
+
+Полная инструкция: [windows-iis.md](windows-iis.md).
+
+---
+
+## 9. Caddy / OpenLiteSpeed / Apache (Windows)
+
+| Сервер | Конфиг |
+|--------|--------|
+| **Caddy 2** | [deploy/caddy/Caddyfile](../deploy/caddy/Caddyfile) — `root` → `/var/www/nativegallery` или `/mnt/win/nativegallery` |
+| **OpenLiteSpeed** | [deploy/openlitespeed/vhost.conf](../deploy/openlitespeed/vhost.conf) |
+| **Apache (Windows)** | `.htaccess` + `DocumentRoot` → каталог проекта |
+
+---
+
+## 10. Docker
+
+Образ включает nginx, PHP 8.3-FPM, supervisor, cron. БД — отдельный контейнер MariaDB. Корень в контейнере: **`/var/www/html`**.
 
 ```bash
 cp docker-compose.example.env .env   # опционально
@@ -316,7 +343,7 @@ docker compose up -d --build
 
 ---
 
-## 9. Pterodactyl Panel
+## 11. Pterodactyl Panel
 
 Egg для панели: `deploy/pterodactyl/egg-nativegallery.json`. Требуется внешняя MySQL/MariaDB.
 
@@ -324,7 +351,7 @@ Egg для панели: `deploy/pterodactyl/egg-nativegallery.json`. Требу
 
 ---
 
-## 10. Проверка установки
+## 12. Проверка установки
 
 | Проверка | Команда / действие |
 |----------|-------------------|

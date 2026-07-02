@@ -28,7 +28,7 @@ PHP 8.3 на Debian: репозиторий [packages.sury.org](https://packages
 | `NG_DB_NAME` | `ngallery` | Имя БД |
 | `NG_DB_USER` | `ngallery` | Пользователь БД |
 | `NG_DB_PASS` | случайный | Пароль БД |
-| `NG_WEB_ROOT` | `/var/www/nativegallery` | Корень проекта |
+| `NG_WEB_ROOT` | `/var/www/nativegallery` | Корень проекта (production: `/mnt/win/nativegallery`) |
 | `NG_WEB_USER` | `www-data` (Debian) / `apache` (RHEL) | Пользователь PHP-FPM и cron |
 
 Пример:
@@ -175,15 +175,40 @@ sudo certbot --apache -d example.com
 
 ---
 
-## Shared-хостинг и Windows
+## Пути (важно)
+
+| Среда | `NG_WEB_ROOT` / корень по умолчанию |
+|-------|-------------------------------------|
+| Скрипты Linux | `/var/www/nativegallery` |
+| **Production форка** | `/mnt/win/nativegallery` |
+| Docker | `/var/www/html` |
+| Pterodactyl | `/home/container` |
+| Windows IIS | `C:\inetpub\nativegallery` |
+
+Полная таблица: [paths.md](paths.md).
+
+---
+
+## Windows, Caddy, OpenLiteSpeed
+
+| Платформа | Документация | Конфиг |
+|-----------|--------------|--------|
+| **Windows + IIS** | [windows-iis.md](windows-iis.md) | `web.config`, `deploy/windows/*.ps1` |
+| **Apache на Windows** | [windows-iis.md](windows-iis.md) §4 | `.htaccess` |
+| **Caddy 2** | [manual-install.md](manual-install.md) §9 | [deploy/caddy/Caddyfile](../deploy/caddy/Caddyfile) |
+| **OpenLiteSpeed** | [manual-install.md](manual-install.md) §9 | [deploy/openlitespeed/vhost.conf](../deploy/openlitespeed/vhost.conf) |
+
+---
+
+## Прочие платформы
 
 | Платформа | Поддержка |
 |-----------|-----------|
 | Shared-хостинг | Не поддерживается (см. README) |
-| Windows + IIS | Не документируется; возможен ручной перенос при наличии PHP 8.3 + MySQL |
-| **Docker** | [docker.md](docker.md) — `Dockerfile`, `docker compose` |
-| **Pterodactyl** | [pterodactyl.md](pterodactyl.md) — egg `deploy/pterodactyl/egg-nativegallery.json` |
-| Ручная установка | [manual-install.md](manual-install.md) — все стеки с полным списком пакетов |
+| **Docker** | [docker.md](docker.md) |
+| **Pterodactyl** | [pterodactyl.md](pterodactyl.md) |
+| Ручная установка | [manual-install.md](manual-install.md) |
+| Пути | [paths.md](paths.md) |
 
 ---
 

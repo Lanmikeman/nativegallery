@@ -21,6 +21,8 @@ if (NGALLERY['root']['title'] != null && NGALLERY['root']['showtitle'] === true)
     $title = 'NativeGallery';
 }
 
+$nonrw = '';
+$nonr = '';
 $noncheckedimgs = DB::query('SELECT COUNT(*) FROM followers_notifications WHERE checked=0 AND follower_id=:id', array(':id'=>Auth::userid()))[0]['COUNT(*)'];
 if ($noncheckedimgs > 0) {
     $nonrw = '<span class="mm-notify notify-count">'.$noncheckedimgs.'</span>';
@@ -88,7 +90,7 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
             </li>
             <li><a href="/mapmedia" class="mm-item"><span class="mm-label">Map Media<span class="mm-notify notify-count">NEW</span></span></a></li>
             <?php
-            foreach (NGALLERY['root']['navbar'] as $ngn) {
+            foreach (NGALLERY['root']['navbar'] ?? [] as $ngn) {
                 echo '<li><a href="'.$ngn['link'].'" class="mm-item"><span class="mm-label">'.$ngn['name'].'</li>';
             }
             if (Auth::userid() <= 0) { ?>

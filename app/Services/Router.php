@@ -87,9 +87,6 @@ class Router
         // Обработка корневого маршрута
         if ($route_parts[0] == '' && count($request_url_parts) == 0) {
             self::includeControllerMethod($path_to_include);
-            $file_path = $root . '/app/Controllers/' . $controller . '.php';
-            $file_size = filesize($file_path);
-            header("Content-Length: $file_size");
             exit();
         }
 

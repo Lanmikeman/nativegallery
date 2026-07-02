@@ -67,6 +67,17 @@ class Date
         return $formattedDate;
     }
 
+    public static function chronologyDate(int $date): string
+    {
+        $months = [
+            1 => 'января', 2 => 'февраля', 3 => 'марта', 4 => 'апреля',
+            5 => 'мая', 6 => 'июня', 7 => 'июля', 8 => 'августа',
+            9 => 'сентября', 10 => 'октября', 11 => 'ноября', 12 => 'декабря',
+        ];
+
+        return (int) date('j', $date) . ' ' . $months[(int) date('n', $date)] . ' ' . date('Y', $date);
+    }
+
     public static function addTime($timeString, int $baseTime = null)
     {
     if ($baseTime === null) {

@@ -33,6 +33,10 @@ use \App\Controllers\Api\Admin\Images\SetVisibility as AdminPhotoSetVisibility;
 use \App\Controllers\Api\Admin\News\Create as AdminCreateNews;
 use \App\Controllers\Api\Admin\News\Load as AdminLoadNews;
 use \App\Controllers\Api\Admin\News\Delete as AdminDeleteNews;
+use \App\Controllers\Api\Admin\Chronology\Create as AdminCreateChronology;
+use \App\Controllers\Api\Admin\Chronology\Delete as AdminDeleteChronology;
+use \App\Controllers\Api\Admin\Links\Create as AdminCreateLink;
+use \App\Controllers\Api\Admin\Links\Delete as AdminDeleteLink;
 use \App\Controllers\Api\Admin\GetVehicleInputs as AdminGetVehicleInputs;
 use \App\Controllers\Api\Admin\Models\RequestHandler as AdminModelsRequestHandler;
 use \App\Controllers\Api\Admin\GeoDB\Create as AdminGeoDBCreate;
@@ -128,6 +132,18 @@ class ApiController
     }
     public static function adminloadnews() {
         return new AdminLoadNews();
+    }
+    public static function admincreatechronology() {
+        return new AdminCreateChronology();
+    }
+    public static function admindeletechronology() {
+        return new AdminDeleteChronology();
+    }
+    public static function admincreatelink() {
+        return new AdminCreateLink();
+    }
+    public static function admindeletelink() {
+        return new AdminDeleteLink();
     }
     public static function admingetvehicleinputs() {
         return new AdminGetVehicleInputs();

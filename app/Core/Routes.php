@@ -42,6 +42,13 @@ class Routes
         Router::get('/voting/results', 'ContestsController@results');
         Router::get('/voting/waiting', 'ContestsController@waiting');
         Router::get('/comments', 'MainController@comments');
+        Router::get('/news', 'MainController@chronology');
+        Router::get('/news.php', 'MainController@chronology');
+        Router::get('/news2', 'MainController@sitenews');
+        Router::get('/news2.php', 'MainController@sitenews');
+        Router::get('/misc', 'MainController@misc');
+        Router::get('/links', 'MainController@links');
+        Router::get('/links.php', 'MainController@links');
         if (Auth::userid() > 0) {
             $user = new \App\Models\User(Auth::userid());
 
@@ -93,6 +100,10 @@ class Routes
                 Router::any('/api/admin/news/create', 'ApiController@admincreatenews');
                 Router::any('/api/admin/news/$id/delete', 'ApiController@admindeletenews');
                 Router::any('/api/admin/loadnews', 'ApiController@adminloadnews');
+                Router::post('/api/admin/chronology/create', 'ApiController@admincreatechronology');
+                Router::post('/api/admin/chronology/$id/delete', 'ApiController@admindeletechronology');
+                Router::post('/api/admin/links/create', 'ApiController@admincreatelink');
+                Router::get('/api/admin/links/delete', 'ApiController@admindeletelink');
                 Router::any('/api/admin/getvehicleinputs/$id', 'ApiController@admingetvehicleinputs');
                 Router::any('/api/admin/models/requests/$id/$type', 'ApiController@adminmodelsrequesthandler');
                 Router::any('/api/admin/geodb/create', 'ApiController@admingeodbcreate');

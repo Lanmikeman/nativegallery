@@ -82,7 +82,9 @@ class Upload
 
         if (explode('/', $type)[0] === 'video') {
             $newname = GenerateRandomStr::init(64);
-            $ffmpegPath = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'E:\Maksim\kandle\app\Controllers\Video\Exec\ffmpeg.exe' : 'ffmpeg';
+            $ffmpegPath = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
+                ? $_SERVER['DOCUMENT_ROOT'] . '/app/Controllers/Exec/ffmpeg.exe'
+                : 'ffmpeg';
             $tempDir = $_SERVER['DOCUMENT_ROOT'] . '/cdn/temp/';
             $mp4File = $tempDir . $newname . '.mp4';
 

@@ -47,11 +47,11 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
             <li><a href="#" onclick="return false" class="mm-item"><span class="mm-label">Дополнительно</span></a>
                 <div>
                     <ul class="mm-level-2">
-                        <li><a href="/news.php" class="mm-item"><span class="mm-label">Новости и хронология</span></a></li>
-                        <li><a href="/misc/" class="mm-item"><span class="mm-label">Разные фотогалереи</span></a></li>
-                        <li><a href="/voting.php" class="mm-item"><span class="mm-label">Фотоконкурс</span></a></li>
-                        <li><a href="/news2.php" class="mm-item"><span class="mm-label">Новости сайта</span></a></li>
-                        <li><a href="/links.php" class="mm-item"><span class="mm-label">Ссылки</span></a></li>
+                        <li><a href="/news" class="mm-item"><span class="mm-label">Новости и хронология</span></a></li>
+                        <li><a href="/misc" class="mm-item"><span class="mm-label">Разные фотогалереи</span></a></li>
+                        <li><a href="/voting" class="mm-item"><span class="mm-label">Фотоконкурс</span></a></li>
+                        <li><a href="/news2" class="mm-item"><span class="mm-label">Новости сайта</span></a></li>
+                        <li><a href="/links" class="mm-item"><span class="mm-label">Ссылки</span></a></li>
                     </ul>
                 </div>
             </li>

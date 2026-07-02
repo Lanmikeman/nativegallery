@@ -245,6 +245,63 @@ const createNews = () => {
   });
 };
 
+const createChronology = () => {
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/chronology/create",
+    data: {
+      city: $("#chrono-city").val(),
+      geodb_id: $("#chrono-geodb").val(),
+      transit_type: $("#chrono-transit").val(),
+      date: $("#chrono-date").val(),
+      body: $("#chrono-body").val(),
+      main: $("#chrono-main").is(":checked") ? 1 : 0,
+    },
+    success: function () {
+      Notify.noty("success", "Запись добавлена!");
+      location.reload();
+    },
+  });
+};
+
+const deleteChronology = (id) => {
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/chronology/" + id + "/delete",
+    success: function () {
+      Notify.noty("success", "Удалено!");
+      $("#chrono" + id).remove();
+    },
+  });
+};
+
+const createSiteLink = () => {
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/links/create",
+    data: {
+      title: $("#link-title").val(),
+      url: $("#link-url").val(),
+      sort: $("#link-sort").val(),
+    },
+    success: function () {
+      Notify.noty("success", "Ссылка добавлена!");
+      location.reload();
+    },
+  });
+};
+
+const deleteSiteLink = (id) => {
+  $.ajax({
+    type: "GET",
+    url: "/api/admin/links/delete?id=" + id,
+    success: function () {
+      Notify.noty("success", "Удалено!");
+      $("#link" + id).remove();
+    },
+  });
+};
+
 const handleModelRequest = (modelId, type) => {
   $.ajax({
     type: "POST",

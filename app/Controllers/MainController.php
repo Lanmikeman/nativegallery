@@ -88,6 +88,22 @@ class MainController
        Page::set('Comments/Index');
        
     }
+    public static function sitenews()
+    {
+       Page::set('SiteNews');
+    }
+    public static function chronology()
+    {
+       Page::set('Chronology');
+    }
+    public static function misc()
+    {
+       Page::set('MiscGalleries');
+    }
+    public static function links()
+    {
+       Page::set('Links');
+    }
     public static function tour()
     {
        Page::set('Tour');

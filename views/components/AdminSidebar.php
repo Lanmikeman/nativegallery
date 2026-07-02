@@ -70,6 +70,14 @@ if ($nonreviewedimgs > 0) {
                             <i class="bx bx-news nav__icon"></i>
                             <span class="nav__name">Новости сайта</span>
                         </a>
+                        <a href="/admin?type=Chronology" class="nav__link">
+                            <i class="bx bx-time-five nav__icon"></i>
+                            <span class="nav__name">Хронология</span>
+                        </a>
+                        <a href="/admin?type=Links" class="nav__link">
+                            <i class="bx bx-link nav__icon"></i>
+                            <span class="nav__name">Ссылки</span>
+                        </a>
                         <a href="/admin?type=Contests" class="nav__link">
                             <i class="bx bx-party nav__icon"></i>
                             <span class="nav__name">Фотоконкурсы <span class="badge text-bg-warning">BETA</span></span>

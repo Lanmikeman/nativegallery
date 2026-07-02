@@ -60,6 +60,9 @@ if ($premoderation !== 'true' && $premoderation !== 'false') {
             <option value="1" <?= (int) $user->i('admin') === 1 ? 'selected' : '' ?>>Администратор</option>
             <option value="2" <?= (int) $user->i('admin') === 2 ? 'selected' : '' ?>>Фотомодератор</option>
             <option value="3" <?= (int) $user->i('admin') === 3 ? 'selected' : '' ?>>Модератор</option>
+            <?php if (AdminAccess::isOwner()) { ?>
+                <option value="<?= AdminAccess::ROLE_OWNER ?>" <?= (int) $user->i('admin') === AdminAccess::ROLE_OWNER ? 'selected' : '' ?>>Владелец сервера</option>
+            <?php } ?>
         </select>
         <?php if ($userId === Auth::userid()) { ?>
             <div class="form-text">Свою роль администратора изменить нельзя.</div>

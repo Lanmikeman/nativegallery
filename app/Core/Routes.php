@@ -116,6 +116,10 @@ class Routes
             Router::get('/api/geodb/search', 'ApiController@geodbsearch');
             if ($user->i('admin') > 0) {
                 Router::any('/admin', 'AdminController@index');
+                if ((int) $user->i('admin') === \App\Services\AdminAccess::ROLE_OWNER) {
+                    Router::post('/api/admin/settings/debug', 'ApiController@adminsettingsdebug');
+                    Router::post('/api/admin/settings/server', 'ApiController@adminsettingsserver');
+                }
                 Router::any('/api/admin/images/setvisibility', 'ApiController@adminsetvis');
                 Router::any('/api/admin/news/create', 'ApiController@admincreatenews');
                 Router::any('/api/admin/news/$id', 'ApiController@admingetnews');

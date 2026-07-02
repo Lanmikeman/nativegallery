@@ -30,8 +30,17 @@ class Update
         $status = isset($_POST['status']) ? (int) $_POST['status'] : (int) $target['status'];
         $premoderation = (string) ($_POST['premoderation'] ?? 'false');
 
-        if (!in_array($admin, [0, 1, 2, 3], true)) {
+        if (!in_array($admin, [0, 1, 2, 3, AdminAccess::ROLE_OWNER], true)) {
             echo Json::return(['errorcode' => 1, 'error' => 1, 'message' => 'Некорректный уровень доступа']);
+            return;
+        }
+
+        if ($admin === AdminAccess::ROLE_OWNER && !AdminAccess::isOwner()) {
+            echo Json::return([
+                'errorcode' => 1,
+                'error' => 1,
+                'message' => 'Назначать владельца может только текущий владелец',
+            ]);
             return;
         }
 
@@ -46,17 +55,35 @@ class Update
         }
 
         $editorId = Auth::userid();
-        if ($userId === $editorId && $admin !== 1) {
+        $editorAdmin = (int) (new User($editorId))->i('admin');
+
+        if ($userId === $editorId && $admin !== $editorAdmin) {
             echo Json::return([
                 'errorcode' => 1,
                 'error' => 1,
-                'message' => 'Нельзя снять с себя права администратора',
+                'message' => 'Нельзя изменить свою роль',
             ]);
             return;
         }
 
-        if ((int) $target['admin'] === 1 && $admin !== 1) {
-            $admins = DB::query('SELECT COUNT(*) AS cnt FROM users WHERE admin = 1');
+        if ((int) $target['admin'] === AdminAccess::ROLE_OWNER && $admin !== AdminAccess::ROLE_OWNER) {
+            $owners = DB::query('SELECT COUNT(*) AS cnt FROM users WHERE admin = :role', [
+                ':role' => AdminAccess::ROLE_OWNER,
+            ]);
+            if ((int) ($owners[0]['cnt'] ?? 0) <= 1) {
+                echo Json::return([
+                    'errorcode' => 1,
+                    'error' => 1,
+                    'message' => 'Нельзя снять последнего владельца сервера',
+                ]);
+                return;
+            }
+        }
+
+        if ((int) $target['admin'] === AdminAccess::ROLE_ADMIN && $admin !== AdminAccess::ROLE_ADMIN) {
+            $admins = DB::query('SELECT COUNT(*) AS cnt FROM users WHERE admin = :role', [
+                ':role' => AdminAccess::ROLE_ADMIN,
+            ]);
             if ((int) ($admins[0]['cnt'] ?? 0) <= 1) {
                 echo Json::return([
                     'errorcode' => 1,

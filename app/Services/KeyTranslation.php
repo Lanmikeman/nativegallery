@@ -44,6 +44,45 @@ class KeyTranslation
             case 'cloudflare-caching':
                 return 'Кэширование Cloudflare (и прочих CDN)';
                 break;
+            case 'db':
+                return 'База данных';
+                break;
+            case 'host':
+                return 'Хост';
+                break;
+            case 'login':
+                return 'Логин';
+                break;
+            case 'password':
+                return 'Пароль';
+                break;
+            case 'name':
+                return 'Имя БД';
+                break;
+            case 'timezone':
+                return 'Часовой пояс';
+                break;
+            case 'footerslogan':
+                return 'Слоган в подвале';
+                break;
+            case 'logslocation':
+                return 'Каталог логов';
+                break;
+            case 'alloweddomains':
+                return 'Разрешённые домены';
+                break;
+            case 'openvk':
+                return 'OpenVK';
+                break;
+            case 'registration':
+                return 'Регистрация';
+                break;
+            case 'photo':
+                return 'Фотографии';
+                break;
+            case 'contests':
+                return 'Фотоконкурсы';
+                break;
             default:
                 return $key;
                 break;

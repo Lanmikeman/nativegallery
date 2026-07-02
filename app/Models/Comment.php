@@ -179,7 +179,9 @@ class Comment
         if (($content['edited'] ?? '') === 'true') {
             echo '<br>(отредактировано)';
         }
-        if ($user->i('admin') === 1) {
+        if ($user->i('admin') === 4) {
+            $admintype = ' · Владелец сервера';
+        } else if ($user->i('admin') === 1) {
             $admintype = ' · Администратор сервера';
         } else if ($user->i('admin') === 2) {
             $admintype = ' · Фотомодератор';

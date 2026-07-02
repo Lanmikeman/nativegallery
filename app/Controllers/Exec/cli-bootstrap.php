@@ -16,7 +16,8 @@ if (!defined('NGALLERY')) {
         exit(1);
     }
     $ngallery = Yaml::parse(file_get_contents($configPath))['ngallery'];
-    define('NGALLERY', GalleryConfig::applyAuthOverlay($ngallery));
+    $ngallery = GalleryConfig::applyAuthOverlay($ngallery);
+    define('NGALLERY', GalleryConfig::applyServerOverlay($ngallery));
 }
 
 if (empty($_SERVER['DOCUMENT_ROOT'])) {

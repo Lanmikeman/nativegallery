@@ -1,7 +1,7 @@
 <?php
 
 use \App\Core\Page;
-use \App\Services\DB;
+use \App\Services\{AdminAccess, DB};
 
 $nonr = '';
 $nonr_e = '';
@@ -112,6 +112,12 @@ if ($nonreviewedentities > 0) {
                             <i class="bx bx-cog nav__icon"></i>
                             <span class="nav__name">Настройки<span class="badge text-bg-warning">BETA</span></span>
                         </a>
+                        <?php if (AdminAccess::isOwner()) { ?>
+                        <a href="/admin?type=ServerSettings" class="nav__link">
+                            <i class="bx bx-server nav__icon"></i>
+                            <span class="nav__name">Сервер<span class="badge text-bg-danger">OWNER</span></span>
+                        </a>
+                        <?php } ?>
 
 
                     </div>

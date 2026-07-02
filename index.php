@@ -18,6 +18,7 @@ class App
         if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/ngallery.yaml')) {
             $ngallery = Yaml::parse(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/ngallery.yaml'))['ngallery'];
             $ngallery = GalleryConfig::applyAuthOverlay($ngallery);
+            $ngallery = GalleryConfig::applyServerOverlay($ngallery);
             define('NGALLERY', $ngallery);
             define("NGALLERY_TASKS", Yaml::parse(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/app/Controllers/Exec/Tasks/ngallery-tasks.yaml'))['tasks']);
             \App\Services\Date::applySiteTimezone();

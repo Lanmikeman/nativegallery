@@ -16,6 +16,11 @@ class GalleryConfig
         return $_SERVER['DOCUMENT_ROOT'] . '/storage/auth-settings.json';
     }
 
+    public static function serverSettingsPath(): string
+    {
+        return $_SERVER['DOCUMENT_ROOT'] . '/storage/server-settings.json';
+    }
+
     /** @return array<string, mixed> */
     public static function loadYamlRoot(): array
     {
@@ -47,6 +52,90 @@ class GalleryConfig
 
         $data = json_decode($raw, true);
         return is_array($data) ? $data : [];
+    }
+
+    /** @return array<string, mixed> */
+    public static function loadServerOverlay(): array
+    {
+        $path = self::serverSettingsPath();
+        if (!is_readable($path)) {
+            return [];
+        }
+
+        $raw = file_get_contents($path);
+        if ($raw === false || trim($raw) === '') {
+            return [];
+        }
+
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * @param array<string, mixed> $ngallery
+     * @return array<string, mixed>
+     */
+    public static function applyServerOverlay(array $ngallery): array
+    {
+        $overlay = self::loadServerOverlay();
+        if ($overlay === [] || !isset($overlay['root']) || !is_array($overlay['root'])) {
+            return $ngallery;
+        }
+
+        if (!isset($ngallery['root']) || !is_array($ngallery['root'])) {
+            $ngallery['root'] = [];
+        }
+
+        $ngallery['root'] = self::deepMerge($ngallery['root'], $overlay['root']);
+        return $ngallery;
+    }
+
+    /** @return array{ok: bool, message: string, debug?: bool} */
+    public static function setDebug(bool $enabled): array
+    {
+        $overlay = self::loadServerOverlay();
+        if (!isset($overlay['root']) || !is_array($overlay['root'])) {
+            $overlay['root'] = [];
+        }
+        $overlay['root']['debug'] = $enabled;
+
+        if (!self::saveServerOverlay($overlay)) {
+            return ['ok' => false, 'message' => self::writableErrorMessage('storage/server-settings.json')];
+        }
+
+        return [
+            'ok' => true,
+            'message' => $enabled ? 'Debug (Tracy) включён' : 'Debug (Tracy) выключен',
+            'debug' => $enabled,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $postedRoot
+     * @return array{ok: bool, message: string}
+     */
+    public static function saveRootConfig(array $postedRoot): array
+    {
+        $yamlRoot = self::loadYamlRoot();
+        if ($yamlRoot === []) {
+            return ['ok' => false, 'message' => 'Не удалось прочитать ngallery.yaml'];
+        }
+
+        $normalized = self::coerceRootTypes(
+            self::normalizeConfigValues($postedRoot),
+            $yamlRoot
+        );
+        $overlay = self::loadServerOverlay();
+        $overlay['root'] = self::buildRootOverlay($yamlRoot, $normalized);
+
+        if (!self::saveServerOverlay($overlay)) {
+            return ['ok' => false, 'message' => self::writableErrorMessage('storage/server-settings.json')];
+        }
+
+        return [
+            'ok' => true,
+            'message' => 'Конфигурация сохранена в storage/server-settings.json',
+        ];
     }
 
     /**
@@ -466,10 +555,141 @@ class GalleryConfig
         return true;
     }
 
-    private static function writableErrorMessage(): string
+    private static function writableErrorMessage(string $target = 'storage/'): string
     {
-        return 'Не удалось сохранить настройки. Выдайте права на запись каталогу storage/: '
+        return 'Не удалось сохранить настройки. Выдайте права на запись ' . $target . ': '
             . 'chown -R www-data:www-data storage && chmod -R 775 storage';
+    }
+
+    /** @param array<string, mixed> $overlay */
+    private static function saveServerOverlay(array $overlay): bool
+    {
+        $path = self::serverSettingsPath();
+        $dir = dirname($path);
+
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return false;
+        }
+
+        $json = json_encode($overlay, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            return false;
+        }
+
+        $tmp = $path . '.tmp.' . getmypid();
+        if (@file_put_contents($tmp, $json . "\n", LOCK_EX) === false) {
+            @unlink($tmp);
+            return false;
+        }
+
+        if (!@rename($tmp, $path)) {
+            @unlink($tmp);
+            return @file_put_contents($path, $json . "\n", LOCK_EX) !== false;
+        }
+
+        @chmod($path, 0664);
+        return true;
+    }
+
+    /**
+     * @param array<string, mixed> $base
+     * @param array<string, mixed> $overlay
+     * @return array<string, mixed>
+     */
+    private static function deepMerge(array $base, array $overlay): array
+    {
+        foreach ($overlay as $key => $value) {
+            if (is_array($value) && isset($base[$key]) && is_array($base[$key]) && self::isAssoc($value) && self::isAssoc($base[$key])) {
+                $base[$key] = self::deepMerge($base[$key], $value);
+            } else {
+                $base[$key] = $value;
+            }
+        }
+
+        return $base;
+    }
+
+    /** @param array<string, mixed> $yamlRoot @param array<string, mixed> $desired */
+    private static function buildRootOverlay(array $yamlRoot, array $desired): array
+    {
+        $overlay = [];
+        foreach ($desired as $key => $value) {
+            $yamlValue = $yamlRoot[$key] ?? null;
+            if (is_array($value) && is_array($yamlValue) && self::isAssoc($value) && self::isAssoc($yamlValue)) {
+                $childOverlay = self::buildRootOverlay($yamlValue, $value);
+                if ($childOverlay !== []) {
+                    $overlay[$key] = $childOverlay;
+                }
+                continue;
+            }
+
+            if ($value !== $yamlValue) {
+                $overlay[$key] = $value;
+            }
+        }
+
+        return $overlay;
+    }
+
+    /** @param mixed $value @return mixed */
+    private static function normalizeConfigValues(mixed $value): mixed
+    {
+        if (!is_array($value)) {
+            if ($value === 'true') {
+                return true;
+            }
+            if ($value === 'false') {
+                return false;
+            }
+            if (is_string($value) && is_numeric($value)) {
+                return str_contains($value, '.') ? (float) $value : (int) $value;
+            }
+            return $value;
+        }
+
+        $normalized = [];
+        foreach ($value as $key => $item) {
+            $normalized[$key] = self::normalizeConfigValues($item);
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param array<string, mixed> $normalized
+     * @param array<string, mixed> $yamlRoot
+     * @return array<string, mixed>
+     */
+    private static function coerceRootTypes(array $normalized, array $yamlRoot): array
+    {
+        foreach ($yamlRoot as $key => $yamlValue) {
+            if (!array_key_exists($key, $normalized)) {
+                continue;
+            }
+
+            if (is_array($yamlValue) && $yamlValue !== [] && array_keys($yamlValue) === range(0, count($yamlValue) - 1)) {
+                if (is_string($normalized[$key])) {
+                    $normalized[$key] = array_values(array_filter(array_map('trim', explode(',', $normalized[$key]))));
+                }
+                continue;
+            }
+
+            if (is_array($yamlValue) && is_array($normalized[$key]) && self::isAssoc($yamlValue) && self::isAssoc($normalized[$key])) {
+                $normalized[$key] = self::coerceRootTypes($normalized[$key], $yamlValue);
+            }
+        }
+
+        return $normalized;
+    }
+
+    /** @param array<mixed> $array */
+    private static function isAssoc(array $array): bool
+    {
+        if ($array === []) {
+            return true;
+        }
+
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 
     private static function providerExistsInYaml(string $providerId): bool

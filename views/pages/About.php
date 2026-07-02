@@ -32,6 +32,20 @@ use \App\Models\User;
                         </ul>
                     </div>
                     <div class="p20">
+                        <h4><img src="/static/img/220.ico">Владельцы</h4>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <?php
+                            $owners = DB::query('SELECT * FROM users WHERE admin=4');
+                            foreach ($owners as $a) {
+                                echo '<li><b><a href="/author/'.$a['id'].'/"><img onerror="this.src = `/static/img/avatar.png`; this.onerror = null;" src="'.$a['photourl'].'" width="32" style="border-radius: 3px; margin-right: 5px;">'.htmlspecialchars($a['username']).'</a></b></li>';
+                            }
+                            if ($owners === []) {
+                                echo '<li class="sm">Не назначены</li>';
+                            }
+                            ?>
+                        </ul>
+                    </div>
+                    <div class="p20">
                         <h4><img src="/static/img/220.ico">Администраторы</h4>
                         <ul style="list-style: none; margin: 0; padding: 0;">
                             <?php

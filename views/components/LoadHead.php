@@ -1,5 +1,8 @@
 <?php
 use \App\Services\{ThemeManager, Auth};
+
+require_once $_SERVER['DOCUMENT_ROOT'] . '/views/components/AssetHelper.php';
+
 $themeManager = new ThemeManager();
 $themeManager->loadThemes();
 
@@ -14,41 +17,41 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=PT+Sans+Narrow:wght@400;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/desktop.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/trans.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/photo.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/notie.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/comments.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/desktop.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/trans.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/photo.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/notie.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/comments.css') ?>">
     <?php
     if ($stylesheet) { ?>
-    <link rel="stylesheet" href="<?php echo $stylesheet; if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <link rel="stylesheet" href="<?= ng_asset($stylesheet) ?>">
     <?php } ?>
-    <link rel="stylesheet" href="/static/css/map.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/jquery-ui-1.8.20.custom.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <link rel="stylesheet" href="/static/css/progress.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/map.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/jquery-ui-1.8.20.custom.css') ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/progress.css') ?>">
     <?php if ($musicUserLoggedIn) { ?>
-    <link rel="stylesheet" href="/static/css/music-player.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/music-player.css') ?>">
     <?php } ?>
-    <script src="/static/js/jquery.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/jquery.form.min.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/core.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/index.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/jquery-ui.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/selector.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/selector2.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/imageupload.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/progress.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/notie.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/jquery.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/jquery.form.min.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/core.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/index.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/jquery-ui.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/selector.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/selector2.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/imageupload.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/progress.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/notie.js') ?>" data-restart></script>
     <?php if ($musicUserLoggedIn) { ?>
-    <script src="/static/js/music-player.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>"></script>
-    <script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>"></script>
+    <script src="<?= ng_asset('/static/js/music-player.js') ?>"></script>
+    <script src="<?= ng_asset('/static/js/routing.js') ?>"></script>
     <?php } ?>
-    <script src="/static/js/photo.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/newcore.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/act.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/core_lk.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
-    <script src="/static/js/tablesort.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/photo.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/newcore.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/act.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/core_lk.js') ?>" data-restart></script>
+    <script src="<?= ng_asset('/static/js/tablesort.js') ?>" data-restart></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">

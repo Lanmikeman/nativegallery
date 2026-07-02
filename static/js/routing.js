@@ -68,7 +68,9 @@
   }
 
   function handleClick(e) {
-    if (e.target.closest("#ng-music-bar, .ng-music-page, #prev, #next, #photobar")) {
+    if (e.target.closest(
+      "#ng-music-bar, .ng-music-page, #prev, #next, #photobar, [data-action], [data-play-item], [data-queue-item], [data-play-playlist], [data-play-pl-item]"
+    )) {
       return;
     }
 

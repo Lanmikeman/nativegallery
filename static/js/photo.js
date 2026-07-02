@@ -5,23 +5,6 @@
 		return $('#photobar').length > 0;
 	}
 
-	function photoNavSuffix() {
-		if (typeof vid !== 'undefined' && vid) return '?vid=' + vid;
-		if (typeof gid !== 'undefined' && gid) return '?gid=' + gid;
-		if (typeof aid !== 'undefined' && aid) return '?aid=' + aid;
-		if (typeof upd !== 'undefined' && upd) return '?upd=1';
-		return '';
-	}
-
-	function goToPhoto(nextId) {
-		var url = '/photo/' + nextId + '/' + photoNavSuffix();
-		if (window.ngSpaNavigate) {
-			window.ngSpaNavigate(url);
-		} else {
-			window.location.href = url;
-		}
-	}
-
 	function cleanPhotoUrl() {
 		var url = document.location.toString();
 		url = url.replace(/\?vid=\d+$/, '');
@@ -56,32 +39,6 @@
 	function bindPhotoHandlers() {
 		if (window.__ngPhotoHandlersBound) return;
 		window.__ngPhotoHandlersBound = true;
-
-		$(document).on('click.ngPhoto', '#prev, #next', function () {
-			if (!photoPageActive()) return;
-
-			var next = (this.id === 'prev' ? 0 : 1);
-
-			$.get('/api/photo/move', {
-				pid: pid,
-				vid: typeof vid !== 'undefined' ? vid : 0,
-				gid: typeof gid !== 'undefined' ? gid : 0,
-				aid: typeof aid !== 'undefined' ? aid : 0,
-				next: next
-			}, function (nextPid) {
-				nextPid = parseInt(nextPid, 10);
-				if (!nextPid) {
-					if (!vid && !gid) {
-						if (next) alert(_text['P_MOVE_FIRST'] + '.');
-						else alert(_text['P_MOVE_LAST'] + '.');
-					} else {
-						alert(_text[vid ? 'P_MOVE_ALONE_V' : 'P_MOVE_ALONE_G'] + '.');
-					}
-					return;
-				}
-				goToPhoto(nextPid);
-			});
-		});
 
 		$(document).on('click.ngPhoto', '#showmap a', function () {
 			$('#map').show();

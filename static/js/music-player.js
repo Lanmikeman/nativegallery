@@ -152,7 +152,11 @@
             }
         } catch (e) { /* ignore */ }
 
-        a.play().catch(function () {
+        a.play().catch(function (err) {
+            console.error('NgMusicPlayer play failed:', err);
+            if (typeof Notify !== 'undefined') {
+                Notify.noty('danger', 'Не удалось начать воспроизведение');
+            }
             updateBar();
         });
         if (resumed) updateBar();

@@ -109,7 +109,8 @@ $tablesExist = AudioLibrary::tablesExist();
         </tr>
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'; ?>
     </table>
-    <script src="/static/js/music-page.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>"></script>
+    <?php require_once $_SERVER['DOCUMENT_ROOT'] . '/views/components/AssetHelper.php'; ?>
+    <script src="<?= ng_asset('/static/js/music-page.js') ?>"></script>
 </body>
 
 </html>

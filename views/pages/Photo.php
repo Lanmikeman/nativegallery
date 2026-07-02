@@ -13,11 +13,14 @@ if (isset($GLOBALS['id'])) {
         $id = (int) $parts[1];
     }
 }
+$photo = new \App\Models\Photo($id);
 $navVid = (int) ($_GET['vid'] ?? 0);
 $navGid = (int) ($_GET['gid'] ?? 0);
 $navAid = (int) ($_GET['aid'] ?? 0);
 $navUpd = isset($_GET['upd']) ? 1 : 0;
-$photo = new \App\Models\Photo($id);
+if ($navVid === 0 && $navGid === 0 && $navAid === 0 && $photo->i('id') !== null && (int) $photo->i('entitydata_id') > 0) {
+    $navVid = (int) $photo->i('entitydata_id');
+}
 if ($photo->i('id') !== null) {
     if ($photo->content('video') != null) {
         $extname = 'видео';
@@ -179,6 +182,48 @@ if ($photo->i('id') !== null) {
                         var lng = 0;
                         var dir = 0;
                         <?php } ?>
+                        (function () {
+                            function photoNavSuffix() {
+                                if (vid) return '?vid=' + vid;
+                                if (gid) return '?gid=' + gid;
+                                if (aid) return '?aid=' + aid;
+                                if (upd) return '?upd=1';
+                                return '';
+                            }
+                            function goToPhoto(nextId) {
+                                var url = '/photo/' + nextId + '/' + photoNavSuffix();
+                                if (window.ngSpaNavigate) window.ngSpaNavigate(url);
+                                else window.location.href = url;
+                            }
+                            function bindPhotoArrows() {
+                                if (typeof jQuery === 'undefined') return;
+                                jQuery('#prev, #next').off('click.ngInlineNav').on('click.ngInlineNav', function (e) {
+                                    e.preventDefault();
+                                    e.stopImmediatePropagation();
+                                    var next = (this.id === 'prev' ? 0 : 1);
+                                    jQuery.get('/api/photo/move', {
+                                        pid: pid,
+                                        vid: vid || 0,
+                                        gid: gid || 0,
+                                        aid: aid || 0,
+                                        next: next
+                                    }, function (nextPid) {
+                                        nextPid = parseInt(nextPid, 10);
+                                        if (!nextPid) {
+                                            if (!vid && !gid) {
+                                                alert(_text[next ? 'P_MOVE_FIRST' : 'P_MOVE_LAST'] + '.');
+                                            } else {
+                                                alert(_text[vid ? 'P_MOVE_ALONE_V' : 'P_MOVE_ALONE_G'] + '.');
+                                            }
+                                            return;
+                                        }
+                                        goToPhoto(nextPid);
+                                    });
+                                });
+                            }
+                            if (typeof jQuery !== 'undefined') jQuery(bindPhotoArrows);
+                            else document.addEventListener('DOMContentLoaded', bindPhotoArrows);
+                        })();
                     </script>
                     <center>
 

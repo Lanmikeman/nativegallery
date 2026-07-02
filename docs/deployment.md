@@ -78,6 +78,7 @@ UPDATE users SET admin = 4 WHERE username = 'ваш_ник';
 |------|-----|
 | `pk.php` | `/pk.php?pid=…&type=d` |
 | `help/index.php` | `/help/` |
+| `lk/index.php` | `/lk/` — личный кабинет |
 | `lk/ticket.php` | `/lk/ticket.php` |
 | `lk/konkurs.php` | `/lk/konkurs.php` |
 

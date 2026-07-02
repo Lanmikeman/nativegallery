@@ -181,6 +181,7 @@
 | `/update.php` | `/update` |
 | `/pk.php` | `/voting/report` (через заглушку `pk.php`) |
 | `/help/` | `/help` (через `help/index.php`) |
+| `/lk/` | `/lk` (через `lk/index.php`) |
 | `/lk/ticket.php` | `/lk/ticket` |
 | `/lk/konkurs.php` | `/lk/konkurs` |
 

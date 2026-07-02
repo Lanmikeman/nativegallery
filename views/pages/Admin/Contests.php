@@ -13,9 +13,7 @@ if (!$task->isTaskExists('ExecContests', null, $execContestsHandler)) {
 ?>
 
 
-<tr>
-    <td class="main">
-        <h1><b>Фотоконкурсы</b></h1>
+<h1><b>Фотоконкурсы</b></h1>
         <p class="sm text-muted">Часовой пояс сайта: <b><?= htmlspecialchars(Date::getSiteTimezoneName()) ?></b>. Даты в формах указываются в этом поясе.</p>
         <div class="v-header__tabs">
             <div class="v-tabs">
@@ -138,8 +136,6 @@ if (!$task->isTaskExists('ExecContests', null, $execContestsHandler)) {
                 </table>
             </div>
         </div>
-    </td>
-</tr>
 <div class="modal fade" id="createContest" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

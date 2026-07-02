@@ -48,41 +48,7 @@ function renderInputs($data, $prefix = '')
 
 
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<link rel="stylesheet" href="/static/css/notie.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) {
-                                                        echo '?' . time();
-                                                    } ?>">
-<script src="/static/js/notie.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) {
-                                    echo '?' . time();
-                                } ?>"></script>
-
-<script>
-    notie.setOptions({
-        transitionCurve: 'cubic-bezier(0.2, 0, 0.2, 1)'
-    });
-    var Notify = {
-        noty: function(status, text) {
-
-            if (status == 'danger') status = 'error';
-
-            return notie.alert({
-                type: status,
-                text: text
-            })
-
-        },
-    }
-</script>
-
-<body>
-    <div class="container">
-
-        <?= \App\Controllers\AdminController::loadMenu(); ?>
-        <?= \App\Controllers\AdminController::loadContent(); ?>
-
-        <h1><b>Настройки</b></h1>
+<h1><b>Настройки</b></h1>
         <div class="v-header__tabs">
             <div class="v-tabs">
                 <div class="v-tabs__scroll">
@@ -151,11 +117,6 @@ function renderInputs($data, $prefix = '')
                             </tbody>
         </table>
         </div>
-    </div>
-
-
-
-</body>
 <script>
     function taskManager(id, type) {
         $.ajax({
@@ -174,6 +135,4 @@ function renderInputs($data, $prefix = '')
             }
         });
     }
-    </script>
-
-</html>
+</script>

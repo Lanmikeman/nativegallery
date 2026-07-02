@@ -1,158 +1,64 @@
 <?php
 
-use \App\Core\Page;
-use \App\Services\{AdminAccess, DB};
+use App\Core\Page;
+use App\Services\{AdminAccess, DB};
+
+$currentType = trim((string) ($_GET['type'] ?? ''));
+if ($currentType === '' || !Page::exists('Admin/' . $currentType)) {
+    $currentType = 'General';
+}
 
 $nonr = '';
-$nonr_e = '';
-$nonreviewedimgs = DB::query('SELECT COUNT(*) FROM photos WHERE moderated=0')[0]['COUNT(*)'];
-if ($nonreviewedimgs > 0) {
-    $nonr = '<span class="badge text-bg-danger">' . $nonreviewedimgs . '</span>';
+$nonrE = '';
+$nonreviewedImgs = (int) DB::query('SELECT COUNT(*) AS cnt FROM photos WHERE moderated = 0')[0]['cnt'];
+if ($nonreviewedImgs > 0) {
+    $nonr = '<span class="badge text-bg-danger admin-nav__badge">' . $nonreviewedImgs . '</span>';
 }
-$nonreviewedentities = DB::query('SELECT COUNT(*) FROM entities_requests WHERE status=0')[0]['COUNT(*)'];
-if ($nonreviewedentities > 0) {
-    $nonr_e = '<span class="badge text-bg-danger">' . $nonreviewedentities . '</span>';
+$nonreviewedEntities = (int) DB::query('SELECT COUNT(*) AS cnt FROM entities_requests WHERE status = 0')[0]['cnt'];
+if ($nonreviewedEntities > 0) {
+    $nonrE = '<span class="badge text-bg-danger admin-nav__badge">' . $nonreviewedEntities . '</span>';
 }
+
+$navClass = static function (string $type) use ($currentType): string {
+    return $type === $currentType ? ' admin-nav__link--active' : '';
+};
+
+$items = [
+    ['type' => 'General', 'href' => '/admin', 'icon' => 'fa-users-cog', 'label' => 'Пользователи'],
+    ['type' => 'Photo', 'href' => '/admin?type=Photo', 'icon' => 'fa-camera', 'label' => 'Фотографии', 'badge' => $nonr],
+    ['type' => 'Galleries', 'href' => '/admin?type=Galleries', 'icon' => 'fa-images', 'label' => 'Галереи'],
+    ['type' => 'News', 'href' => '/admin?type=News', 'icon' => 'fa-bullhorn', 'label' => 'Новости сайта'],
+    ['type' => 'Chronology', 'href' => '/admin?type=Chronology', 'icon' => 'fa-clock', 'label' => 'Хронология'],
+    ['type' => 'Links', 'href' => '/admin?type=Links', 'icon' => 'fa-link', 'label' => 'Ссылки'],
+    ['type' => 'Contests', 'href' => '/admin?type=Contests', 'icon' => 'fa-trophy', 'label' => 'Фотоконкурсы'],
+    ['type' => 'Entities', 'href' => '/admin?type=Entities', 'icon' => 'fa-cubes', 'label' => 'Сущности'],
+    ['type' => 'Models', 'href' => '/admin?type=Models', 'icon' => 'fa-database', 'label' => 'База моделей', 'badge' => $nonrE],
+    ['type' => 'GeoDB', 'href' => '/admin?type=GeoDB', 'icon' => 'fa-globe', 'label' => 'GeoDB'],
+    ['type' => 'Pages', 'href' => '/admin?type=Pages', 'icon' => 'fa-file-alt', 'label' => 'Страницы'],
+    ['type' => 'AuthSettings', 'href' => '/admin?type=AuthSettings', 'icon' => 'fa-key', 'label' => 'Авторизация'],
+    ['type' => 'Settings', 'href' => '/admin?type=Settings', 'icon' => 'fa-cog', 'label' => 'Настройки'],
+];
 
 ?>
-<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
-
-    body {
-        font-family: Inter !important;
-    }
-</style>
-<script src="/static/js/changeTab.js" defer></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js" integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="/static/css/header.admin.css">
-<link rel="stylesheet" href="/static/css/tabs.css">
-<div class="layout__left-column layout__sticky">
-    <header style="background-color: #0d1012;" class="header">
-        <div class="header__container">
-
-
-
-
-            <div class="header__toggle">
-                <i class='bx bx-menu' id="header-toggle"></i>
-            </div>
-        </div>
-    </header>
-
-    <div class="nav" id="navbar">
-
-        <nav class="nav__container">
-            <div>
-                <a href="/admin" class="nav__link nav__logo">
-                    <h5><b><?= NGALLERY['root']['title'] ?></b></h5>
-                </a>
-
-
-
-
-
-                <div class="nav__list">
-
-                    <div class="nav__items">
-                        <h3 class="nav__subtitle"></h3>
-
-                        <a href="/admin" class="nav__link">
-                            <i class="bx bx-user-pin nav__icon"></i>
-                            <span class="nav__name">Пользователи</span>
-                        </a>
-                        <a href="/admin?type=Photo" class="nav__link">
-                            <i class="bx bx-camera nav__icon"></i>
-                            <span class="nav__name">Фотографии <?= $nonr ?></span>
-                        </a>
-                        <a href="/admin?type=Galleries" class="nav__link">
-                            <i class="bx bx-images nav__icon"></i>
-                            <span class="nav__name">Галереи</span>
-                        </a>
-                        <a href="/admin?type=News" class="nav__link">
-                            <i class="bx bx-news nav__icon"></i>
-                            <span class="nav__name">Новости сайта</span>
-                        </a>
-                        <a href="/admin?type=Chronology" class="nav__link">
-                            <i class="bx bx-time-five nav__icon"></i>
-                            <span class="nav__name">Хронология</span>
-                        </a>
-                        <a href="/admin?type=Links" class="nav__link">
-                            <i class="bx bx-link nav__icon"></i>
-                            <span class="nav__name">Ссылки</span>
-                        </a>
-                        <a href="/admin?type=Contests" class="nav__link">
-                            <i class="bx bx-party nav__icon"></i>
-                            <span class="nav__name">Фотоконкурсы <span class="badge text-bg-warning">BETA</span></span>
-                        </a>
-                        <a href="/admin?type=Entities" class="nav__link">
-                            <i class="bx bx-package nav__icon"></i>
-                            <span class="nav__name">Сущности</span>
-                        </a>
-                        <a href="/admin?type=Models" class="nav__link">
-                            <i class="bx bx-data nav__icon"></i>
-                            <span class="nav__name">База моделей <?= $nonr_e ?></span>
-                        </a>
-                        <a href="/admin?type=GeoDB" class="nav__link">
-                            <i class="bx bx-world nav__icon"></i>
-                            <span class="nav__name">GeoDB<span class="badge text-bg-warning">BETA</span></span>
-                        </a>
-                        <a href="/admin?type=Pages" class="nav__link">
-                            <i class="bx bx-file-blank nav__icon"></i>
-                            <span class="nav__name">Страницы</span>
-                        </a>
-                        <a href="/admin?type=AuthSettings" class="nav__link">
-                            <i class="bx bx-key nav__icon"></i>
-                            <span class="nav__name">Авторизация</span>
-                        </a>
-                        <a href="/admin?type=Settings" class="nav__link">
-                            <i class="bx bx-cog nav__icon"></i>
-                            <span class="nav__name">Настройки<span class="badge text-bg-warning">BETA</span></span>
-                        </a>
-                        <?php if (AdminAccess::isOwner()) { ?>
-                        <a href="/admin?type=ServerSettings" class="nav__link">
-                            <i class="bx bx-server nav__icon"></i>
-                            <span class="nav__name">Сервер<span class="badge text-bg-danger">OWNER</span></span>
-                        </a>
-                        <?php } ?>
-
-
-                    </div>
-
-                </div>
-            </div>
-
-        </nav>
+<nav class="admin-nav">
+    <div class="admin-nav__head">
+        <h2 class="admin-nav__title">Админ-панель</h2>
+        <a href="/" class="admin-nav__back"><i class="fas fa-arrow-left"></i> На сайт</a>
     </div>
-</div>
-<script>
-    /*==================== SHOW NAVBAR ====================*/
-    const showMenu = (headerToggle, navbarId) => {
-        const toggleBtn = document.getElementById(headerToggle),
-            nav = document.getElementById(navbarId)
-
-        // Validate that variables exist
-        if (headerToggle && navbarId) {
-            toggleBtn.addEventListener('click', () => {
-                // We add the show-menu class to the div tag with the nav__menu class
-                nav.classList.toggle('show-menu')
-                // change icon
-                toggleBtn.classList.toggle('bx-x')
-            })
-        }
-    }
-    showMenu('header-toggle', 'navbar')
-
-    /*==================== LINK ACTIVE ====================*/
-    const linkColor = document.querySelectorAll('.nav__link')
-
-    function colorLink() {
-        linkColor.forEach(l => l.classList.remove('active'))
-        this.classList.add('active')
-    }
-
-    linkColor.forEach(l => l.addEventListener('click', colorLink))
-</script>
+    <div class="admin-nav__items">
+        <?php foreach ($items as $item) { ?>
+            <a href="<?= htmlspecialchars($item['href']) ?>" class="admin-nav__link<?= $navClass($item['type']) ?>">
+                <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                <span><?= htmlspecialchars($item['label']) ?></span>
+                <?= $item['badge'] ?? '' ?>
+            </a>
+        <?php } ?>
+        <?php if (AdminAccess::isOwner()) { ?>
+            <a href="/admin?type=ServerSettings" class="admin-nav__link<?= $navClass('ServerSettings') ?>">
+                <i class="fas fa-server"></i>
+                <span>Сервер</span>
+                <span class="badge text-bg-danger admin-nav__badge">OWNER</span>
+            </a>
+        <?php } ?>
+    </div>
+</nav>

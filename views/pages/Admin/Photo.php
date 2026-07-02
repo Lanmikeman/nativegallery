@@ -7,8 +7,7 @@ use \App\Models\User;
 ?>
 
 
-<tr>
-    <style>
+<style>
     #sbmt {
         display: inline-block;
     box-sizing: border-box;
@@ -34,8 +33,7 @@ use \App\Models\User;
     -webkit-border-radius: 0;
     }
     </style>
-                <td class="main">
-                    <h1><b>Фотографии</b></h1>
+<h1><b>Фотографии</b></h1>
                     <div class="v-header__tabs">
                 <div class="v-tabs">
                     <div class="v-tabs__scroll">
@@ -253,10 +251,7 @@ use \App\Models\User;
                     <div style="display: none;" id="full__block">
                       fgdfg
                     </div>
-
-                </td>
-            </tr>
-            <script>
+<script>
 function photoAction(photo_id, decline_reason, iRate, kRate, mod) {
    $.ajax({
                 type: "GET",

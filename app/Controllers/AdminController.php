@@ -8,24 +8,15 @@ use \App\Core\Page;
 
 class AdminController
 {
-    static $file = 'General';
-
-    public function __construct()
+    public static function resolvePage(): string
     {
-        if (isset($_GET['type'])) {
-            switch (Page::exists('Admin/' . $_GET['type'])) {
-                case true:
-                    self::$file = $_GET['type'];
-                    break;
-                case false:
-                    self::$file = 'General';
-                    break;
-            }
-        } else {
-            self::$file = 'General';
+        $type = trim((string) ($_GET['type'] ?? ''));
+        if ($type === '' || !Page::exists('Admin/' . $type)) {
+            return 'General';
         }
-    }
 
+        return $type;
+    }
 
     public static function loadMenu()
     {
@@ -36,14 +27,9 @@ class AdminController
     {
         Page::set('Admin/Index');
     }
+
     public static function loadContent()
     {
-        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/views/pages/Admin/' . self::$file . '.php';
-
-        if (file_exists($filePath)) {
-            Page::set('Admin/' . self::$file);
-        } else {
-            Page::set('Admin/General');
-        }
+        Page::set('Admin/' . self::resolvePage());
     }
 }

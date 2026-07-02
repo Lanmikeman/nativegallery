@@ -72,7 +72,7 @@ if (!isset($_GET['type']) || $_GET['type'] != 'Photo') {
                                     <td class="c">
                                    ';
 
-                            echo '<a href="/admin?type=EntityEdit&id=' . $p['id'] . '&mod=1" class="btn btn-primary">Редактировать</a>
+                            echo '<a href="/admin?type=EntityEdit&id=' . $p['id'] . '" class="btn btn-primary">Редактировать</a>
                                     <a data-bs-toggle="modal" data-bs-target="#declinePhotoModal' . $p['id'] . '" href="#" class="btn btn-danger">Удалить</a>
                       
                                     </td>';

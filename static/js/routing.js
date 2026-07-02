@@ -43,7 +43,7 @@
   function shouldIntercept(link, event) {
     try {
       if (!link || !link.href) return false;
-      if (link.dataset.noAjax) return false;
+      if (link.hasAttribute("data-no-ajax")) return false;
       if (event && (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) {
         return false;
       }

@@ -112,20 +112,20 @@ function AddPhotoToBlock(block, arr, prepend) {
     if (!photoId) return;
 
     const html = `
-    <a href="/photo/${photoId}/" data-no-ajax class="prw-grid-item prw-grid-item--link">
-        <span class="prw-wrapper">
+    <div class="prw-grid-item">
+        <div class="prw-wrapper">
             ${arr.place}
-            <span>${arr.date}</span>
-        </span>
-        <span class="prw-animate blur-load"
+            <div>${arr.date}</div>
+        </div>
+        <a href="/photo/${photoId}/" data-no-ajax="1" class="prw-animate blur-load"
            style="background-image: url('${arr.photourl_extrasmall}')"
            data-src="${arr.photourl_small}">
             ${arr.ccnt != 0 ? `
-            <span class="hdshade">
-                <span class="com-icon">${arr.ccnt}</span>
-            </span>` : ''}
-        </span>
-    </a>`;
+            <div class="hdshade">
+                <div class="com-icon">${arr.ccnt}</div>
+            </div>` : ''}
+        </a>
+    </div>`;
 
     block[prepend ? 'prepend' : 'append'](html);
 

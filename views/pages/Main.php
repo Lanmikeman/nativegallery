@@ -118,11 +118,11 @@ LIMIT 10;');
                                         $date = Date::zmdate($p['posted_at']);
                                     }
                                     $thumb = '/api/photo/compress?url=' . rawurlencode((string) $p['photourl']);
-                                    echo '<a href="/photo/' . $photoId . '/" class="prw-grid-item prw-grid-item--link" data-no-ajax>';
-                                    echo '<span class="prw-wrapper"><span style="word-spacing:-1px"><b>' . htmlspecialchars((string) $p['place']) . '</b></span>';
-                                    echo '<span>' . htmlspecialchars($date) . '</span></span>';
-                                    echo '<span class="prw-animate" style="background-image:url(\'' . htmlspecialchars($thumb, ENT_QUOTES) . '\')"></span>';
-                                    echo '</a>';
+                                    echo '<div class="prw-grid-item">';
+                                    echo '<div class="prw-wrapper"><span style="word-spacing:-1px"><b>' . htmlspecialchars((string) $p['place']) . '</b></span>';
+                                    echo '<div>' . htmlspecialchars($date) . '</div></div>';
+                                    echo '<a href="/photo/' . $photoId . '/" class="prw-animate" data-no-ajax="1" style="background-image:url(\'' . htmlspecialchars($thumb, ENT_QUOTES) . '\')" aria-label="' . htmlspecialchars((string) $p['place']) . '"></a>';
+                                    echo '</div>';
                                 }
                                 ?>
                             </div>

@@ -46,6 +46,8 @@ use \App\Controllers\Api\Admin\Chronology\Create as AdminCreateChronology;
 use \App\Controllers\Api\Admin\Chronology\Delete as AdminDeleteChronology;
 use \App\Controllers\Api\Admin\Links\Create as AdminCreateLink;
 use \App\Controllers\Api\Admin\Links\Delete as AdminDeleteLink;
+use \App\Controllers\Api\Admin\Radio\Create as AdminCreateRadio;
+use \App\Controllers\Api\Admin\Radio\Delete as AdminDeleteRadio;
 use \App\Controllers\Api\Admin\GetVehicleInputs as AdminGetVehicleInputs;
 use \App\Controllers\Api\Admin\Models\RequestHandler as AdminModelsRequestHandler;
 use \App\Controllers\Api\Admin\GeoDB\Create as AdminGeoDBCreate;
@@ -201,6 +203,12 @@ class ApiController
     }
     public static function admindeletelink() {
         return new AdminDeleteLink();
+    }
+    public static function admincreateradio() {
+        return new AdminCreateRadio();
+    }
+    public static function admindeleteradio() {
+        return new AdminDeleteRadio();
     }
     public static function admingetvehicleinputs() {
         return new AdminGetVehicleInputs();

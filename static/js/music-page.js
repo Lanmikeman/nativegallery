@@ -1,7 +1,7 @@
 (function ($, window) {
     'use strict';
 
-    var library = { tracks: [], streams: [], playlists: [] };
+    var library = { tracks: [], streams: [], global_streams: [], playlists: [] };
     var pageReady = false;
 
     function apiPost(url, data, isMultipart) {
@@ -52,13 +52,18 @@
 
     function trackRow(item, kind) {
         var artist = item.artist ? '<span class="ng-music-list__artist"> — ' + escapeHtml(item.artist) + '</span>' : '';
-        var badge = kind === 'stream' ? ' <small>(поток)</small>' : (item.source_type === 'url' ? ' <small>(ссылка)</small>' : '');
+        var badge = kind === 'global_stream'
+            ? ' <small>(радио сайта)</small>'
+            : (kind === 'stream' ? ' <small>(мой поток)</small>' : (item.source_type === 'url' ? ' <small>(ссылка)</small>' : ''));
+        var deleteBtn = (kind === 'global_stream' || item.readonly)
+            ? ''
+            : '<button type="button" class="ng-music-nav__btn" data-delete-item title="Удалить"><i class="fas fa-trash"></i></button>';
         return '<li data-kind="' + kind + '" data-id="' + item.id + '">' +
             '<button type="button" class="ng-music-nav__btn" data-play-item title="Воспроизвести"><i class="fas fa-play"></i></button>' +
             '<span class="ng-music-list__label"><b>' + escapeHtml(item.title) + '</b>' + artist + badge + '</span>' +
             '<span class="ng-music-list__actions">' +
             '<button type="button" class="ng-music-nav__btn" data-queue-item title="В очередь"><i class="fas fa-plus"></i></button>' +
-            '<button type="button" class="ng-music-nav__btn" data-delete-item title="Удалить"><i class="fas fa-trash"></i></button>' +
+            deleteBtn +
             '</span></li>';
     }
 
@@ -67,14 +72,24 @@
     }
 
     function renderLibrary() {
+        var $global = $('#ng-music-global-streams-list');
         var $tracks = $('#ng-music-tracks-list');
         var $streams = $('#ng-music-streams-list');
         var $playlists = $('#ng-music-playlists-list');
         if (!$tracks.length) return;
 
+        if ($global.length) $global.empty();
         $tracks.empty();
         $streams.empty();
         $playlists.empty();
+
+        if ($global.length) {
+            if (!library.global_streams.length) {
+                $global.html('<li class="ng-music-empty">Администратор ещё не добавил общие станции</li>');
+            } else {
+                library.global_streams.forEach(function (s) { $global.append(trackRow(s, 'global_stream')); });
+            }
+        }
 
         if (!library.tracks.length) {
             $tracks.html('<li class="ng-music-empty">Нет загруженных треков</li>');
@@ -83,7 +98,7 @@
         }
 
         if (!library.streams.length) {
-            $streams.html('<li class="ng-music-empty">Нет потоков</li>');
+            $streams.html('<li class="ng-music-empty">Нет личных потоков</li>');
         } else {
             library.streams.forEach(function (s) { $streams.append(trackRow(s, 'stream')); });
         }
@@ -126,6 +141,9 @@
                 $('#ng-music-migration-hint').show();
             }
             library = res.library || library;
+            if (!Array.isArray(library.global_streams)) {
+                library.global_streams = [];
+            }
             renderLibrary();
         });
     }
@@ -133,7 +151,9 @@
     function itemFromLi($li) {
         var kind = $li.data('kind');
         var id = parseInt($li.data('id'), 10);
-        var list = kind === 'stream' ? library.streams : library.tracks;
+        var list = kind === 'global_stream'
+            ? library.global_streams
+            : (kind === 'stream' ? library.streams : library.tracks);
         for (var i = 0; i < list.length; i++) {
             if (list[i].id === id) return list[i];
         }
@@ -243,6 +263,7 @@
             if (!$(this).closest('.ng-music-page').length) return;
             var $li = $(this).closest('li');
             var kind = $li.data('kind');
+            if (kind === 'global_stream') return;
             var id = $li.data('id');
             if (!confirm('Удалить?')) return;
             apiPost('/api/audio/delete', { kind: kind, id: id }).done(function (res) {

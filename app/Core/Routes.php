@@ -152,6 +152,8 @@ class Routes
                 Router::post('/api/admin/chronology/$id/delete', 'ApiController@admindeletechronology');
                 Router::post('/api/admin/links/create', 'ApiController@admincreatelink');
                 Router::get('/api/admin/links/delete', 'ApiController@admindeletelink');
+                Router::post('/api/admin/radio/create', 'ApiController@admincreateradio');
+                Router::get('/api/admin/radio/delete', 'ApiController@admindeleteradio');
                 Router::any('/api/admin/getvehicleinputs/$id', 'ApiController@admingetvehicleinputs');
                 Router::any('/api/admin/models/requests/$id/$type', 'ApiController@adminmodelsrequesthandler');
                 Router::any('/api/admin/geodb/create', 'ApiController@admingeodbcreate');

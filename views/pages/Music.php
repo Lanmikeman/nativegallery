@@ -41,9 +41,11 @@ $tablesExist = AudioLibrary::tablesExist();
                     </div>
 
                     <div id="ng-music-panel-library" class="ng-music-panel active">
+                        <h3>Радио сайта</h3>
+                        <ul id="ng-music-global-streams-list" class="ng-music-list"></ul>
                         <h3>Треки</h3>
                         <ul id="ng-music-tracks-list" class="ng-music-list"></ul>
-                        <h3>Потоки</h3>
+                        <h3>Мои потоки</h3>
                         <ul id="ng-music-streams-list" class="ng-music-list"></ul>
                     </div>
 

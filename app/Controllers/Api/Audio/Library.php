@@ -19,6 +19,7 @@ class Library
             'error' => 0,
             'library' => AudioLibrary::libraryForUser($userId),
             'tables_exist' => AudioLibrary::tablesExist(),
+            'global_streams_table_exist' => AudioLibrary::globalStreamsTableExist(),
         ]);
     }
 }

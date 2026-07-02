@@ -13,6 +13,15 @@ class AudioLibrary
         return !empty($row) && (int) $row[0]['c'] > 0;
     }
 
+    public static function globalStreamsTableExist(): bool
+    {
+        $row = DB::query(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'audio_global_streams'"
+        );
+        return !empty($row) && (int) $row[0]['c'] > 0;
+    }
+
     public static function uploadAllowed(): bool
     {
         return (NGALLERY['root']['audio']['upload']['allow'] ?? true) === true;
@@ -85,8 +94,21 @@ class AudioLibrary
             'SELECT id FROM audio_tracks WHERE user_id = :uid AND src = :url AND source_type = :st LIMIT 1',
             [':uid' => $userId, ':url' => $url, ':st' => 'url']
         );
+        if (!empty($owned)) {
+            return true;
+        }
 
-        return !empty($owned);
+        if (self::globalStreamsTableExist()) {
+            $global = DB::query(
+                'SELECT id FROM audio_global_streams WHERE url = :url AND enabled = 1 LIMIT 1',
+                [':url' => $url]
+            );
+            if (!empty($global)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static function fetchIcyMetadata(string $url, int $timeoutSec = 8): array
@@ -245,19 +267,37 @@ class AudioLibrary
         return [
             'id' => (int) $row['id'],
             'type' => 'stream',
+            'scope' => 'user',
             'title' => $row['title'],
             'artist' => '',
             'src' => $row['url'],
             'source_type' => 'stream',
             'duration' => 0,
             'created_at' => (int) $row['created_at'],
+            'readonly' => false,
+        ];
+    }
+
+    public static function globalStreamRow(array $row): array
+    {
+        return [
+            'id' => (int) $row['id'],
+            'type' => 'stream',
+            'scope' => 'global',
+            'title' => $row['title'],
+            'artist' => '',
+            'src' => $row['url'],
+            'source_type' => 'stream',
+            'duration' => 0,
+            'created_at' => (int) $row['created_at'],
+            'readonly' => true,
         ];
     }
 
     public static function libraryForUser(int $userId): array
     {
         if (!self::tablesExist()) {
-            return ['tracks' => [], 'streams' => [], 'playlists' => []];
+            return ['tracks' => [], 'streams' => [], 'global_streams' => [], 'playlists' => []];
         }
 
         $tracks = DB::query(
@@ -268,6 +308,9 @@ class AudioLibrary
             'SELECT * FROM audio_streams WHERE user_id = :uid ORDER BY created_at DESC',
             [':uid' => $userId]
         );
+        $globalStreams = self::globalStreamsTableExist()
+            ? DB::query('SELECT * FROM audio_global_streams WHERE enabled = 1 ORDER BY sort_order ASC, id ASC')
+            : [];
         $playlists = DB::query(
             'SELECT * FROM audio_playlists WHERE user_id = :uid ORDER BY updated_at DESC',
             [':uid' => $userId]
@@ -276,6 +319,7 @@ class AudioLibrary
         return [
             'tracks' => array_map([self::class, 'trackRow'], $tracks),
             'streams' => array_map([self::class, 'streamRow'], $streams),
+            'global_streams' => array_map([self::class, 'globalStreamRow'], $globalStreams),
             'playlists' => array_map(function ($pl) {
                 return [
                     'id' => (int) $pl['id'],

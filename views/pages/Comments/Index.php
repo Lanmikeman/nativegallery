@@ -58,19 +58,22 @@ use \App\Models\{User, Photo, Vote};
                     $user = new User($c['user_id']);
                     $content = json_decode($c['content'], true);
                     $photo = new Photo($c['photo_id']);
-                    if ($user->i('admin') === 1) {
+                    $admintype = '';
+                    if ((int) $user->i('admin') === 4) {
+                        $admintype = ' · Владелец сервера';
+                    } else if ((int) $user->i('admin') === 1) {
                         $admintype = ' · Администратор сервера';
-                    } else if ($user->i('admin') === 2) {
+                    } else if ((int) $user->i('admin') === 2) {
                         $admintype = ' · Фотомодератор';
                     }
-                    if ((int)Vote::countcommrates($c['id'], -1) >= 1) {
+                    $commclass = '';
+                    $symb = '';
+                    $rate = (int) Vote::countcommrates($c['id'], -1);
+                    if ($rate >= 1) {
                         $commclass = 'pro';
                         $symb = '+';
-                    } else if ((int)Vote::countcommrates($c['id'], -1) < 0) {
+                    } else if ($rate < 0) {
                         $commclass = 'con';
-                        $symb = '';
-                    } else if ((int)Vote::countcommrates($c['id'], -1) === 0) {
-                        $commclass = '';
                     }
                     echo '<div class="p-comment p20p">
                     <div class="pc-photo"><a href="/photo/'.$c['photo_id'].'/?top=1" target="_blank" class="prw"><img src="/api/photo/compress?url='.$photo->i('photourl').'" class="f"></a></div>

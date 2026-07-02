@@ -103,25 +103,26 @@ LIMIT 10;');
                         <td style="vertical-align:top; width:70%; padding-top:4px">
 
 
-                            <h4><a href="/photo/">Случайные фотографии</a></h4>
+                            <h4>Случайные фотографии <a href="#" id="newrand" class="sm und" title="Показать другие">обновить</a><span id="newrand-loader" style="display:none"> …</span></h4>
                             <div id="random-photos" class="ix-photos ix-photos-oneline">
                                 <?php
                                 $photos = DB::query('SELECT * FROM photos WHERE moderated=1 ORDER BY RAND() DESC LIMIT 7');
                                 foreach ($photos as $p) {
+                                    $photoId = (int) $p['id'];
+                                    if ($photoId <= 0) {
+                                        continue;
+                                    }
                                     if ($p['posted_at'] === 943909200 || Date::zmdate($p['posted_at']) === '30 ноября 1999 в 00:00') {
                                         $date = 'дата не указана';
                                     } else {
                                         $date = Date::zmdate($p['posted_at']);
                                     }
-                                    $bck = 'background-image:url("/api/photo/compress?url=' . $p['photourl'] . '")';
-                                    echo ' <div class="prw-grid-item">
-                                    <div class="prw-wrapper"><span style="word-spacing:-1px"><b>' . htmlspecialchars($p['place']) . '</b></span>
-                                        <div>' . $date . '</div>
-                                    </div>
-                                    '; ?>
-                                    <a href="/photo/<?= $p['id'] ?>" class="prw-animate" style='background-image:url("/api/photo/compress?url=<?= $p['photourl'] ?>")'></a>
-                                <?php echo '
-                                </div>';
+                                    $thumb = '/api/photo/compress?url=' . rawurlencode((string) $p['photourl']);
+                                    echo '<a href="/photo/' . $photoId . '/" class="prw-grid-item prw-grid-item--link" data-no-ajax>';
+                                    echo '<span class="prw-wrapper"><span style="word-spacing:-1px"><b>' . htmlspecialchars((string) $p['place']) . '</b></span>';
+                                    echo '<span>' . htmlspecialchars($date) . '</span></span>';
+                                    echo '<span class="prw-animate" style="background-image:url(\'' . htmlspecialchars($thumb, ENT_QUOTES) . '\')"></span>';
+                                    echo '</a>';
                                 }
                                 ?>
                             </div>

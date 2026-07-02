@@ -63,6 +63,10 @@
         return false;
       }
 
+      if (/^\/photo\/\d+/.test(path)) {
+        return false;
+      }
+
       return true;
     } catch {
       return false;

@@ -3,7 +3,16 @@
 use App\Services\{DB, Auth, Date, Json};
 use App\Models\{User, Vote, Comment, Vehicle};
 
-$id = explode('/', $_SERVER['REQUEST_URI'])[2];
+$id = 0;
+if (isset($GLOBALS['id'])) {
+    $id = (int) $GLOBALS['id'];
+} else {
+    $path = trim((string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+    $parts = explode('/', $path);
+    if (($parts[0] ?? '') === 'photo' && ($parts[1] ?? '') !== '') {
+        $id = (int) $parts[1];
+    }
+}
 $photo = new \App\Models\Photo($id);
 if ($photo->i('id') !== null) {
     if ($photo->content('video') != null) {

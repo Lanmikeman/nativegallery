@@ -15,6 +15,7 @@ class Routes
         Router::get('/t', 'MainController@t');
         Router::get('/login', 'LoginController@i');
         Router::get('/register', 'RegisterController@i');
+        Router::get('/photo', 'PhotoController@random');
         Router::get('/photo/$id', 'PhotoController@i');
         Router::get('/author/$id', 'ProfileController@i');
         Router::get('/page/$id', 'MainController@page');
@@ -38,6 +39,7 @@ class Routes
         Router::get('/photoext', 'PhotoController@photoext');
         Router::get('/api/photo/compress', 'ApiController@photocompress');
         Router::get('/api/photo/loadrecent', 'ApiController@recentphotos');
+        Router::get('/api/photo/random', 'ApiController@randomphotos');
         Router::get('/api/users/load/$id', 'ApiController@loaduser');
         Router::get('/api/users/emailverify', 'ApiController@emailverify');
         Router::get('/api/users/search', 'ApiController@userssearch');

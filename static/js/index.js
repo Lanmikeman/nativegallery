@@ -30,7 +30,12 @@ $(document).ready(function()
 
 
 	$('#loadmore').on('click', LoadRecentPhotos).click();
-	$('#newrand' ).on('click', LoadRandomPhotos).click();
+	if ($('#newrand').length) {
+		$('#newrand').on('click', function (e) {
+			e.preventDefault();
+			LoadRandomPhotos();
+		});
+	}
 
 	updateInterval = setInterval(LoadPubPhotos, 60000);
 
@@ -101,27 +106,27 @@ function searchVehicles()
 
 
 function AddPhotoToBlock(block, arr, prepend) {
+    const photoId = parseInt(arr.id, 10);
+    if (!photoId) return;
+
     const html = `
-    <div class="prw-grid-item">
-        <div class="prw-wrapper">
+    <a href="/photo/${photoId}/" data-no-ajax class="prw-grid-item prw-grid-item--link">
+        <span class="prw-wrapper">
             ${arr.place}
-            <div>${arr.date}</div>
-        </div>
-        <a href="/photo/${arr.id}/" 
-           target="_blank" 
-           class="prw-animate blur-load"
-           style="background-image: url('`+arr.photourl_extrasmall+`')"
+            <span>${arr.date}</span>
+        </span>
+        <span class="prw-animate blur-load"
+           style="background-image: url('${arr.photourl_extrasmall}')"
            data-src="${arr.photourl_small}">
             ${arr.ccnt != 0 ? `
-            <div class="hdshade">
-                <div class="com-icon">${arr.ccnt}</div>
-            </div>` : ''}
-        </a>
-    </div>`;
-    
+            <span class="hdshade">
+                <span class="com-icon">${arr.ccnt}</span>
+            </span>` : ''}
+        </span>
+    </a>`;
+
     block[prepend ? 'prepend' : 'append'](html);
-    
-    // Инициируем загрузку для нового элемента
+
     lazyLoadSingleImage(block.find('.blur-load').last()[0]);
 }
 
@@ -165,18 +170,21 @@ function LoadRandomPhotos()
 	newrand.hide();
 	loader.show();
 
-	$.getJSON('/api.php', { action: 'get-random-photos', width: width }, function(data)
+	$.getJSON('/api/photo/random', function(data)
 	{
-		random.html('');
-
-		if (data)
+		if (Array.isArray(data) && data.length) {
+			random.html('');
 			for (var i = 0; i < data.length; i++) AddPhotoToBlock(random, data[i]);
-		else random.append('Load error');
+		}
 
 		newrand.show();
 		loader.hide();
 	})
-	.fail(function(jx) { if (jx.responseText != '') console.log(jx.responseText); });
+	.fail(function(jx) {
+		newrand.show();
+		loader.hide();
+		if (jx.responseText != '') console.log(jx.responseText);
+	});
 
 	return false;
 }

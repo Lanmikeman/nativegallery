@@ -215,7 +215,7 @@ class UpdateQuery
             }
         }
 
-        usort($result, fn($a, $b) => strcmp($a['title'], $b['title']));
+        usort($result, fn($a, $b) => strcmp((string) ($a['title'] ?? ''), (string) ($b['title'] ?? '')));
         return $result;
     }
 
@@ -224,13 +224,13 @@ class UpdateQuery
         [$where, $bind] = self::buildPhotoFilter(self::facetParams($params));
 
         $rows = DB::query(
-            'SELECT ent.id, ent.title, COUNT(*) AS cnt
+            'SELECT COALESCE(ent.id, 0) AS id, COALESCE(MAX(ent.title), \'\') AS title, COUNT(*) AS cnt
              FROM photos p
              LEFT JOIN entities_data ed ON ed.id = p.entitydata_id
              LEFT JOIN entities ent ON ent.id = ed.entityid
              WHERE ' . implode(' AND ', $where) . '
-             GROUP BY COALESCE(ent.id, 0), COALESCE(ent.title, \'\')
-             ORDER BY ent.title ASC',
+             GROUP BY COALESCE(ent.id, 0)
+             ORDER BY title ASC',
             $bind
         );
 
@@ -260,7 +260,7 @@ class UpdateQuery
              FROM photos
              WHERE moderated = 1
              GROUP BY DATE(FROM_UNIXTIME(timeupload))
-             ORDER BY upload_date DESC
+             ORDER BY DATE(FROM_UNIXTIME(timeupload)) DESC
              LIMIT ' . self::ARCHIVE_DAYS_PER_PAGE . ' OFFSET ' . max(0, $offset)
         );
     }

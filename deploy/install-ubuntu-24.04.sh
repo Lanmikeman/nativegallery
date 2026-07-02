@@ -84,9 +84,9 @@ echo "==> Installing Composer dependencies"
 COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction
 
 echo "==> Creating writable directories"
-mkdir -p uploads cdn/temp cdn/previews cdn/image cdn/video logs lock
-chown -R www-data:www-data uploads cdn logs lock
-chmod -R 775 uploads cdn logs lock
+mkdir -p uploads cdn/temp cdn/previews cdn/image cdn/video logs lock storage/locks
+chown -R www-data:www-data uploads cdn logs lock storage
+chmod -R 775 uploads cdn logs lock storage
 
 echo "==> Importing SQL schema"
 for sql_file in sqlcore/base.sql sqlcore/sql_0001.sql sqlcore/sql_0002.sql sqlcore/sql_0003.sql sqlcore/sql_0004.sql sqlcore/sql_0005.sql sqlcore/sql_0006.sql sqlcore/sql_0007.sql; do

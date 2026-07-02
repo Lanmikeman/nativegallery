@@ -20,7 +20,11 @@ class App
             define("NGALLERY_TASKS", Yaml::parse(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/app/Controllers/Exec/Tasks/ngallery-tasks.yaml'))['tasks']);
             \App\Services\Date::applySiteTimezone();
             if (NGALLERY['root']['debug'] === true) {
-                Debugger::enable();
+                $logDir = $_SERVER['DOCUMENT_ROOT'] . (NGALLERY['root']['logslocation'] ?? '/logs');
+                if (!is_dir($logDir)) {
+                    @mkdir($logDir, 0775, true);
+                }
+                Debugger::enable(Debugger::DEVELOPMENT, $logDir);
             }
             try {
 

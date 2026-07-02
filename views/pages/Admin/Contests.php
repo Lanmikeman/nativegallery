@@ -56,6 +56,7 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                         <?php
                         $themes = DB::query('SELECT * FROM contests ORDER BY id DESC');
                         foreach ($themes as $t) {
+                            $color = '';
                             $themetitle = DB::query('SELECT title FROM contests_themes WHERE id=:id', array(':id' => $t['themeid']))[0]['title'];
                             $contestStatus = (int) $t['status'];
                             if ($contestStatus === 0) {
@@ -119,6 +120,7 @@ if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task-
                         <?php
                         $themes = DB::query('SELECT * FROM contests_themes');
                         foreach ($themes as $t) {
+                            $color = '';
                             if ((int) $t['status'] === 1) {
                                 $auto = 'Да';
                             } else {

@@ -59,7 +59,8 @@ if (!isset($_GET['type']) || $_GET['type'] != 'Photo') {
                     <?php
                     $photos = DB::query('SELECT * FROM entities ORDER BY id DESC');
                     foreach ($photos as $p) {
-                       
+                        $color = '';
+
                         echo ' <tr id="pht' . $p['id'] . '" class="' . $color . '">
                                     <td>
                                       '.$p['id'].'

@@ -12,6 +12,7 @@ if (!isset($_GET['type']) || $_GET['type'] != 'Photo') {
     }
 }
 
+$nonr_e = '';
 $nonreviewedentities = DB::query('SELECT COUNT(*) FROM entities_requests WHERE status=0')[0]['COUNT(*)'];
 if ($nonreviewedentities > 0) {
     $nonr_e = '<span id="mdlnum" class="badge text-bg-danger">' . $nonreviewedentities . '</span>';
@@ -83,6 +84,7 @@ if ($nonreviewedentities > 0) {
                         $photos = DB::query('SELECT * FROM entities_data ORDER BY id DESC');
                         foreach ($photos as $p) {
                             $entity = new Vehicle($p['entityid']);
+                            $color = '';
 
                             echo ' <tr id="pht' . $p['id'] . '" class="' . $color . '">
                                     <td>

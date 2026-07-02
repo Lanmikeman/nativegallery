@@ -3,9 +3,15 @@
 use \App\Core\Page;
 use \App\Services\DB;
 
+$nonr = '';
+$nonr_e = '';
 $nonreviewedimgs = DB::query('SELECT COUNT(*) FROM photos WHERE moderated=0')[0]['COUNT(*)'];
 if ($nonreviewedimgs > 0) {
     $nonr = '<span class="badge text-bg-danger">' . $nonreviewedimgs . '</span>';
+}
+$nonreviewedentities = DB::query('SELECT COUNT(*) FROM entities_requests WHERE status=0')[0]['COUNT(*)'];
+if ($nonreviewedentities > 0) {
+    $nonr_e = '<span class="badge text-bg-danger">' . $nonreviewedentities . '</span>';
 }
 
 ?>

@@ -38,10 +38,7 @@ class AdminController
     }
     public static function loadContent()
     {
-        $fileName = $_GET['type'];
-
-
-        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/views/pages/Admin/' . $fileName . '.php';
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/views/pages/Admin/' . self::$file . '.php';
 
         if (file_exists($filePath)) {
             Page::set('Admin/' . self::$file);

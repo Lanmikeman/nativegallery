@@ -27,9 +27,6 @@ class Page
     {
         $title = htmlspecialchars((string) ($this->table->title ?? 'Без названия'));
         $pageId = (int) $this->id;
-        $titleJson = htmlspecialchars(json_encode((string) ($this->table->title ?? ''), JSON_UNESCAPED_UNICODE), ENT_QUOTES);
-        $bodyJson = htmlspecialchars(json_encode((string) ($this->table->body ?? ''), JSON_UNESCAPED_UNICODE), ENT_QUOTES);
-
         echo '<div class="card mb-3" id="page' . $pageId . '"><div class="card-body">';
         echo '<div class="d-flex justify-content-between align-items-start gap-3">';
         echo '<div><b>#' . $pageId . '</b> — ' . $title;
@@ -46,7 +43,7 @@ class Page
         }
         echo '</div>';
         echo '<div class="text-nowrap">';
-        echo '<a class="btn btn-secondary btn-sm me-2 edit-page-btn" href="#" data-id="' . $pageId . '" data-page-title="' . $titleJson . '" data-page-body="' . $bodyJson . '">Редактировать</a>';
+        echo '<a class="btn btn-secondary btn-sm me-2 edit-page-btn" href="#" data-id="' . $pageId . '">Редактировать</a>';
         echo '<a class="btn btn-danger btn-sm" href="#" onclick="deletePage(' . $pageId . '); return false;">Удалить</a>';
         echo '</div></div>';
         echo '<div class="mt-3 break-links">' . ($this->table->body ?? '') . '</div>';

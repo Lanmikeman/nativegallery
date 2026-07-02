@@ -6,6 +6,22 @@ use App\Models\User;
 
 class SitePage
 {
+    public static function hasMetaColumns(): bool
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $rows = DB::query(
+            'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = \'pages\' AND COLUMN_NAME = \'updated_at\''
+        );
+        $cached = $rows !== [];
+
+        return $cached;
+    }
+
     /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {

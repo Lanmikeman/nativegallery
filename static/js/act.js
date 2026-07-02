@@ -387,6 +387,143 @@ const deleteSiteLink = (id) => {
   });
 };
 
+const loadPages = () => {
+  $.ajax({
+    type: "GET",
+    url: "/api/admin/loadpages",
+    success: function (response) {
+      $("#pages-list").html(response);
+    },
+  });
+};
+
+const showEditPageModal = (pageId, title, body) => {
+  var modalEl = document.getElementById("editPageModal");
+  if (!modalEl) {
+    Notify.noty("danger", "Форма редактирования не найдена. Обновите страницу.");
+    return;
+  }
+  $("#edit-page-id").val(pageId);
+  $("#edit-page-url").text("/page/" + pageId);
+  $("#edit-page-title").val(title || "");
+  $("#edit-page-body").val(body || "");
+  if (typeof bootstrap === "undefined" || !bootstrap.Modal) {
+    Notify.noty("danger", "Bootstrap не загружен");
+    return;
+  }
+  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+};
+
+const openEditPage = (pageId) => {
+  $.ajax({
+    type: "GET",
+    url: "/api/admin/pages/" + pageId,
+    dataType: "json",
+    success: function (jsonData) {
+      if (parseInt(jsonData.errorcode, 10) !== 0 || !jsonData.page) {
+        Notify.noty("danger", jsonData.message || "Не удалось загрузить страницу");
+        return;
+      }
+      showEditPageModal(pageId, jsonData.page.title, jsonData.page.body);
+    },
+    error: function () {
+      Notify.noty("danger", "Ошибка загрузки страницы");
+    },
+  });
+};
+
+window.openEditPage = openEditPage;
+
+$(document).on("click", ".edit-page-btn", function (e) {
+  e.preventDefault();
+  openEditPage($(this).data("id"));
+});
+
+const createPage = () => {
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/pages/create",
+    data: {
+      id: $("#page-create-id").val(),
+      title: $("#page-create-title").val(),
+      body: $("#page-create-body").val(),
+    },
+    success: function (response) {
+      var jsonData = typeof response === "string" ? JSON.parse(response) : response;
+      if (parseInt(jsonData.errorcode, 10) !== 0) {
+        Notify.noty("danger", jsonData.message || "Не удалось создать");
+        return;
+      }
+      Notify.noty("success", "Страница создана");
+      var createModal = document.getElementById("createPageModal");
+      var modal = bootstrap.Modal.getInstance(createModal);
+      if (modal) modal.hide();
+      $("#page-create-id, #page-create-title, #page-create-body").val("");
+      loadPages();
+    },
+    error: function () {
+      Notify.noty("danger", "Ошибка создания");
+    },
+  });
+};
+
+window.createPage = createPage;
+
+const updatePage = () => {
+  var pageId = $("#edit-page-id").val();
+  if (!pageId) {
+    Notify.noty("danger", "Страница не выбрана");
+    return;
+  }
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/pages/" + pageId + "/edit",
+    data: {
+      title: $("#edit-page-title").val(),
+      body: $("#edit-page-body").val(),
+    },
+    success: function (response) {
+      var jsonData = typeof response === "string" ? JSON.parse(response) : response;
+      if (parseInt(jsonData.errorcode, 10) !== 0) {
+        Notify.noty("danger", jsonData.message || "Не удалось сохранить");
+        return;
+      }
+      Notify.noty("success", "Страница обновлена");
+      var modalEl = document.getElementById("editPageModal");
+      var modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      loadPages();
+    },
+    error: function () {
+      Notify.noty("danger", "Ошибка сохранения");
+    },
+  });
+};
+
+window.updatePage = updatePage;
+
+const deletePage = (pageId) => {
+  if (!confirm("Удалить страницу #" + pageId + "?")) return;
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/pages/" + pageId + "/delete",
+    success: function (response) {
+      var jsonData = typeof response === "string" ? JSON.parse(response) : response;
+      if (parseInt(jsonData.errorcode, 10) !== 0) {
+        Notify.noty("danger", jsonData.message || "Не удалось удалить");
+        return;
+      }
+      Notify.noty("success", "Страница удалена");
+      loadPages();
+    },
+    error: function () {
+      Notify.noty("danger", "Ошибка удаления");
+    },
+  });
+};
+
+window.deletePage = deletePage;
+
 const handleModelRequest = (modelId, type) => {
   $.ajax({
     type: "POST",

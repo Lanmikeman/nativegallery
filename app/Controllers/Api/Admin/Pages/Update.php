@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Api\Admin\Pages;
 
-use App\Services\{Auth, DB, Json};
+use App\Services\{Auth, DB, Json, SitePage};
 
 class Update
 {
@@ -34,16 +34,25 @@ class Update
             return;
         }
 
-        DB::query(
-            'UPDATE pages SET title = :title, body = :body, updated_at = :updated_at, updated_by = :updated_by WHERE id = :id',
-            [
-                ':title' => $title,
-                ':body' => $body,
-                ':updated_at' => time(),
-                ':updated_by' => $editorId,
-                ':id' => $pageId,
-            ]
-        );
+        $params = [
+            ':title' => $title,
+            ':body' => $body,
+            ':id' => $pageId,
+        ];
+
+        if (SitePage::hasMetaColumns()) {
+            $params[':updated_at'] = time();
+            $params[':updated_by'] = $editorId;
+            DB::query(
+                'UPDATE pages SET title = :title, body = :body, updated_at = :updated_at, updated_by = :updated_by WHERE id = :id',
+                $params
+            );
+        } else {
+            DB::query(
+                'UPDATE pages SET title = :title, body = :body WHERE id = :id',
+                $params
+            );
+        }
 
         echo Json::return([
             'errorcode' => 0,

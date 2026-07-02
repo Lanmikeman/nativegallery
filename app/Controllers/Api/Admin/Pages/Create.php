@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Api\Admin\Pages;
 
-use App\Services\{Auth, DB, Json};
+use App\Services\{Auth, DB, Json, SitePage};
 
 class Create
 {
@@ -25,6 +25,8 @@ class Create
 
         $now = time();
 
+        $hasMeta = SitePage::hasMetaColumns();
+
         if ($id > 0) {
             $existing = DB::query('SELECT id FROM pages WHERE id = :id', [':id' => $id]);
             if (!empty($existing)) {
@@ -32,32 +34,59 @@ class Create
                 return;
             }
 
-            DB::query(
-                'INSERT INTO pages (id, title, body, created_by, created_at, updated_at, updated_by)
-                 VALUES (:id, :title, :body, :created_by, :created_at, :updated_at, :updated_by)',
-                [
-                    ':id' => $id,
-                    ':title' => $title,
-                    ':body' => $body,
-                    ':created_by' => $editorId,
-                    ':created_at' => $now,
-                    ':updated_at' => $now,
-                    ':updated_by' => $editorId,
-                ]
-            );
+            if ($hasMeta) {
+                DB::query(
+                    'INSERT INTO pages (id, title, body, created_by, created_at, updated_at, updated_by)
+                     VALUES (:id, :title, :body, :created_by, :created_at, :updated_at, :updated_by)',
+                    [
+                        ':id' => $id,
+                        ':title' => $title,
+                        ':body' => $body,
+                        ':created_by' => $editorId,
+                        ':created_at' => $now,
+                        ':updated_at' => $now,
+                        ':updated_by' => $editorId,
+                    ]
+                );
+            } else {
+                DB::query(
+                    'INSERT INTO pages (id, title, body, created_by, created_at)
+                     VALUES (:id, :title, :body, :created_by, :created_at)',
+                    [
+                        ':id' => $id,
+                        ':title' => $title,
+                        ':body' => $body,
+                        ':created_by' => $editorId,
+                        ':created_at' => $now,
+                    ]
+                );
+            }
         } else {
-            DB::query(
-                'INSERT INTO pages (title, body, created_by, created_at, updated_at, updated_by)
-                 VALUES (:title, :body, :created_by, :created_at, :updated_at, :updated_by)',
-                [
-                    ':title' => $title,
-                    ':body' => $body,
-                    ':created_by' => $editorId,
-                    ':created_at' => $now,
-                    ':updated_at' => $now,
-                    ':updated_by' => $editorId,
-                ]
-            );
+            if ($hasMeta) {
+                DB::query(
+                    'INSERT INTO pages (title, body, created_by, created_at, updated_at, updated_by)
+                     VALUES (:title, :body, :created_by, :created_at, :updated_at, :updated_by)',
+                    [
+                        ':title' => $title,
+                        ':body' => $body,
+                        ':created_by' => $editorId,
+                        ':created_at' => $now,
+                        ':updated_at' => $now,
+                        ':updated_by' => $editorId,
+                    ]
+                );
+            } else {
+                DB::query(
+                    'INSERT INTO pages (title, body, created_by, created_at)
+                     VALUES (:title, :body, :created_by, :created_at)',
+                    [
+                        ':title' => $title,
+                        ':body' => $body,
+                        ':created_by' => $editorId,
+                        ':created_at' => $now,
+                    ]
+                );
+            }
             $id = (int) DB::lastInsertId();
         }
 

@@ -133,7 +133,7 @@ class Routes
                 Router::any('/api/admin/loadnews', 'ApiController@adminloadnews');
                 Router::any('/api/admin/loadpages', 'ApiController@adminloadpages');
                 Router::post('/api/admin/pages/create', 'ApiController@admincreatepage');
-                Router::get('/api/admin/pages/$id', 'ApiController@admingetpage');
+                Router::any('/api/admin/pages/$id', 'ApiController@admingetpage');
                 Router::post('/api/admin/pages/$id/edit', 'ApiController@admineditpage');
                 Router::post('/api/admin/pages/$id/delete', 'ApiController@admindeletepage');
                 Router::post('/api/admin/chronology/create', 'ApiController@admincreatechronology');

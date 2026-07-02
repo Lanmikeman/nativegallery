@@ -6,7 +6,6 @@ use App\Services\{Auth, Router, GenerateRandomStr, DB, Json, Word, AuthSession};
 use \App\Controllers\ExceptionRegister;
 use \App\Core\Page;
 
-use donatj\UserAgent\UserAgentParser;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Beeyev\DisposableEmailFilter\DisposableEmailFilter;

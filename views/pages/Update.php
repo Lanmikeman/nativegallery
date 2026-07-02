@@ -109,7 +109,7 @@ $offset = $params['st'];
                         }
                         echo '</p>';
                     }
-                <?php } else { ?>
+                } else { ?>
                     <h1><?= $mode === 'date' ? 'Фотографии за ' . UpdateQuery::periodLabel($params) : 'Новые фотографии за ' . UpdateQuery::periodLabel($params) ?></h1>
 
                     <?php

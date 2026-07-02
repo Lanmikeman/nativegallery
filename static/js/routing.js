@@ -2,11 +2,11 @@
   "use strict";
 
   if (window.__ngRoutingReady) return;
-  window.__ngRoutingReady = true;
 
   const CACHE_TTL = 300000;
   const cache = new Map();
   let loadingTimeout = null;
+  let loader = null;
 
   const PERMANENT_SCRIPTS = [
     "/static/js/jquery.js",
@@ -24,8 +24,6 @@
 
   const executedInlineScripts = new Set();
   let lastPath = location.pathname;
-
-  const loader = createLoader();
 
   function isPhotoPath(path) {
     return /\/photo\/\d+/.test(path);
@@ -374,6 +372,7 @@
   }
 
   function showLoader() {
+    if (!loader) return;
     clearTimeout(loadingTimeout);
     loadingTimeout = setTimeout(() => {
       loader.style.display = "block";
@@ -381,15 +380,28 @@
   }
 
   function hideLoader() {
+    if (!loader) return;
     clearTimeout(loadingTimeout);
     loader.style.display = "none";
   }
 
-  document.addEventListener("click", handleClick, true);
-  window.addEventListener("popstate", handlePopState);
-  window.ngSpaNavigate = (url) => navigateTo(url, false);
+  function boot() {
+    if (window.__ngRoutingReady) return;
+    window.__ngRoutingReady = true;
 
-  if (!window.history.state || !window.history.state.ngSpa) {
-    window.history.replaceState({ ngSpa: true }, "", location.href);
+    loader = createLoader();
+    document.addEventListener("click", handleClick, true);
+    window.addEventListener("popstate", handlePopState);
+    window.ngSpaNavigate = (url) => navigateTo(url, false);
+
+    if (!window.history.state || !window.history.state.ngSpa) {
+      window.history.replaceState({ ngSpa: true }, "", location.href);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
 })();

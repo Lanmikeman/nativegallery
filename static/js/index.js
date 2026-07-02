@@ -1,3 +1,5 @@
+var updateInterval;
+
 function initIndexPage() {
 	if (!$('#random-photos').length && !$('#idx-main').length) return;
 

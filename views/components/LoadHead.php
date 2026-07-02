@@ -29,7 +29,6 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <link rel="stylesheet" href="/static/css/progress.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
     <?php if ($musicUserLoggedIn) { ?>
     <link rel="stylesheet" href="/static/css/music-player.css<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>">
-    <script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>"></script>
     <?php } ?>
     <script src="/static/js/jquery.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/jquery.form.min.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
@@ -43,6 +42,7 @@ $musicUserLoggedIn = Auth::userid() > 0;
     <script src="/static/js/notie.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <?php if ($musicUserLoggedIn) { ?>
     <script src="/static/js/music-player.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>"></script>
+    <script src="/static/js/routing.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?' . time(); } ?>"></script>
     <?php } ?>
     <script src="/static/js/photo.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>
     <script src="/static/js/newcore.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) { echo '?'.time(); } ?>" data-restart></script>

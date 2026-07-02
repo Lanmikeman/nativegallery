@@ -29,6 +29,7 @@ class Routes
         Router::get('/feed', 'MainController@feed');
         Router::get('/tour', 'MainController@tour');
         Router::get('/update', 'MainController@update');
+        Router::get('/update.php', 'MainController@update');
         Router::get('/top30', 'MainController@top30');
         Router::get('/photoext', 'PhotoController@photoext');
         Router::get('/api/photo/compress', 'ApiController@photocompress');

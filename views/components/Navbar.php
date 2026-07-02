@@ -59,10 +59,10 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
             <li><a href="#" onclick="return false" class="mm-item"><span class="mm-label">Обновления</span><?=$nonrw?></a>
                 <div>
                     <ul class="mm-level-2">
-                        <li><a href="/update.php?time=24" class="mm-item"><span class="mm-label">Новые фотографии</span></a></li>
+                        <li><a href="/update?time=24" class="mm-item"><span class="mm-label">Новые фотографии</span></a></li>
                         <li><a href="/feed" class="mm-item"><span class="mm-label">Лента обновлений</span></a></li>
                         <li><a href="/fav_authors" class="mm-item"><span class="mm-label">Фотографии избранных авторов</span><?=$nonrw?></a></li>
-                        <li><a href="/update.php" class="mm-item"><span class="mm-label">Архив обновлений по датам</span></a></li>
+                        <li><a href="/update" class="mm-item"><span class="mm-label">Архив обновлений по датам</span></a></li>
                     </ul>
                 </div>
             </li>

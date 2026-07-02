@@ -1,66 +1,191 @@
 <?php
-use App\Services\{Router, Auth, DB, Date};
+
+use App\Services\{Date, UpdateQuery};
+
+Date::applySiteTimezone();
+
+$params = UpdateQuery::parseParams($_GET);
+$mode = UpdateQuery::mode($params);
+
+$buildUrl = fn(array $overrides = []) => UpdateQuery::buildUrl($params, array_merge(['st' => 0], $overrides));
+
+$photos = [];
+$total = 0;
+$archiveDays = [];
+$archiveTotalDays = 0;
+$daySummary = [];
+
+if ($mode === 'recent' || $mode === 'date') {
+    $photos = UpdateQuery::fetchPhotos($params);
+    $total = UpdateQuery::countPhotos($params);
+    $facetCities = UpdateQuery::fetchFacetCities($params);
+    $facetAuthors = UpdateQuery::fetchFacetAuthors($params);
+    $facetTypes = UpdateQuery::fetchFacetTypes($params);
+} else {
+    $archiveDays = UpdateQuery::fetchArchiveDays($params['st']);
+    $archiveTotalDays = UpdateQuery::countArchiveDays();
+    foreach ($archiveDays as $day) {
+        $daySummary[$day['upload_date']] = UpdateQuery::fetchDaySummary($day['upload_date']);
+    }
+}
+
+$perPage = UpdateQuery::PER_PAGE;
+$offset = $params['st'];
+
+function renderFilterLine(string $label, array $items, array $params, callable $buildUrl, string $key, $activeValue): void
+{
+    echo '<p class="sm" style="margin:8px 0"><b>' . htmlspecialchars($label) . ':</b> ';
+    $allActive = $activeValue === null;
+    echo $allActive ? '<b>(все)</b>' : '<a href="' . htmlspecialchars($buildUrl([$key => null, 'st' => 0])) . '">(все)</a>';
+
+    foreach ($items as $item) {
+        $id = (int) $item['id'];
+        $isActive = $activeValue !== null && (int) $activeValue === $id;
+        echo ' · ';
+        if ($isActive) {
+            echo '<b>' . htmlspecialchars($item['title'] ?? $item['username'] ?? '') . '</b>';
+        } else {
+            $title = $item['title'] ?? $item['username'] ?? '';
+            echo '<a href="' . htmlspecialchars($buildUrl([$key => $id, 'st' => 0])) . '">' . htmlspecialchars($title) . '</a>';
+        }
+    }
+    echo '</p>';
+}
 ?>
+<!DOCTYPE html>
 <html lang="ru">
 
-
 <head>
-<?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'); ?>
-
-   
+    <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'); ?>
 </head>
-
 
 <body>
     <div id="backgr"></div>
     <table class="tmain">
-    <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
         <tr>
             <td class="main">
-                <h1>Новые фотографии за 72 часа</h1>
-                
-              
-                <?php
-               $photos = DB::query('SELECT * FROM photos WHERE moderated=1 AND timeupload>=:time ORDER BY timeupload DESC', array(':time'=>time()-259200));
-               foreach ($photos as $p) {
-                $photouser = new \App\Models\User($p['user_id']);
-                echo '<div class="p20p">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td class="pb_photo" id="p1936120"><a href="/photo/'.$p['id'].'" target="_blank" class="prw"><img class="f" src="'.$p['photourl'].'">
-                                        <div class="hpshade">
-                                        ';
-                                        if (DB::query('SELECT COUNT(*) FROM photos_comments WHERE photo_id=:id', array(':id'=>$p['id']))[0]['COUNT(*)'] >= 1) {
-                                            echo '<div class="com-icon">'.DB::query('SELECT COUNT(*) FROM photos_comments WHERE photo_id=:id', array(':id'=>$p['id']))[0]['COUNT(*)'].'</div>';
-                                        }
-                                        echo '
-                                        <div class="eye-icon">'.DB::query('SELECT COUNT(*) FROM photos_views WHERE photo_id=:id', array(':id'=>$p['id']))[0]['COUNT(*)'].'</div></div>
-                                    </a></td>
-                                <td class="pb_descr">
-                                
-                                    <p><b class="pw-place">'.htmlspecialchars($p['place']).'</b></p>
-                                    <span class="pw-descr">'.htmlspecialchars($p['postbody']).'</span>
-                                    <p class="sm"><b>'.Date::zmdate($p['timeupload']).'</b><br>Автор: <a href="/author/'.$p['user_id'].'/">'.htmlspecialchars($photouser->i('username')).'</a></p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>';
-               }
-               ?>
-              
-                <br>
-                
-             
+                <p class="sm" style="margin-bottom:10px">
+                    <a href="/update?time=24"<?= ($mode === 'recent' && (int) ($params['time'] ?? 0) === 24) ? ' style="font-weight:bold"' : '' ?>>Новые фотографии (24 ч)</a>
+                    · <a href="/update?time=72"<?= ($mode === 'recent' && (int) ($params['time'] ?? 0) === 72) ? ' style="font-weight:bold"' : '' ?>>за 72 часа</a>
+                    · <a href="/update"<?= $mode === 'archive' ? ' style="font-weight:bold"' : '' ?>>Архив по датам</a>
+                </p>
+
+                <?php if ($mode === 'archive') { ?>
+                    <h1>Архив обновлений по датам</h1>
+                    <?php
+                    if (empty($archiveDays)) {
+                        echo '<p class="sm"><i>Нет опубликованных фотографий.</i></p>';
+                    }
+                    foreach ($archiveDays as $day) {
+                        $date = $day['upload_date'];
+                        $cnt = (int) $day['cnt'];
+                        $ts = strtotime($date . ' 12:00:00');
+                        echo '<h4 style="margin-top:20px"><b><a href="/update?date=' . htmlspecialchars($date) . '">'
+                            . Date::chronologyDate($ts) . '</a></b> — ' . $cnt . ' '
+                            . ($cnt % 10 === 1 && $cnt % 100 !== 11 ? 'фотография' : ($cnt % 10 >= 2 && $cnt % 10 <= 4 && ($cnt % 100 < 10 || $cnt % 100 >= 20) ? 'фотографии' : 'фотографий'))
+                            . '</h4>';
+
+                        $summary = $daySummary[$date] ?? [];
+                        foreach ($summary as $city) {
+                            echo '<p style="margin:4px 0 4px 15px"><b>' . htmlspecialchars($city['title']) . '</b>:</p>';
+                            foreach ($city['galleries'] as $gid => $gtitle) {
+                                echo '<p style="margin:2px 0 2px 30px">» <i>' . htmlspecialchars($gtitle) . '</i></p>';
+                            }
+                            foreach ($city['types'] as $type) {
+                                $entities = array_unique(array_filter($type['entities']));
+                                $entityList = implode(', ', array_slice($entities, 0, 20));
+                                if (count($entities) > 20) {
+                                    $entityList .= '…';
+                                }
+                                echo '<p style="margin:2px 0 2px 30px">» <a href="/update?date=' . htmlspecialchars($date) . '&t=' . (int) $type['id'] . '">'
+                                    . htmlspecialchars($type['title']) . '</a>';
+                                if ($entityList !== '') {
+                                    echo ' — ' . htmlspecialchars($entityList);
+                                }
+                                echo '</p>';
+                            }
+                        }
+                    }
+
+                    $daysPerPage = UpdateQuery::ARCHIVE_DAYS_PER_PAGE;
+                    if ($archiveTotalDays > $daysPerPage) {
+                        $pages = (int) ceil($archiveTotalDays / $daysPerPage);
+                        $current = (int) floor($offset / $daysPerPage) + 1;
+                        echo '<p class="sm" style="margin-top:25px">';
+                        if ($offset > 0) {
+                            echo '<a href="/update?st=' . max(0, $offset - $daysPerPage) . '">« назад</a> ';
+                        }
+                        for ($p = max(1, $current - 2); $p <= min($pages, $current + 2); $p++) {
+                            $st = ($p - 1) * $daysPerPage;
+                            if ($p === $current) {
+                                echo '<b>' . $p . '</b> ';
+                            } else {
+                                echo '<a href="/update?st=' . $st . '">' . $p . '</a> ';
+                            }
+                        }
+                        if ($offset + $daysPerPage < $archiveTotalDays) {
+                            echo '<a href="/update?st=' . ($offset + $daysPerPage) . '">вперёд »</a>';
+                        }
+                        echo '</p>';
+                    }
+                <?php } else { ?>
+                    <h1><?= $mode === 'date' ? 'Фотографии за ' . UpdateQuery::periodLabel($params) : 'Новые фотографии за ' . UpdateQuery::periodLabel($params) ?></h1>
+
+                    <?php
+                    renderFilterLine('Города', $facetCities, $params, $buildUrl, 'cid', $params['cid']);
+                    renderFilterLine('Авторы', $facetAuthors, $params, $buildUrl, 'aid', $params['aid'] ? $params['aid'] : null);
+                    renderFilterLine('Виды сущностей', $facetTypes, $params, $buildUrl, 't', $params['t']);
+                    ?>
+
+                    <br>
+
+                    <?php if (empty($photos)) { ?>
+                        <p class="sm"><i>За выбранный период фотографий не найдено.</i></p>
+                    <?php } else {
+                        include $_SERVER['DOCUMENT_ROOT'] . '/views/components/UpdatePhotoList.php';
+                    } ?>
+
+                    <p class="sm" style="margin-top:15px">
+                        Фотографий за период: <b><?= $total ?></b>
+                        <?php if ($total > 0) { ?>
+                            · Показано: <?= min($perPage, count($photos)) ?> из <?= $total ?>
+                        <?php } ?>
+                    </p>
+
+                    <?php if ($total > $perPage) {
+                        $pages = (int) ceil($total / $perPage);
+                        $current = (int) floor($offset / $perPage) + 1;
+                        echo '<p class="sm" style="margin-top:10px">';
+                        if ($offset > 0) {
+                            echo '<a href="' . htmlspecialchars($buildUrl(['st' => $offset - $perPage])) . '">« назад</a> ';
+                        }
+                        for ($p = max(1, $current - 2); $p <= min($pages, $current + 2); $p++) {
+                            $st = ($p - 1) * $perPage;
+                            if ($p === $current) {
+                                echo '<b>' . $p . '</b> ';
+                            } else {
+                                echo '<a href="' . htmlspecialchars($buildUrl(['st' => $st])) . '">' . $p . '</a> ';
+                            }
+                        }
+                        if ($offset + $perPage < $total) {
+                            echo '<a href="' . htmlspecialchars($buildUrl(['st' => $offset + $perPage])) . '">вперёд »</a>';
+                        }
+                        echo '</p>';
+                    } ?>
+
+                    <?php
+                    renderFilterLine('Города', $facetCities, $params, $buildUrl, 'cid', $params['cid']);
+                    renderFilterLine('Авторы', $facetAuthors, $params, $buildUrl, 'aid', $params['aid'] ? $params['aid'] : null);
+                    renderFilterLine('Виды сущностей', $facetTypes, $params, $buildUrl, 't', $params['t']);
+                    ?>
+                <?php } ?>
             </td>
         </tr>
-      
         <tr>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>
+            <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>
         </tr>
     </table>
-
 </body>
 
 </html>

@@ -106,6 +106,7 @@ class Routes
             Router::post('/api/audio/url', 'ApiController@audiourl');
             Router::get('/api/audio/library', 'ApiController@audiolibrary');
             Router::get('/api/audio/proxy', 'ApiController@audioproxy');
+            Router::get('/api/audio/metadata', 'ApiController@audiometadata');
             Router::post('/api/audio/delete', 'ApiController@audiodelete');
             Router::post('/api/audio/playlist', 'ApiController@audioplaylist');
             Router::post('/api/photo/edit', 'ApiController@photoedit');

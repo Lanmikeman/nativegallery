@@ -10,6 +10,9 @@
     var audio = null;
     var loadGeneration = 0;
     var playRequestId = 0;
+    var streamMeta = { title: '', artist: '', station: '' };
+    var streamMetaTimer = null;
+    var streamMetaSrc = '';
 
     function savePlaybackState() {
         if (!audio) return;
@@ -33,11 +36,6 @@
         if (!track) return false;
         if (track.type === 'stream' || track.source_type === 'stream') return true;
         return isLikelyHttpStream(track.src);
-    }
-
-    function needsStreamProxy(track, src) {
-        if (!src || !/^https?:\/\//i.test(src)) return false;
-        return isLiveStream(track) || isLikelyHttpStream(src);
     }
 
     function isPlaying(a) {
@@ -132,8 +130,17 @@
         attemptPlay(false);
     }
 
+    function absoluteSrc(src) {
+        try {
+            return new URL(src, window.location.origin).href;
+        } catch (e) {
+            return src;
+        }
+    }
+
     function setAudioSrc(a, resolved) {
-        if (a.src === resolved) {
+        var abs = absoluteSrc(resolved);
+        if (a.src === abs) {
             loadGeneration += 1;
             return false;
         }
@@ -143,14 +150,78 @@
         return true;
     }
 
+    function stopStreamMetaPoll() {
+        if (streamMetaTimer) {
+            clearInterval(streamMetaTimer);
+            streamMetaTimer = null;
+        }
+        streamMeta = { title: '', artist: '', station: '' };
+        streamMetaSrc = '';
+    }
+
+    function startStreamMetaPoll(track) {
+        stopStreamMetaPoll();
+        if (!track || !isLiveStream(track) || !track.src) return;
+
+        streamMetaSrc = track.src;
+
+        function poll() {
+            if (streamMetaSrc !== track.src) return;
+            fetch('/api/audio/metadata?url=' + encodeURIComponent(track.src), {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res.error || streamMetaSrc !== track.src) return;
+                    var changed = false;
+                    if (res.title && res.title !== streamMeta.title) {
+                        streamMeta.title = res.title;
+                        changed = true;
+                    }
+                    if (res.artist && res.artist !== streamMeta.artist) {
+                        streamMeta.artist = res.artist;
+                        changed = true;
+                    }
+                    if (res.station && res.station !== streamMeta.station) {
+                        streamMeta.station = res.station;
+                        changed = true;
+                    }
+                    if (changed) updateBar();
+                })
+                .catch(function () { /* ignore */ });
+        }
+
+        poll();
+        streamMetaTimer = setInterval(poll, 12000);
+    }
+
+    function displayLabels(track) {
+        if (!track) return { title: 'Музыка', artist: '' };
+        if (!isLiveStream(track)) {
+            return { title: track.title, artist: track.artist || '' };
+        }
+        if (streamMeta.title || streamMeta.artist) {
+            return {
+                title: streamMeta.title || track.title || streamMeta.station || 'Поток',
+                artist: streamMeta.artist || ''
+            };
+        }
+        return {
+            title: track.title || streamMeta.station || 'Поток',
+            artist: track.artist || streamMeta.station || 'Поток'
+        };
+    }
+
     function reconnectStream() {
         var track = currentTrack();
         if (!track || !isLiveStream(track)) return;
         var a = getAudio();
-        var resolved = resolveAudioSrc(track.src, track);
+        var resolved = resolveAudioSrc(track.src);
         if (!resolved) return;
         setAudioSrc(a, resolved);
         requestPlay(a, { isStream: true });
+        startStreamMetaPoll(track);
         updateBar();
     }
 
@@ -253,18 +324,16 @@
         barEl.classList.toggle('ng-music-idle', !track);
         barEl.classList.toggle('ng-music-playing', !!playing);
 
+        var labels = displayLabels(track);
+
         if (titleEl) {
-            titleEl.textContent = track ? track.title : 'Музыка';
+            titleEl.textContent = labels.title;
             titleEl.setAttribute('href', '/music');
-            titleEl.setAttribute('title', track ? track.title + ' — открыть библиотеку' : 'Открыть библиотеку');
+            titleEl.setAttribute('title', track ? labels.title + (labels.artist ? ' — ' + labels.artist : '') + ' — открыть библиотеку' : 'Открыть библиотеку');
         }
 
         if (artistEl) {
-            if (track) {
-                artistEl.textContent = track.artist || (track.type === 'stream' ? 'Поток' : '');
-            } else {
-                artistEl.textContent = '';
-            }
+            artistEl.textContent = track ? labels.artist : '';
         }
 
         if (playBtn) {
@@ -285,14 +354,9 @@
         }
     }
 
-    function resolveAudioSrc(src, track) {
+    function resolveAudioSrc(src) {
         if (!src) return '';
-        if (/^https?:\/\//i.test(src)) {
-            if (needsStreamProxy(track, src)) {
-                return '/api/audio/proxy?url=' + encodeURIComponent(src);
-            }
-            return src;
-        }
+        if (/^https?:\/\//i.test(src)) return src;
         if (src.charAt(0) === '/') return src;
         return '/' + src;
     }
@@ -302,20 +366,26 @@
         index = i;
         var track = queue[index];
         var a = getAudio();
-        var resolved = resolveAudioSrc(track.src, track);
+        var resolved = resolveAudioSrc(track.src);
         if (!resolved) return;
         var seekTime = null;
         try {
             var pb = JSON.parse(sessionStorage.getItem(PLAYBACK_KEY) || 'null');
             var sameTrack = pb && pb.src && (
                 pb.src.indexOf(track.src) >= 0 ||
-                resolved.indexOf(pb.src) >= 0 ||
-                pb.src.indexOf(resolved) >= 0
+                pb.src.indexOf(resolved) >= 0 ||
+                absoluteSrc(resolved).indexOf(pb.src) >= 0
             );
             if (sameTrack && !isLiveStream(track) && pb.time > 1 && !pb.paused) {
                 seekTime = pb.time;
             }
         } catch (e) { /* ignore */ }
+
+        if (isLiveStream(track)) {
+            startStreamMetaPoll(track);
+        } else {
+            stopStreamMetaPoll();
+        }
 
         setAudioSrc(a, resolved);
         requestPlay(a, { seekTime: seekTime, isStream: isLiveStream(track) });
@@ -378,6 +448,7 @@
             index = typeof startIndex === 'number' ? startIndex : 0;
             if (queue.length === 0) {
                 index = -1;
+                stopStreamMetaPoll();
                 if (audio) {
                     audio.pause();
                 }
@@ -421,7 +492,11 @@
             var a = getAudio();
             if (a.paused) {
                 if (!a.src) playAt(index);
-                else requestPlay(a);
+                else {
+                    var track = currentTrack();
+                    if (track && isLiveStream(track)) startStreamMetaPoll(track);
+                    requestPlay(a, { isStream: track && isLiveStream(track) });
+                }
             } else {
                 a.pause();
             }
@@ -469,6 +544,7 @@
         },
 
         clear: function () {
+            stopStreamMetaPoll();
             queue = [];
             index = -1;
             if (audio) {

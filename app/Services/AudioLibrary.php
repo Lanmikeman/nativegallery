@@ -89,6 +89,143 @@ class AudioLibrary
         return !empty($owned);
     }
 
+    public static function fetchIcyMetadata(string $url, int $timeoutSec = 8): array
+    {
+        $result = [
+            'title' => '',
+            'artist' => '',
+            'station' => '',
+        ];
+
+        if (!function_exists('curl_init')) {
+            return $result;
+        }
+
+        $metaInterval = 0;
+        $audioRemaining = 0;
+        $phase = 'audio';
+        $metaRemaining = 0;
+        $done = false;
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => $timeoutSec,
+            CURLOPT_HTTPHEADER => [
+                'Icy-MetaData: 1',
+                'User-Agent: NativeGallery/1.0',
+            ],
+            CURLOPT_HEADERFUNCTION => static function ($ch, string $header) use (&$metaInterval, &$audioRemaining, &$result): int {
+                if (stripos($header, 'icy-metaint:') === 0) {
+                    $metaInterval = (int) trim(substr($header, 12));
+                    $audioRemaining = $metaInterval;
+                }
+                if (stripos($header, 'icy-name:') === 0) {
+                    $result['station'] = trim(substr($header, 9));
+                }
+                return strlen($header);
+            },
+            CURLOPT_WRITEFUNCTION => static function ($ch, string $data) use (
+                &$metaInterval,
+                &$audioRemaining,
+                &$phase,
+                &$metaRemaining,
+                &$done,
+                &$result
+            ): int {
+                if ($done) {
+                    return 0;
+                }
+
+                $input = $data;
+                while ($input !== '') {
+                    if ($metaInterval <= 0) {
+                        $done = true;
+                        return 0;
+                    }
+
+                    if ($phase === 'audio') {
+                        if ($audioRemaining <= 0) {
+                            $audioRemaining = $metaInterval;
+                        }
+                        $take = min($audioRemaining, strlen($input));
+                        $input = substr($input, $take);
+                        $audioRemaining -= $take;
+                        if ($audioRemaining === 0) {
+                            $phase = 'meta_len';
+                        }
+                        continue;
+                    }
+
+                    if ($phase === 'meta_len') {
+                        $metaRemaining = ord($input[0]) * 16;
+                        $input = substr($input, 1);
+                        $phase = $metaRemaining > 0 ? 'meta_skip' : 'audio';
+                        if ($phase === 'audio') {
+                            $audioRemaining = $metaInterval;
+                        }
+                        continue;
+                    }
+
+                    $need = $metaRemaining;
+                    $have = strlen($input);
+                    if ($have < $need) {
+                        $block = $input;
+                        $input = '';
+                    } else {
+                        $block = substr($input, 0, $need);
+                        $input = substr($input, $need);
+                    }
+                    $metaRemaining -= strlen($block);
+                    if ($metaRemaining === 0) {
+                        $parsed = self::parseIcyMetaBlock($block);
+                        if ($parsed['title'] !== '') {
+                            $result['title'] = $parsed['title'];
+                        }
+                        if ($parsed['artist'] !== '') {
+                            $result['artist'] = $parsed['artist'];
+                        }
+                        $done = true;
+                        return 0;
+                    }
+                }
+
+                return strlen($data);
+            },
+        ]);
+
+        curl_exec($ch);
+        curl_close($ch);
+
+        return $result;
+    }
+
+    public static function parseIcyMetaBlock(string $block): array
+    {
+        $title = '';
+        $artist = '';
+
+        if (!preg_match("/StreamTitle='([^']*)'/i", $block, $m)) {
+            return ['title' => '', 'artist' => ''];
+        }
+
+        $streamTitle = trim($m[1]);
+        if ($streamTitle === '') {
+            return ['title' => '', 'artist' => ''];
+        }
+
+        if (preg_match('/^(.+?)\s*[-–—]\s*(.+)$/u', $streamTitle, $parts)) {
+            $artist = trim($parts[1]);
+            $title = trim($parts[2]);
+        } else {
+            $title = $streamTitle;
+        }
+
+        return ['title' => $title, 'artist' => $artist];
+    }
+
     public static function trackRow(array $row): array
     {
         return [

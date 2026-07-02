@@ -73,6 +73,7 @@ use \App\Controllers\Api\Audio\Library as AudioLibraryApi;
 use \App\Controllers\Api\Audio\Delete as AudioDelete;
 use \App\Controllers\Api\Audio\Playlist as AudioPlaylist;
 use \App\Controllers\Api\Audio\Proxy as AudioProxy;
+use \App\Controllers\Api\Audio\Metadata as AudioMetadata;
 
 class ApiController
 {
@@ -294,6 +295,9 @@ class ApiController
     }
     public static function audioproxy() {
         return new AudioProxy();
+    }
+    public static function audiometadata() {
+        return new AudioMetadata();
     }
 
 

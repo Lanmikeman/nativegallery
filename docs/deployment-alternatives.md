@@ -28,7 +28,7 @@ PHP 8.3 на Debian: репозиторий [packages.sury.org](https://packages
 | `NG_DB_NAME` | `ngallery` | Имя БД |
 | `NG_DB_USER` | `ngallery` | Пользователь БД |
 | `NG_DB_PASS` | случайный | Пароль БД |
-| `NG_WEB_ROOT` | `/var/www/nativegallery` | Корень проекта (production: `/mnt/win/nativegallery`) |
+| `NG_WEB_ROOT` | `/var/www/nativegallery` | Корень проекта (любой свой; пример: `/mnt/win/nativegallery`) |
 | `NG_WEB_USER` | `www-data` (Debian) / `apache` (RHEL) | Пользователь PHP-FPM и cron |
 
 Пример:
@@ -180,7 +180,7 @@ sudo certbot --apache -d example.com
 | Среда | `NG_WEB_ROOT` / корень по умолчанию |
 |-------|-------------------------------------|
 | Скрипты Linux | `/var/www/nativegallery` |
-| **Production форка** | `/mnt/win/nativegallery` |
+| **Пример своего пути** | `/mnt/win/nativegallery` (не обязателен) |
 | Docker | `/var/www/html` |
 | Pterodactyl | `/home/container` |
 | Windows IIS | `C:\inetpub\nativegallery` |

@@ -2,7 +2,7 @@
 # Install or update cron job for photo contest automation.
 #
 # Default NG_WEB_ROOT: /var/www/nativegallery
-# Production example:  /mnt/win/nativegallery  (mounted disk — docs/paths.md)
+# Custom path example: /mnt/win/nativegallery  (optional — any NG_WEB_ROOT, see docs/paths.md)
 #
 # Usage:
 #   sudo bash deploy/setup-cron.sh

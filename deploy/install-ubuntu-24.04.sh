@@ -7,7 +7,7 @@
 #   sudo bash deploy/install-ubuntu-24.04.sh
 #
 # Defaults: NG_WEB_ROOT=/var/www/nativegallery  NG_DOMAIN=example.com
-# Production: NG_WEB_ROOT=/mnt/win/nativegallery  NG_DOMAIN=cttc.fetbuk.ru
+# Custom path example (optional): NG_WEB_ROOT=/mnt/win/nativegallery  NG_DOMAIN=your.domain
 # See docs/paths.md
 #
 # Optional: NG_DOMAIN, NG_DB_NAME, NG_DB_USER, NG_DB_PASS, NG_WEB_ROOT

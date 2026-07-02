@@ -10,7 +10,7 @@
 |----------|----------|
 | [configuration.md](configuration.md) | Параметры `ngallery.yaml`, overlay `storage/*.json`, роли, OpenVK |
 | [deployment.md](deployment.md) | Обновление, миграции, права, cron, legacy-заглушки Nginx |
-| [paths.md](paths.md) | Пути по умолчанию: `/var/www/...`, production `/mnt/win/...`, Windows, Docker |
+| [paths.md](paths.md) | Пути по умолчанию, свой `NG_WEB_ROOT`, Windows, Docker |
 | [manual-install.md](manual-install.md) | Ручная установка: все зависимости и пакеты по стекам |
 | [windows-iis.md](windows-iis.md) | Windows IIS, Apache, Caddy, OpenLiteSpeed |
 | [deployment-alternatives.md](deployment-alternatives.md) | Apache, Rocky/AlmaLinux/CentOS — автоскрипты |

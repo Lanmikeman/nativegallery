@@ -3,7 +3,7 @@
 Актуально для форка **v1.7**.
 
 **Production:** Ubuntu 24.04 + Nginx (`deploy/install-ubuntu-24.04.sh`).  
-**Пути:** [paths.md](paths.md) — `/var/www/nativegallery` (default), `/mnt/win/nativegallery` (production).  
+**Пути:** [paths.md](paths.md) — по умолчанию `/var/www/nativegallery`; свой каталог через `NG_WEB_ROOT`.
 **Альтернативы** (Debian, Apache, Rocky, Windows IIS, Caddy, Docker, Pterodactyl): [deployment-alternatives.md](deployment-alternatives.md).  
 **Ручная установка:** [manual-install.md](manual-install.md).
 
@@ -21,9 +21,9 @@
 ## Обновление с GitHub
 
 ```bash
-# По умолчанию: /var/www/nativegallery
-# Production:    /mnt/win/nativegallery  (см. docs/paths.md)
-cd /mnt/win/nativegallery
+# cd /var/www/nativegallery   — по умолчанию
+# cd /ваш/путь/к/проекту     — любой NG_WEB_ROOT (см. docs/paths.md)
+cd /var/www/nativegallery
 git fetch --tags
 git pull origin main        # или git checkout release-1.7
 composer install --no-dev --optimize-autoloader

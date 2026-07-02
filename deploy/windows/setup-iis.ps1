@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "==> NativeGallery IIS setup helper"
 Write-Host "    WebRoot (default): $WebRoot"
 Write-Host "    SiteName:          $SiteName"
-Write-Host "    See docs/paths.md for production Linux path: /mnt/win/nativegallery"
+Write-Host "    See docs/paths.md — Linux NG_WEB_ROOT is any path (e.g. /mnt/win/nativegallery)"
 Write-Host ""
 
 if (-not (Test-Path $WebRoot)) {

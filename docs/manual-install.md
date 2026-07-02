@@ -2,8 +2,7 @@
 
 Пошаговая установка **без автоскриптов**: все зависимости, пакеты и настройка веб-сервера для каждого поддерживаемого стека.
 
-**Production форка:** Ubuntu 24.04 + Nginx, путь **`/mnt/win/nativegallery`**, домен **`cttc.fetbuk.ru`**.  
-**Пути по умолчанию в скриптах:** `/var/www/nativegallery`, `example.com` — см. [paths.md](paths.md).
+**Production форка:** Ubuntu 24.04 + Nginx. Корень проекта — **любой каталог** (`NG_WEB_ROOT`); в скриптах по умолчанию `/var/www/nativegallery`. В примерах иногда фигурирует `/mnt/win/nativegallery` — **только иллюстрация** смонтированного диска. См. [paths.md](paths.md).
 
 См. также: [deployment.md](deployment.md), [deployment-alternatives.md](deployment-alternatives.md), [windows-iis.md](windows-iis.md), [docker.md](docker.md), [pterodactyl.md](pterodactyl.md).
 
@@ -52,8 +51,9 @@ date.timezone = UTC
 # По умолчанию в документации и скриптах:
 cd /var/www/nativegallery
 
-# Production форка (смонтированный диск):
+# Свой путь (пример — смонтированный диск, не обязателен):
 # cd /mnt/win/nativegallery
+# cd /srv/gallery
 
 mkdir -p uploads cdn/temp cdn/previews cdn/image cdn/video logs storage/locks
 chown -R www-data:www-data uploads cdn logs storage    # apache на Rocky
@@ -323,7 +323,7 @@ sudo apachectl configtest && sudo systemctl enable --now httpd php-fpm mariadb
 
 | Сервер | Конфиг |
 |--------|--------|
-| **Caddy 2** | [deploy/caddy/Caddyfile](../deploy/caddy/Caddyfile) — `root` → `/var/www/nativegallery` или `/mnt/win/nativegallery` |
+| **Caddy 2** | [deploy/caddy/Caddyfile](../deploy/caddy/Caddyfile) — `root` → ваш `NG_WEB_ROOT` |
 | **OpenLiteSpeed** | [deploy/openlitespeed/vhost.conf](../deploy/openlitespeed/vhost.conf) |
 | **Apache (Windows)** | `.htaccess` + `DocumentRoot` → каталог проекта |
 

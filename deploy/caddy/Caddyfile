@@ -5,7 +5,7 @@
 #   sudo systemctl reload caddy
 #
 # По умолчанию (скрипты):  /var/www/nativegallery
-# Production (пример):     /mnt/win/nativegallery
+# Свой путь (пример):      /mnt/win/nativegallery  — не обязателен
 
 example.com {
     root * /var/www/nativegallery

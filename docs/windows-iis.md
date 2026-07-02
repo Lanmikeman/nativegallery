@@ -2,7 +2,7 @@
 
 Ручная установка NativeGallery на **Windows Server** / **Windows 10+** с **IIS**, а также кратко: Apache на Windows, Caddy, OpenLiteSpeed.
 
-**Production форка** развёрнут на Linux (`/mnt/win/nativegallery` — монтирование диска). Windows-инструкция — для dev, тестов или отдельного IIS-хоста.
+На Linux production часто используют **свой** `NG_WEB_ROOT` (в документации встречается пример `/mnt/win/nativegallery` — смонтированный диск, **не обязательный** путь). Windows-инструкция — для dev, тестов или IIS-хоста.
 
 Пути по умолчанию: [paths.md](paths.md).
 
@@ -12,7 +12,7 @@
 
 | Параметр | По умолчанию | Пример |
 |----------|--------------|--------|
-| Корень сайта | `C:\inetpub\nativegallery` | `D:\sites\cttc` |
+| Корень сайта | `C:\inetpub\nativegallery` | `D:\sites\nativegallery` (любой свой) |
 | Домен | `localhost` | `gallery.local` |
 | PHP CGI | `C:\php\php-cgi.exe` | из [windows.php.net](https://windows.php.net/download/) |
 | MySQL | `127.0.0.1:3306` | MariaDB / MySQL 8 Windows |
@@ -201,7 +201,7 @@ UPDATE users SET admin = 1 WHERE username = 'ваш_ник';
 Конфиг: [deploy/caddy/Caddyfile](../deploy/caddy/Caddyfile)
 
 ```bash
-# Linux: замените root на /mnt/win/nativegallery при необходимости
+# Linux: укажите root = ваш NG_WEB_ROOT
 caddy run --config deploy/caddy/Caddyfile
 ```
 
@@ -220,7 +220,7 @@ caddy run --config deploy/caddy/Caddyfile
 
 | | Linux production | Windows IIS |
 |--|------------------|-------------|
-| Корень | `/mnt/win/nativegallery` | `C:\inetpub\nativegallery` (или свой) |
+| Корень | любой `NG_WEB_ROOT` (пример: `/mnt/win/nativegallery`) | `C:\inetpub\nativegallery` (или свой) |
 | Веб-сервер | Nginx | IIS + `web.config` |
 | PHP | php8.3-fpm socket | php-cgi.exe FastCGI |
 | Cron | `/etc/cron.d/nativegallery` | Task Scheduler |

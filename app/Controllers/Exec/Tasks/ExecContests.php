@@ -142,7 +142,18 @@ class ExecContests
                 $contestopen = Date::addTime(NGALLERY['root']['contests']['autonew']['times']['open']);
             }
             $contestclose = Date::addTime(NGALLERY['root']['contests']['autonew']['times']['close']);
-            DB::query('INSERT INTO contests VALUES (\'0\', :themeid, :openprdate, :closeprdate, :opendate, :closedate, :status)', array(':themeid'=>$theme['id'], ':openprdate'=>$pretendsopen, ':closeprdate'=>$pretendsclose, ':opendate'=>$contestopen, ':closedate'=>$contestclose, ':status'=>$status));
+            DB::query(
+                'INSERT INTO contests (themeid, openpretendsdate, closepretendsdate, opendate, closedate, status)
+                 VALUES (:themeid, :openprdate, :closeprdate, :opendate, :closedate, :status)',
+                [
+                    ':themeid' => $theme['id'],
+                    ':openprdate' => $pretendsopen,
+                    ':closeprdate' => $pretendsclose,
+                    ':opendate' => $contestopen,
+                    ':closedate' => $contestclose,
+                    ':status' => $status,
+                ]
+            );
             echo "Contest created! Continue...";
         }
      }

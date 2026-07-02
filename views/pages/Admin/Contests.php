@@ -190,15 +190,17 @@ if (!$task->isTaskExists('ExecContests', null, $execContestsHandler)) {
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="exampleFormControlTextarea1" class="form-label">Дата конца проведения конкурса</label>
-                                <input name="closedate" type="datetime-local" class="form-select">
+                                <input id="contestEndInput" name="closedate" type="datetime-local" class="form-select">
+                                <div class="form-text" id="contestEndHint"></div>
                             </div>
                         </div>
                     </div>
                 </form>
+                <div id="createContestAlert"></div>
             </div>
             <div class="modal-footer">
                 <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</a>
-                <a href="#" onclick="createContest(); return false;" data-bs-dismiss="modal" class="btn btn-primary">Добавить</a>
+                <a href="#" onclick="createContest(); return false;" class="btn btn-primary" id="createContestBtn">Добавить</a>
             </div>
         </div>
     </div>
@@ -288,10 +290,16 @@ if (!$task->isTaskExists('ExecContests', null, $execContestsHandler)) {
 
 <script>
     $(document).ready(function() {
-    $('#startContestNow').on('change', function() {
-        $('#contestStartInput').prop('disabled', $(this).is(':checked'));
+        function syncContestNowFields() {
+            const checked = $('#startContestNow').is(':checked');
+            $('#contestStartInput').prop('disabled', checked);
+            $('#contestEndHint').text(checked
+                ? 'Дату конца можно не указывать — голосование длится столько же, сколько отбор претендентов (минимум 1 час).'
+                : '');
+        }
+        $('#startContestNow').on('change', syncContestNowFields);
+        syncContestNowFields();
     });
-});
     function createContestTheme() {
         var formData = new FormData(document.getElementById("contestTheme"));
         $.ajax({
@@ -313,24 +321,43 @@ if (!$task->isTaskExists('ExecContests', null, $execContestsHandler)) {
     }
 
     function createContest() {
-        var formData = new FormData(document.getElementById("contest"));
+        const btn = $('#createContestBtn');
+        const alertBox = $('#createContestAlert');
+        const formData = new FormData(document.getElementById('contest'));
+        if ($('#startContestNow').is(':checked')) {
+            formData.set('startContestNow', '1');
+        }
+
+        btn.prop('disabled', true);
+        alertBox.html('');
+
         $.ajax({
-            type: "POST",
+            type: 'POST',
             url: '/api/admin/contests/create',
             data: formData,
-            success: function(response) {
-                var jsonData = JSON.parse(response);
-                if (jsonData.errorcode === 0) {
-                    Notify.noty('success', 'Конкурс создан');
-                    location.reload();
-                } else {
-                    Notify.noty('danger', jsonData.error || 'Ошибка');
-                }
-            },
             cache: false,
             contentType: false,
             processData: false
-        });
+        })
+            .done(function(response) {
+                const jsonData = typeof response === 'string' ? JSON.parse(response) : response;
+                if (jsonData.errorcode === 0) {
+                    Notify.noty('success', jsonData.message || 'Конкурс создан');
+                    bootstrap.Modal.getInstance(document.getElementById('createContest')).hide();
+                    location.reload();
+                    return;
+                }
+                const message = jsonData.message || jsonData.error || 'Ошибка';
+                alertBox.html('<div class="alert alert-danger mt-2">' + message + '</div>');
+                Notify.noty('error', message);
+            })
+            .fail(function() {
+                alertBox.html('<div class="alert alert-danger mt-2">Ошибка сети</div>');
+                Notify.noty('error', 'Ошибка сети');
+            })
+            .always(function() {
+                btn.prop('disabled', false);
+            });
     }
 
     function openForceClose(id, title) {

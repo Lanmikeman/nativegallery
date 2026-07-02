@@ -31,18 +31,67 @@
         return a && !a.paused && !a.ended;
     }
 
+    function schedulePlayError(a, gen, reqId, err, showError, message) {
+        setTimeout(function () {
+            if (gen !== loadGeneration || reqId !== playRequestId) return;
+            if (isPlaying(a)) return;
+            console.error('NgMusicPlayer play failed:', err);
+            if (showError && typeof Notify !== 'undefined') {
+                Notify.noty('danger', message || 'Не удалось начать воспроизведение');
+            }
+            updateBar();
+        }, 900);
+    }
+
     function requestPlay(a, opts) {
         opts = opts || {};
         var gen = loadGeneration;
         var reqId = ++playRequestId;
         var showError = opts.showError !== false;
         var seekTime = typeof opts.seekTime === 'number' ? opts.seekTime : null;
+        var waitingForReady = false;
 
-        function attemptPlay() {
-            if (gen !== loadGeneration || reqId !== playRequestId) return;
+        function cleanupWait() {
+            waitingForReady = false;
+            a.removeEventListener('loadedmetadata', onReady);
+            a.removeEventListener('loadeddata', onReady);
+            a.removeEventListener('canplay', onReady);
+            a.removeEventListener('error', onLoadError);
+        }
+
+        function applySeek() {
             if (seekTime !== null && !isLiveStream(currentTrack())) {
                 try { a.currentTime = seekTime; } catch (e) { /* ignore */ }
             }
+        }
+
+        function waitForReady() {
+            if (waitingForReady) return;
+            waitingForReady = true;
+            if (a.readyState >= 1) {
+                attemptPlay(true);
+                return;
+            }
+            a.addEventListener('loadedmetadata', onReady);
+            a.addEventListener('loadeddata', onReady);
+            a.addEventListener('canplay', onReady);
+            a.addEventListener('error', onLoadError);
+        }
+
+        function onReady() {
+            cleanupWait();
+            attemptPlay(true);
+        }
+
+        function onLoadError() {
+            cleanupWait();
+            if (gen !== loadGeneration) return;
+            schedulePlayError(a, gen, reqId, new Error('load failed'), showError, 'Не удалось воспроизвести трек');
+        }
+
+        function attemptPlay(isRetry) {
+            if (gen !== loadGeneration || reqId !== playRequestId) return;
+            applySeek();
             var p = a.play();
             if (!p || typeof p.then !== 'function') {
                 updateBar();
@@ -50,55 +99,31 @@
             }
             p.then(function () {
                 if (gen !== loadGeneration) return;
+                cleanupWait();
                 updateBar();
             }).catch(function (err) {
                 if (gen !== loadGeneration || reqId !== playRequestId) return;
                 if (err && err.name === 'AbortError') return;
-                setTimeout(function () {
-                    if (gen !== loadGeneration || reqId !== playRequestId) return;
-                    if (isPlaying(a)) return;
-                    console.error('NgMusicPlayer play failed:', err);
-                    if (showError && typeof Notify !== 'undefined') {
-                        Notify.noty('danger', 'Не удалось начать воспроизведение');
-                    }
-                    updateBar();
-                }, 900);
+                if (!isRetry) {
+                    waitForReady();
+                    return;
+                }
+                schedulePlayError(a, gen, reqId, err, showError);
             });
         }
 
-        function onReady() {
-            a.removeEventListener('canplay', onReady);
-            a.removeEventListener('error', onLoadError);
-            attemptPlay();
-        }
-
-        function onLoadError() {
-            a.removeEventListener('canplay', onReady);
-            a.removeEventListener('error', onLoadError);
-            if (gen !== loadGeneration) return;
-            setTimeout(function () {
-                if (gen !== loadGeneration) return;
-                if (isPlaying(a)) return;
-                if (showError && typeof Notify !== 'undefined') {
-                    Notify.noty('danger', 'Не удалось воспроизвести трек');
-                }
-            }, 900);
-        }
-
-        if (a.readyState >= 2) {
-            attemptPlay();
-        } else {
-            a.addEventListener('canplay', onReady);
-            a.addEventListener('error', onLoadError);
-            a.load();
-        }
+        attemptPlay(false);
     }
 
     function setAudioSrc(a, resolved) {
+        if (a.src === resolved) {
+            loadGeneration += 1;
+            return false;
+        }
         loadGeneration += 1;
-        playRequestId += 1;
         a.pause();
         a.src = resolved;
+        return true;
     }
 
     function reconnectStream() {
@@ -115,7 +140,7 @@
     function getAudio() {
         if (!window.__ngMusicAudio) {
             audio = new Audio();
-            audio.preload = 'metadata';
+            audio.preload = 'auto';
             window.__ngMusicAudio = audio;
             audio.addEventListener('ended', function () {
                 if (audio.paused) return;

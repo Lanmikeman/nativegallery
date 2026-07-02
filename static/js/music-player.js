@@ -9,16 +9,59 @@
     var barEl = null;
     var audio = null;
 
+    function savePlaybackState() {
+        if (!audio) return;
+        try {
+            sessionStorage.setItem(PLAYBACK_KEY, JSON.stringify({
+                src: audio.src,
+                time: audio.currentTime,
+                paused: audio.paused
+            }));
+        } catch (e) { /* ignore */ }
+    }
+
+    function isLiveStream(track) {
+        if (!track) return false;
+        return track.type === 'stream' || track.source_type === 'stream';
+    }
+
+    function reconnectStream() {
+        var track = currentTrack();
+        if (!track || !isLiveStream(track)) return;
+        var a = getAudio();
+        var resolved = resolveAudioSrc(track.src);
+        if (!resolved) return;
+        a.pause();
+        a.src = resolved;
+        a.load();
+        a.play().catch(function (err) {
+            console.error('NgMusicPlayer stream reconnect failed:', err);
+        });
+        updateBar();
+    }
+
     function getAudio() {
         if (!window.__ngMusicAudio) {
             audio = new Audio();
             audio.preload = 'metadata';
             window.__ngMusicAudio = audio;
             audio.addEventListener('ended', function () {
+                if (audio.paused) return;
+                var track = currentTrack();
+                if (isLiveStream(track)) {
+                    reconnectStream();
+                    return;
+                }
                 NgMusicPlayer.next();
             });
-            audio.addEventListener('play', function () { updateBar(); });
-            audio.addEventListener('pause', function () { updateBar(); });
+            audio.addEventListener('play', function () {
+                savePlaybackState();
+                updateBar();
+            });
+            audio.addEventListener('pause', function () {
+                savePlaybackState();
+                updateBar();
+            });
             audio.addEventListener('error', function () {
                 if (typeof Notify !== 'undefined') {
                     Notify.noty('danger', 'Не удалось воспроизвести трек');
@@ -29,13 +72,7 @@
                 var now = Date.now();
                 if (now - lastSave < 2000) return;
                 lastSave = now;
-                try {
-                    sessionStorage.setItem(PLAYBACK_KEY, JSON.stringify({
-                        src: audio.src,
-                        time: audio.currentTime,
-                        paused: audio.paused
-                    }));
-                } catch (e) { /* ignore */ }
+                savePlaybackState();
             });
         } else {
             audio = window.__ngMusicAudio;
@@ -71,7 +108,8 @@
             type: item.type || 'track',
             title: item.title || 'Без названия',
             artist: item.artist || '',
-            src: item.src
+            src: item.src,
+            source_type: item.source_type || ''
         };
     }
 
@@ -143,12 +181,10 @@
         var resolved = resolveAudioSrc(track.src);
         if (!resolved) return;
         a.src = resolved;
-        var resumed = false;
         try {
             var pb = JSON.parse(sessionStorage.getItem(PLAYBACK_KEY) || 'null');
-            if (pb && pb.src && a.src && a.src.indexOf(pb.src) >= 0 && pb.time > 1 && !pb.paused) {
+            if (pb && pb.src && a.src && a.src.indexOf(pb.src) >= 0 && !isLiveStream(track) && pb.time > 1 && !pb.paused) {
                 a.currentTime = pb.time;
-                resumed = true;
             }
         } catch (e) { /* ignore */ }
 
@@ -159,7 +195,6 @@
             }
             updateBar();
         });
-        if (resumed) updateBar();
         saveState();
         updateBar();
         window.dispatchEvent(new CustomEvent('ngmusic:change', { detail: { track: track, index: index } }));
@@ -291,7 +326,13 @@
         next: function () {
             if (queue.length === 0) return;
             var nextIdx = index + 1;
-            if (nextIdx >= queue.length) nextIdx = 0;
+            if (nextIdx >= queue.length) {
+                if (isLiveStream(currentTrack())) {
+                    reconnectStream();
+                    return;
+                }
+                nextIdx = 0;
+            }
             playAt(nextIdx);
         },
 

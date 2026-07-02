@@ -3,6 +3,7 @@ use \App\Services\{Auth, DB, Date};
 use \App\Models\User;
 
 $user = new User(Auth::userid());
+$lkActive = 'profile';
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -20,6 +21,7 @@ $user = new User(Auth::userid());
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
         <tr>
             <td class="main">
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
                 <center>
                     <div class="tabs">
                         <nav class="tab-nav">
@@ -35,6 +37,7 @@ $user = new User(Auth::userid());
 
 
                 </center>
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellClose.php'; ?>
             </td>
         </tr>
         <tr>

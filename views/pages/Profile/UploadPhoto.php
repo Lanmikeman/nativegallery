@@ -4,6 +4,7 @@ use \App\Services\{Auth, DB, Date};
 use \App\Models\User;
 
 $user = new User(Auth::userid());
+$lkActive = 'upload';
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -46,6 +47,7 @@ $user = new User(Auth::userid());
             <?php if (NGALLERY['root']['registration']['emailverify'] != false || $user->i('status') === 3) {
                 die('Чтобы публиковать Фотографии и Видео, нужно подтвердить почту.');
             } ?>
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
                 <h1>Предложить медиа на публикацию</h1>
                 <p>Ваш текущий индекс загрузки: <b><?= $user->i('uploadindex') ?></b></p>
 
@@ -1208,6 +1210,7 @@ $(document).ready(function()
         <h4>Загруженные фотографии</h4>
         <div id="loadbox" style="display:flex; flex-wrap:wrap; gap:10px"></div>
     </div>
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellClose.php'; ?>
     </td>
     </tr>
     <tr>

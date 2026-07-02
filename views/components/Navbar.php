@@ -118,13 +118,13 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
                                 <li><a href="/admin" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-info-circle"></i></span><span class="mm-label">Admin</span><?=$nonr?></a></li>
                             <?php }
                             if (NGALLERY['root']['registration']['emailverify'] != true || $user->i('status') != 3) { ?>
-                            <li><a href="/lk/upload" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-plus-square"></i></span><span class="mm-label"><b>Предложить медиа</b></span></a></li>
+                            <li><a href="/lk/upload.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-plus-square"></i></span><span class="mm-label"><b>Предложить медиа</b></span></a></li>
                             <?php } ?>
-                            <li><a href="/lk/history" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-images"></i></span><span class="mm-label">Журнал</span></a></li>
+                            <li><a href="/lk/history.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-images"></i></span><span class="mm-label">Журнал</span></a></li>
                             <li><a href="/lk/konkurs.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-compass"></i></span><span class="mm-label">Конкурс</span></a></li>
                             <li><a href="/vehicle/edit" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-folder-plus"></i></span><span class="mm-label"><b>Правка БД</b></span></a></li>
                             <li><a href="/lk/ticket.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-question-circle"></i></span><span class="mm-label">Мои заявки</span></a></li>
-                            <li><a href="/lk/profile" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-cog"></i></span><span class="mm-label">Настройки профиля</span></a></li>
+                            <li><a href="/lk/profile.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-cog"></i></span><span class="mm-label">Настройки профиля</span></a></li>
                             <li><a href="/search?id=<?=Auth::userid()?>" class="mm-item"><span class="mm-icon"><i class="far fa-sm fa-fw fa-images"></i></span><span class="mm-label">Мои фотографии</span></a></li>
                             <li><a href="/fav" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-star"></i></span><span class="mm-label">Избранные снимки</span></a></li>
                             <li><a href="/logout" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-sign-out-alt"></i></span><span class="mm-label">Выход</span></a></li>

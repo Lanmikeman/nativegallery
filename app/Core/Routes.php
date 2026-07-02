@@ -62,14 +62,19 @@ class Routes
 
             Router::get('/lk', 'ProfileController@lk');
             Router::get('/lk/upload', 'ProfileController@upload');
+            Router::get('/lk/upload.php', 'ProfileController@upload');
             Router::get('/lk/history', 'ProfileController@lkhistory');
+            Router::get('/lk/history.php', 'ProfileController@lkhistory');
             Router::get('/lk/ticket', 'ProfileController@lkticket');
             Router::get('/lk/ticket.php', 'ProfileController@lkticket');
             Router::get('/lk/konkurs', 'ProfileController@lkkonkurs');
             Router::get('/lk/konkurs.php', 'ProfileController@lkkonkurs');
             Router::any('/lk/profile', 'ProfileController@lkprofile');
+            Router::any('/lk/profile.php', 'ProfileController@lkprofile');
             Router::get('/lk/pday', 'ProfileController@photoindexhistory');
+            Router::get('/lk/pday.php', 'ProfileController@photoindexhistory');
             Router::get('/lk/editimage', 'ProfileController@editimage');
+            Router::get('/lk/editimage.php', 'ProfileController@editimage');
             Router::get('/fav_authors', 'MainController@favauthors');
 
             Router::get('/messages', 'MessagesController@i');

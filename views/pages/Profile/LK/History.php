@@ -3,7 +3,7 @@
 use \App\Services\{Auth, DB, Date};
 use \App\Models\{User, Photo};
 
-//$userprofile = new User(explode('/', $_SERVER['REQUEST_URI'])[2]);
+$lkActive = 'history';
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -21,6 +21,7 @@ use \App\Models\{User, Photo};
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
             <tr>
                 <td class="main">
+                    <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
                     <h1>Журнал</h1>
                     <script src="/js/diff.js"></script>
                     <script src="/js/pwrite-compare.js"></script>
@@ -98,7 +99,7 @@ use \App\Models\{User, Photo};
                                         
                                     </td>';
                                     echo '
-                                    <td class="cs"><a type="button" href="/lk/editimage?id='.$p['id'].'">Редактировать</a>
+                                    <td class="cs"><a type="button" href="/lk/editimage.php?id='.$p['id'].'">Редактировать</a>
                                         
                                     </td>
                                 </tr>';
@@ -109,7 +110,7 @@ use \App\Models\{User, Photo};
                             </tbody>
                         </table>
                     </div><br>
-
+                    <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellClose.php'; ?>
                 </td>
             </tr>
             <tr>

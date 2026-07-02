@@ -168,7 +168,7 @@ button:disabled,
 
 .show-all-vdata { background-color:#272727; }
 
-.lk-dir { background:url('/img/dir_dark.gif'); }
+.lk-dir { background:url('/static/img/dir_dark.gif') no-repeat; }
 
 .new_vehicle { background-color:#444; }
 

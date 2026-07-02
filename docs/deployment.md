@@ -79,6 +79,11 @@ UPDATE users SET admin = 4 WHERE username = 'ваш_ник';
 | `pk.php` | `/pk.php?pid=…&type=d` |
 | `help/index.php` | `/help/` |
 | `lk/index.php` | `/lk/` — личный кабинет |
+| `lk/upload.php` | `/lk/upload.php` |
+| `lk/history.php` | `/lk/history.php` |
+| `lk/profile.php` | `/lk/profile.php` |
+| `lk/pday.php` | `/lk/pday.php` — история индекса загрузки |
+| `lk/editimage.php` | `/lk/editimage.php` |
 | `lk/ticket.php` | `/lk/ticket.php` |
 | `lk/konkurs.php` | `/lk/konkurs.php` |
 

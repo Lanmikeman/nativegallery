@@ -26,6 +26,8 @@ $winners = DB::query(
     [':uid' => $userId]
 );
 
+$lkActive = 'konkurs';
+
 $statusForPhoto = static function (array $photo): array {
     $onContest = (int) ($photo['on_contest'] ?? 0);
     if ($onContest === 1) {
@@ -52,6 +54,7 @@ $statusForPhoto = static function (array $photo): array {
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'; ?>
         <tr>
             <td class="main">
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
                 <h1>Фотоконкурс</h1>
                 <p class="sm">
                     <a href="/voting">Голосование</a> &nbsp;·&nbsp;
@@ -134,6 +137,7 @@ $statusForPhoto = static function (array $photo): array {
                         </table>
                     </div>
                 <?php } ?>
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellClose.php'; ?>
             </td>
         </tr>
         <tr>

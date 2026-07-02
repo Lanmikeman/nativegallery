@@ -8,6 +8,8 @@ $requests = DB::query(
     [':uid' => Auth::userid()]
 );
 
+$lkActive = 'ticket';
+
 $statusLabels = [
     0 => ['label' => 'В рассмотрении', 'class' => 's1'],
     1 => ['label' => 'Принято', 'class' => 's2'],
@@ -28,6 +30,7 @@ $statusLabels = [
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'; ?>
         <tr>
             <td class="main">
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
                 <h1>Мои заявки</h1>
                 <p class="sm">Заявки на добавление и уточнение записей в базе данных транспортных средств.</p>
                 <p><a href="/vehicle/edit" class="und">Отправить новую заявку</a></p>
@@ -108,6 +111,7 @@ $statusLabels = [
                         </table>
                     </div>
                 <?php } ?>
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellClose.php'; ?>
             </td>
         </tr>
         <tr>

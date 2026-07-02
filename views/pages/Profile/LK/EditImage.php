@@ -30,6 +30,7 @@ if ($entitydataId > 0) {
 }
 $entityRoute = (string) ($content['entityroute'] ?? '');
 $entityNotes = (string) ($content['entitycomment'] ?? '');
+$lkActive = 'history';
 
 ?>
 <!DOCTYPE html>
@@ -46,8 +47,9 @@ $entityNotes = (string) ($content['entitycomment'] ?? '');
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
         <tr>
             <td class="main">
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellOpen.php'; ?>
                 <h1>Редактирование фотографии #<?= $photoId ?></h1>
-                <p class="sm"><a href="/lk/history">← Вернуться в журнал</a> · <a href="/photo/<?= $photoId ?>/" target="_blank">Открыть на сайте</a></p>
+                <p class="sm"><a href="/lk/history.php">← Вернуться в журнал</a> · <a href="/photo/<?= $photoId ?>/" target="_blank">Открыть на сайте</a></p>
 
                 <?php if ($isDeclined) { ?>
                     <div class="p20 s3" style="margin:15px 0">
@@ -214,6 +216,7 @@ $entityNotes = (string) ($content['entitycomment'] ?? '');
                         </tbody>
                     </table>
                 </form>
+                <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/LkShellClose.php'; ?>
             </td>
         </tr>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>

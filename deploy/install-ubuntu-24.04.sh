@@ -89,7 +89,7 @@ chown -R www-data:www-data uploads cdn logs lock storage
 chmod -R 775 uploads cdn logs lock storage
 
 echo "==> Importing SQL schema"
-for sql_file in sqlcore/base.sql sqlcore/sql_0001.sql sqlcore/sql_0002.sql sqlcore/sql_0003.sql sqlcore/sql_0004.sql sqlcore/sql_0005.sql sqlcore/sql_0006.sql sqlcore/sql_0007.sql sqlcore/sql_0008.sql; do
+for sql_file in sqlcore/base.sql sqlcore/sql_0001.sql sqlcore/sql_0002.sql sqlcore/sql_0003.sql sqlcore/sql_0004.sql sqlcore/sql_0005.sql sqlcore/sql_0006.sql sqlcore/sql_0007.sql sqlcore/sql_0008.sql sqlcore/sql_0009.sql sqlcore/sql_0010.sql sqlcore/sql_0011.sql; do
     if [[ -f "$sql_file" ]]; then
         mysql "${NG_DB_NAME}" < "$sql_file"
         echo "    imported: $sql_file"

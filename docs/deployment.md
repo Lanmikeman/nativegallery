@@ -1,23 +1,24 @@
 # Развёртывание и обслуживание
 
-Актуально для форка **v1.6**.
+Актуально для форка **v1.7**.
 
 ## Обновление между версиями форка
 
 | С версии | Действия |
 |----------|----------|
-| 1.4 → 1.6 | `sql_0008.sql` (если не применяли), права на `storage/`, `deploy/setup-cron.sh`, назначение владельца (`admin = 4`) при необходимости |
+| 1.6 → 1.7 | `sql_0010.sql`, `sql_0011.sql` (музыка и общие радиостанции), `git pull`, Ctrl+F5 в браузере |
+| 1.4 → 1.6 | `sql_0008.sql`, `sql_0009.sql` (при необходимости), права на `storage/`, cron, владелец (`admin = 4`) |
 | 1.3 → 1.4 | `sql_0005.sql` … `sql_0007.sql`, `timezone`, cron |
 | Чистая установка | `deploy/install-ubuntu-24.04.sh` (все миграции автоматически) |
 
-Подробные заметки: [releases/1.6.md](releases/1.6.md), [releases/1.4.md](releases/1.4.md).
+Подробные заметки: [releases/1.7.md](releases/1.7.md), [releases/1.6.md](releases/1.6.md), [releases/1.4.md](releases/1.4.md).
 
 ## Обновление с GitHub
 
 ```bash
 cd /var/www/nativegallery   # или /mnt/win/nativegallery
 git fetch --tags
-git pull origin main        # или git checkout release-1.6
+git pull origin main        # или git checkout release-1.7
 composer install --no-dev --optimize-autoloader
 ```
 
@@ -30,9 +31,12 @@ mysql -u USER -p DATABASE < sqlcore/sql_0005.sql   # chronology, site_links
 mysql -u USER -p DATABASE < sqlcore/sql_0006.sql   # closure_meta у конкурсов
 mysql -u USER -p DATABASE < sqlcore/sql_0007.sql   # photo_id в entities_requests
 mysql -u USER -p DATABASE < sqlcore/sql_0008.sql   # edited_at/edited_by у news
+mysql -u USER -p DATABASE < sqlcore/sql_0009.sql   # updated_at у pages
+mysql -u USER -p DATABASE < sqlcore/sql_0010.sql   # музыкальная библиотека
+mysql -u USER -p DATABASE < sqlcore/sql_0011.sql   # общие радиостанции сайта
 ```
 
-Полный список при чистой установке: `base.sql` → `sql_0001.sql` … → `sql_0008.sql`.
+Полный список при чистой установке: `base.sql` → `sql_0001.sql` … → `sql_0011.sql`.
 
 Роль владельца сервера (`admin = 4`) **не требует** отдельной миграции.
 
@@ -117,5 +121,9 @@ sudo systemctl reload nginx php8.3-fpm
 
 ```bash
 git describe --tags --always
-# ожидается release-1.6 или коммит поверх него
+# ожидается release-1.7 или коммит поверх него
 ```
+
+## Nginx и музыка
+
+Для релиза 1.7 **отдельные правки nginx не нужны**, если уже используется [deploy/nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf) с front controller. HTTP-радио (например `radio.fetbuk.ru`) воспроизводится напрямую из браузера; API `/api/audio/*` обрабатывается как обычный PHP.

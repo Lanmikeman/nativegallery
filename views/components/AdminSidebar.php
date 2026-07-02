@@ -1,7 +1,7 @@
 <?php
 
 use App\Core\Page;
-use App\Services\{AdminAccess, DB};
+use App\Services\{AdminAccess, AdminNav, DB};
 
 $currentType = trim((string) ($_GET['type'] ?? ''));
 if ($currentType === '' || !Page::exists('Admin/' . $currentType)) {
@@ -23,42 +23,26 @@ $navClass = static function (string $type) use ($currentType): string {
     return $type === $currentType ? ' admin-nav__link--active' : '';
 };
 
-$items = [
-    ['type' => 'General', 'href' => '/admin', 'icon' => 'fa-users-cog', 'label' => 'Пользователи'],
-    ['type' => 'Photo', 'href' => '/admin?type=Photo', 'icon' => 'fa-camera', 'label' => 'Фотографии', 'badge' => $nonr],
-    ['type' => 'Galleries', 'href' => '/admin?type=Galleries', 'icon' => 'fa-images', 'label' => 'Галереи'],
-    ['type' => 'News', 'href' => '/admin?type=News', 'icon' => 'fa-bullhorn', 'label' => 'Новости сайта'],
-    ['type' => 'Chronology', 'href' => '/admin?type=Chronology', 'icon' => 'fa-clock', 'label' => 'Хронология'],
-    ['type' => 'Links', 'href' => '/admin?type=Links', 'icon' => 'fa-link', 'label' => 'Ссылки'],
-    ['type' => 'Contests', 'href' => '/admin?type=Contests', 'icon' => 'fa-trophy', 'label' => 'Фотоконкурсы'],
-    ['type' => 'Entities', 'href' => '/admin?type=Entities', 'icon' => 'fa-cubes', 'label' => 'Сущности'],
-    ['type' => 'Models', 'href' => '/admin?type=Models', 'icon' => 'fa-database', 'label' => 'База моделей', 'badge' => $nonrE],
-    ['type' => 'GeoDB', 'href' => '/admin?type=GeoDB', 'icon' => 'fa-globe', 'label' => 'GeoDB'],
-    ['type' => 'Pages', 'href' => '/admin?type=Pages', 'icon' => 'fa-file-alt', 'label' => 'Страницы'],
-    ['type' => 'AuthSettings', 'href' => '/admin?type=AuthSettings', 'icon' => 'fa-key', 'label' => 'Авторизация'],
-    ['type' => 'Settings', 'href' => '/admin?type=Settings', 'icon' => 'fa-cog', 'label' => 'Настройки'],
-];
+$sections = AdminNav::sections($nonr, $nonrE);
 
 ?>
-<nav class="admin-nav">
+<aside class="admin-nav" aria-label="Меню админ-панели">
     <div class="admin-nav__head">
         <h2 class="admin-nav__title">Админ-панель</h2>
         <a href="/" class="admin-nav__back"><i class="fas fa-arrow-left"></i> На сайт</a>
     </div>
     <div class="admin-nav__items">
-        <?php foreach ($items as $item) { ?>
-            <a href="<?= htmlspecialchars($item['href']) ?>" class="admin-nav__link<?= $navClass($item['type']) ?>">
-                <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
-                <span><?= htmlspecialchars($item['label']) ?></span>
-                <?= $item['badge'] ?? '' ?>
-            </a>
-        <?php } ?>
-        <?php if (AdminAccess::isOwner()) { ?>
-            <a href="/admin?type=ServerSettings" class="admin-nav__link<?= $navClass('ServerSettings') ?>">
-                <i class="fas fa-server"></i>
-                <span>Сервер</span>
-                <span class="badge text-bg-danger admin-nav__badge">OWNER</span>
-            </a>
+        <?php foreach ($sections as $sectionTitle => $items) { ?>
+            <div class="admin-nav__section">
+                <div class="admin-nav__section-title"><?= htmlspecialchars($sectionTitle) ?></div>
+                <?php foreach ($items as $item) { ?>
+                    <a href="<?= htmlspecialchars($item['href']) ?>" class="admin-nav__link<?= $navClass($item['type']) ?>">
+                        <i class="fas <?= htmlspecialchars($item['icon']) ?> admin-nav__icon"></i>
+                        <span class="admin-nav__label"><?= htmlspecialchars($item['label']) ?></span>
+                        <?= $item['badge'] ?? '' ?>
+                    </a>
+                <?php } ?>
+            </div>
         <?php } ?>
     </div>
-</nav>
+</aside>

@@ -1,8 +1,11 @@
 <?php
 
-use App\Services\Auth;
+use App\Controllers\AdminController;
+use App\Services\{AdminNav, Auth};
 
 $user = new \App\Models\User(Auth::userid());
+$adminPageType = AdminController::resolvePage();
+$adminPageLabel = AdminNav::label($adminPageType);
 
 if (!isset($_GET['type']) || $_GET['type'] != 'Photo') {
     if ($user->i('admin') === 2) {
@@ -32,11 +35,16 @@ $cacheBust = NGALLERY['root']['cloudflare-caching'] === true ? '?' . time() : ''
     <table class="tmain">
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'; ?>
         <tr>
-            <td class="main">
+            <td class="main admin-main">
                 <div class="admin-layout">
-                    <?php \App\Controllers\AdminController::loadMenu(); ?>
+                    <?php AdminController::loadMenu(); ?>
                     <div class="admin-panel">
-                        <?php \App\Controllers\AdminController::loadContent(); ?>
+                        <div class="admin-panel__crumb">
+                            <span class="admin-panel__crumb-root">Админ-панель</span>
+                            <span class="admin-panel__crumb-sep">/</span>
+                            <span class="admin-panel__crumb-current"><?= htmlspecialchars($adminPageLabel) ?></span>
+                        </div>
+                        <?php AdminController::loadContent(); ?>
                     </div>
                 </div>
             </td>

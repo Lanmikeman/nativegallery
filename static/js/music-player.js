@@ -22,9 +22,22 @@
         } catch (e) { /* ignore */ }
     }
 
+    function isLikelyHttpStream(src) {
+        if (!src || !/^https?:\/\//i.test(src)) return false;
+        if (/\.(mp3|ogg|wav|flac|m4a|aac|opus|webm)(\?|#|$)/i.test(src)) return false;
+        if (/radio\.fetbuk\.ru\//i.test(src)) return true;
+        return true;
+    }
+
     function isLiveStream(track) {
         if (!track) return false;
-        return track.type === 'stream' || track.source_type === 'stream';
+        if (track.type === 'stream' || track.source_type === 'stream') return true;
+        return isLikelyHttpStream(track.src);
+    }
+
+    function needsStreamProxy(track, src) {
+        if (!src || !/^https?:\/\//i.test(src)) return false;
+        return isLiveStream(track) || isLikelyHttpStream(src);
     }
 
     function isPlaying(a) {
@@ -56,6 +69,7 @@
             a.removeEventListener('loadedmetadata', onReady);
             a.removeEventListener('loadeddata', onReady);
             a.removeEventListener('canplay', onReady);
+            a.removeEventListener('playing', onReady);
             a.removeEventListener('error', onLoadError);
         }
 
@@ -75,6 +89,9 @@
             a.addEventListener('loadedmetadata', onReady);
             a.addEventListener('loadeddata', onReady);
             a.addEventListener('canplay', onReady);
+            if (opts.isStream) {
+                a.addEventListener('playing', onReady);
+            }
             a.addEventListener('error', onLoadError);
         }
 
@@ -130,10 +147,10 @@
         var track = currentTrack();
         if (!track || !isLiveStream(track)) return;
         var a = getAudio();
-        var resolved = resolveAudioSrc(track.src);
+        var resolved = resolveAudioSrc(track.src, track);
         if (!resolved) return;
         setAudioSrc(a, resolved);
-        requestPlay(a);
+        requestPlay(a, { isStream: true });
         updateBar();
     }
 
@@ -268,9 +285,14 @@
         }
     }
 
-    function resolveAudioSrc(src) {
+    function resolveAudioSrc(src, track) {
         if (!src) return '';
-        if (/^https?:\/\//i.test(src)) return src;
+        if (/^https?:\/\//i.test(src)) {
+            if (needsStreamProxy(track, src)) {
+                return '/api/audio/proxy?url=' + encodeURIComponent(src);
+            }
+            return src;
+        }
         if (src.charAt(0) === '/') return src;
         return '/' + src;
     }
@@ -280,18 +302,23 @@
         index = i;
         var track = queue[index];
         var a = getAudio();
-        var resolved = resolveAudioSrc(track.src);
+        var resolved = resolveAudioSrc(track.src, track);
         if (!resolved) return;
         var seekTime = null;
         try {
             var pb = JSON.parse(sessionStorage.getItem(PLAYBACK_KEY) || 'null');
-            if (pb && pb.src && resolved.indexOf(pb.src) >= 0 && !isLiveStream(track) && pb.time > 1 && !pb.paused) {
+            var sameTrack = pb && pb.src && (
+                pb.src.indexOf(track.src) >= 0 ||
+                resolved.indexOf(pb.src) >= 0 ||
+                pb.src.indexOf(resolved) >= 0
+            );
+            if (sameTrack && !isLiveStream(track) && pb.time > 1 && !pb.paused) {
                 seekTime = pb.time;
             }
         } catch (e) { /* ignore */ }
 
         setAudioSrc(a, resolved);
-        requestPlay(a, { seekTime: seekTime });
+        requestPlay(a, { seekTime: seekTime, isStream: isLiveStream(track) });
         saveState();
         updateBar();
         window.dispatchEvent(new CustomEvent('ngmusic:change', { detail: { track: track, index: index } }));

@@ -53,6 +53,42 @@ class AudioLibrary
         return in_array($scheme, ['http', 'https'], true);
     }
 
+    public static function trustedStreamHosts(): array
+    {
+        return ['radio.fetbuk.ru'];
+    }
+
+    public static function canProxyUrl(int $userId, string $url): bool
+    {
+        if ($userId <= 0 || !self::isValidStreamUrl($url) || !self::streamsAllowed()) {
+            return false;
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        if (in_array($host, self::trustedStreamHosts(), true)) {
+            return true;
+        }
+
+        if (!self::tablesExist()) {
+            return false;
+        }
+
+        $owned = DB::query(
+            'SELECT id FROM audio_streams WHERE user_id = :uid AND url = :url LIMIT 1',
+            [':uid' => $userId, ':url' => $url]
+        );
+        if (!empty($owned)) {
+            return true;
+        }
+
+        $owned = DB::query(
+            'SELECT id FROM audio_tracks WHERE user_id = :uid AND src = :url AND source_type = :st LIMIT 1',
+            [':uid' => $userId, ':url' => $url, ':st' => 'url']
+        );
+
+        return !empty($owned);
+    }
+
     public static function trackRow(array $row): array
     {
         return [

@@ -72,6 +72,7 @@ use \App\Controllers\Api\Audio\AddUrl as AudioAddUrl;
 use \App\Controllers\Api\Audio\Library as AudioLibraryApi;
 use \App\Controllers\Api\Audio\Delete as AudioDelete;
 use \App\Controllers\Api\Audio\Playlist as AudioPlaylist;
+use \App\Controllers\Api\Audio\Proxy as AudioProxy;
 
 class ApiController
 {
@@ -290,6 +291,9 @@ class ApiController
     }
     public static function audioplaylist() {
         return new AudioPlaylist();
+    }
+    public static function audioproxy() {
+        return new AudioProxy();
     }
 
 

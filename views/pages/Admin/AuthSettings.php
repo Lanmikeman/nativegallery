@@ -13,7 +13,7 @@ $openvkAutoRegister = !empty(NGALLERY['root']['openvk']['auto_register']);
 $providers = GalleryConfig::listProvidersForAdmin();
 ?>
 <h1><b>Авторизация</b></h1>
-<p class="text-muted">Регистрация и вход через OpenVK. Переключатели и дополнительные инстансы сохраняются в <code>storage/auth-settings.json</code>; базовые инстансы из <code>ngallery.yaml</code> можно только включать/отключать.</p>
+<p class="text-muted">Регистрация и вход через OpenVK. Все изменения инстансов (включая из <code>ngallery.yaml</code>) сохраняются в <code>storage/auth-settings.json</code> и перекрывают базовый конфиг.</p>
 
 <div id="auth-settings-alert"></div>
 
@@ -72,17 +72,16 @@ $providers = GalleryConfig::listProvidersForAdmin();
                             <td><code><?= htmlspecialchars($row['domain']) ?></code></td>
                             <td><span class="badge text-bg-<?= $row['source'] === 'custom' ? 'primary' : 'secondary' ?>"><?= $sourceLabel ?></span></td>
                             <td class="text-end">
-                                <?php if ($row['source'] === 'custom') { ?>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            onclick='editProvider(<?= json_encode($row, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>Изменить</button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteProvider('<?= htmlspecialchars($row['id'], ENT_QUOTES) ?>')">Удалить</button>
-                                <?php } ?>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        onclick='editProvider(<?= json_encode($row, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>Изменить</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="openDeleteProviderModal('<?= htmlspecialchars($row['id'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['label'], ENT_QUOTES) ?>')">Удалить</button>
                             </td>
                         </tr>
                     <?php } ?>
                 </tbody>
             </table>
-            <div class="form-text">Инстансы из yaml (например openvk.org) редактируются в конфиге; через админку можно добавлять свои узлы OpenVK.</div>
+            <div class="form-text">Инстансы из yaml можно менять и удалять здесь — правки пишутся в overlay, исходный <code>ngallery.yaml</code> не трогается. При удалении можно перенести привязки пользователей на другой инстанс.</div>
         <?php } ?>
     </fieldset>
 
@@ -138,7 +137,34 @@ $providers = GalleryConfig::listProvidersForAdmin();
     </div>
 </div>
 
+<div class="modal fade" id="deleteProviderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><b>Удалить инстанс</b></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Удалить инстанс <b id="delete_provider_label"></b> (<code id="delete_provider_id"></code>) из активной конфигурации?</p>
+                <div class="mb-2">
+                    <label class="form-label" for="delete_replace_with">Перенести привязки пользователей на</label>
+                    <select class="form-select" id="delete_replace_with">
+                        <option value="">— не переносить —</option>
+                    </select>
+                    <div class="form-text">Если пользователи входили через этот инстанс, их OpenVK-привязки можно переключить на другой узел.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="delete-provider-confirm" onclick="confirmDeleteProvider()">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+const AUTH_PROVIDERS = <?= json_encode(array_values($providers), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
 (function () {
     const form = document.getElementById('auth-settings-form');
     const alertBox = document.getElementById('auth-settings-alert');
@@ -254,13 +280,46 @@ function saveProvider() {
         });
 }
 
-function deleteProvider(id) {
-    if (!confirm('Удалить инстанс «' + id + '»?')) {
+let deleteProviderId = '';
+
+function openDeleteProviderModal(id, label) {
+    deleteProviderId = id;
+    document.getElementById('delete_provider_id').textContent = id;
+    document.getElementById('delete_provider_label').textContent = label || id;
+
+    const select = document.getElementById('delete_replace_with');
+    select.innerHTML = '<option value="">— не переносить —</option>';
+    AUTH_PROVIDERS.forEach(function (row) {
+        if (row.id === id) {
+            return;
+        }
+        const option = document.createElement('option');
+        option.value = row.id;
+        option.textContent = row.label + ' (' + row.id + ')';
+        select.appendChild(option);
+    });
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteProviderModal'));
+    modal.show();
+}
+
+function confirmDeleteProvider() {
+    if (!deleteProviderId) {
         return;
     }
 
-    fetch('/api/admin/settings/auth/providers/' + encodeURIComponent(id) + '/delete', {
+    const data = new FormData();
+    const replaceWith = document.getElementById('delete_replace_with').value;
+    if (replaceWith) {
+        data.append('replace_with', replaceWith);
+    }
+
+    const btn = document.getElementById('delete-provider-confirm');
+    btn.disabled = true;
+
+    fetch('/api/admin/settings/auth/providers/' + encodeURIComponent(deleteProviderId) + '/delete', {
         method: 'POST',
+        body: data,
         credentials: 'same-origin'
     })
         .then(function (response) { return response.json(); })
@@ -271,6 +330,14 @@ function deleteProvider(id) {
             }
             document.getElementById('auth-settings-alert').innerHTML =
                 '<div class="alert alert-danger">' + (payload.message || 'Ошибка') + '</div>';
+            bootstrap.Modal.getInstance(document.getElementById('deleteProviderModal')).hide();
+        })
+        .catch(function () {
+            document.getElementById('auth-settings-alert').innerHTML =
+                '<div class="alert alert-danger">Ошибка сети</div>';
+        })
+        .finally(function () {
+            btn.disabled = false;
         });
 }
 </script>

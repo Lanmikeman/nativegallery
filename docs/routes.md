@@ -102,7 +102,7 @@
 | `/admin?type=AuthSettings` | Регистрация, OpenVK, добавление кастомных инстансов |
 | `POST /api/admin/settings/auth/providers` | Добавить инстанс OpenVK |
 | `POST /api/admin/settings/auth/providers/{id}` | Изменить кастомный инстанс |
-| `POST /api/admin/settings/auth/providers/{id}/delete` | Удалить кастомный инстанс |
+| `POST /api/admin/settings/auth/providers/{id}/delete` | Удалить инстанс (`replace_with` — перенос привязок) |
 | `/admin?type=UserEdit&user_id=` | Права пользователя |
 | `/admin?type=Settings` | Настройки |
 

@@ -17,7 +17,6 @@ class AuthProvider
         $providerId = '';
         $action = '';
 
-        // /api/admin/settings/auth/providers/{id}/delete
         if (($parts[6] ?? '') === 'providers') {
             $providerId = (string) ($parts[7] ?? '');
             $action = (string) ($parts[8] ?? '');
@@ -38,7 +37,7 @@ class AuthProvider
 
     private function create(): void
     {
-        $result = GalleryConfig::saveCustomProvider([
+        $result = GalleryConfig::saveProvider([
             'provider_id' => $_POST['provider_id'] ?? '',
             'label' => $_POST['label'] ?? '',
             'domain' => $_POST['domain'] ?? '',
@@ -53,16 +52,7 @@ class AuthProvider
 
     private function update(string $providerId): void
     {
-        if (!GalleryConfig::isCustomProvider($providerId)) {
-            echo Json::return([
-                'errorcode' => 1,
-                'error' => 1,
-                'message' => 'Редактировать можно только дополнительные инстансы',
-            ]);
-            return;
-        }
-
-        $result = GalleryConfig::saveCustomProvider([
+        $result = GalleryConfig::saveProvider([
             'label' => $_POST['label'] ?? '',
             'domain' => $_POST['domain'] ?? '',
             'api_domain' => $_POST['api_domain'] ?? '',
@@ -76,7 +66,11 @@ class AuthProvider
 
     private function delete(string $providerId): void
     {
-        $result = GalleryConfig::deleteCustomProvider($providerId);
+        $replaceWith = trim((string) ($_POST['replace_with'] ?? ''));
+        $result = GalleryConfig::deleteProvider(
+            $providerId,
+            $replaceWith !== '' ? $replaceWith : null
+        );
         $this->respond($result);
     }
 

@@ -96,7 +96,12 @@ class GalleryConfig
                     continue;
                 }
 
-                if (!empty($providerOverlay['custom'])) {
+                if (!empty($providerOverlay['removed'])) {
+                    unset($ngallery['root']['openvk']['providers'][$providerId]);
+                    continue;
+                }
+
+                if (!empty($providerOverlay['custom']) || !empty($providerOverlay['override'])) {
                     $ngallery['root']['openvk']['providers'][$providerId] = self::providerForRuntime($providerOverlay);
                     continue;
                 }
@@ -116,9 +121,7 @@ class GalleryConfig
         return $ngallery;
     }
 
-    /**
-     * @return array<string, array{source: string, enabled: bool, label: string, domain: string, api_domain: string, accent: string, icon: string}>
-     */
+    /** @return array<string, array<string, mixed>> */
     public static function listProvidersForAdmin(): array
     {
         $yamlRoot = self::loadYamlRoot();
@@ -136,38 +139,43 @@ class GalleryConfig
         $result = [];
 
         foreach ($yamlProviders as $id => $provider) {
+            $id = (string) $id;
             if (!is_array($provider)) {
                 continue;
             }
-            $enabled = !array_key_exists('enabled', $provider) || !empty($provider['enabled']);
-            if (isset($overlayProviders[$id]['enabled'])) {
-                $enabled = (bool) $overlayProviders[$id]['enabled'];
+            if (self::isProviderRemovedInOverlay($id, $overlayProviders)) {
+                continue;
             }
-            $result[(string) $id] = self::formatProviderRow((string) $id, $provider, 'yaml', $enabled);
+
+            $merged = self::mergeProviderDefinition($provider, $overlayProviders[$id] ?? null);
+            $result[$id] = self::formatProviderRow($id, $merged, 'yaml', self::providerEnabled($merged, $overlayProviders[$id] ?? null));
         }
 
         foreach ($overlayProviders as $id => $provider) {
-            if (!is_array($provider) || empty($provider['custom'])) {
+            $id = (string) $id;
+            if (!is_array($provider) || empty($provider['custom']) || isset($result[$id])) {
                 continue;
             }
-            $result[(string) $id] = self::formatProviderRow((string) $id, $provider, 'custom', !array_key_exists('enabled', $provider) || !empty($provider['enabled']));
+            if (!empty($provider['removed'])) {
+                continue;
+            }
+
+            $result[$id] = self::formatProviderRow($id, $provider, 'custom', self::providerEnabled($provider, null));
         }
 
         return $result;
     }
 
-    public static function isCustomProvider(string $providerId): bool
+    public static function providerExists(string $providerId): bool
     {
-        $overlay = self::loadOverlay();
-        $provider = $overlay['openvk']['providers'][$providerId] ?? null;
-        return is_array($provider) && !empty($provider['custom']);
+        return isset(self::listProvidersForAdmin()[$providerId]);
     }
 
     /**
      * @param array{provider_id?: string, label?: string, domain?: string, api_domain?: string, accent?: string, icon?: string, enabled?: bool} $input
      * @return array{ok: bool, message: string, id?: string}
      */
-    public static function saveCustomProvider(array $input, ?string $existingId = null): array
+    public static function saveProvider(array $input, ?string $existingId = null): array
     {
         $normalized = self::normalizeProviderInput($input, $existingId);
         if (!$normalized['ok']) {
@@ -179,8 +187,12 @@ class GalleryConfig
         /** @var array<string, mixed> $provider */
         $provider = $normalized['provider'];
 
-        if ($existingId === null && self::providerExistsInYaml($id)) {
-            return ['ok' => false, 'message' => 'Такой ID уже занят инстансом из ngallery.yaml'];
+        if ($existingId === null && (self::providerExistsInYaml($id) || self::isCustomInOverlay($id))) {
+            return ['ok' => false, 'message' => 'Инстанс с таким ID уже существует'];
+        }
+
+        if ($existingId !== null && !self::providerExists($existingId)) {
+            return ['ok' => false, 'message' => 'Инстанс не найден'];
         }
 
         $overlay = self::loadOverlay();
@@ -191,36 +203,75 @@ class GalleryConfig
             $overlay['openvk']['providers'] = [];
         }
 
-        $provider['custom'] = true;
-        $overlay['openvk']['providers'][$id] = $provider;
+        $saveId = $existingId ?? $id;
+        if ($existingId !== null && self::providerExistsInYaml($existingId)) {
+            $provider['override'] = true;
+            unset($provider['custom']);
+        } else {
+            $provider['custom'] = true;
+            unset($provider['override']);
+        }
+        unset($provider['removed']);
+
+        $overlay['openvk']['providers'][$saveId] = $provider;
 
         if (!self::saveOverlay($overlay)) {
             return ['ok' => false, 'message' => self::writableErrorMessage()];
         }
 
-        return ['ok' => true, 'message' => 'Инстанс сохранён', 'id' => $id];
+        return ['ok' => true, 'message' => 'Инстанс сохранён', 'id' => $saveId];
     }
 
     /** @return array{ok: bool, message: string} */
-    public static function deleteCustomProvider(string $providerId): array
+    public static function deleteProvider(string $providerId, ?string $replaceWithId = null): array
     {
         $providerId = self::normalizeProviderId($providerId);
         if ($providerId === null) {
             return ['ok' => false, 'message' => 'Некорректный ID инстанса'];
         }
 
-        if (!self::isCustomProvider($providerId)) {
-            return ['ok' => false, 'message' => 'Можно удалить только дополнительные инстансы из админки'];
+        if (!self::providerExists($providerId)) {
+            return ['ok' => false, 'message' => 'Инстанс не найден'];
+        }
+
+        $replaceWithId = $replaceWithId !== null && $replaceWithId !== ''
+            ? self::normalizeProviderId($replaceWithId)
+            : null;
+
+        if ($replaceWithId !== null) {
+            if ($replaceWithId === $providerId) {
+                return ['ok' => false, 'message' => 'Нельзя заменить инстанс сам на себя'];
+            }
+            if (!self::providerExists($replaceWithId)) {
+                return ['ok' => false, 'message' => 'Инстанс для замены не найден'];
+            }
+            self::migrateUserOpenVKLinks($providerId, $replaceWithId);
         }
 
         $overlay = self::loadOverlay();
-        unset($overlay['openvk']['providers'][$providerId]);
+        if (!isset($overlay['openvk']) || !is_array($overlay['openvk'])) {
+            $overlay['openvk'] = [];
+        }
+        if (!isset($overlay['openvk']['providers']) || !is_array($overlay['openvk']['providers'])) {
+            $overlay['openvk']['providers'] = [];
+        }
+
+        if (self::providerExistsInYaml($providerId)) {
+            $overlay['openvk']['providers'][$providerId] = ['removed' => true];
+        } else {
+            unset($overlay['openvk']['providers'][$providerId]);
+        }
 
         if (!self::saveOverlay($overlay)) {
             return ['ok' => false, 'message' => self::writableErrorMessage()];
         }
 
-        return ['ok' => true, 'message' => 'Инстанс удалён'];
+        $message = 'Инстанс удалён из конфигурации';
+        if ($replaceWithId !== null) {
+            $message .= ' (привязки пользователей перенесены на «' . $replaceWithId . '»)';
+        }
+
+        return ['ok' => true, 'message' => $message];
     }
 
     /**
@@ -265,16 +316,7 @@ class GalleryConfig
 
             foreach ($settings['providers'] as $providerId => $enabled) {
                 $providerId = (string) $providerId;
-                if ($providerId === '') {
-                    continue;
-                }
-
-                if (self::isCustomProvider($providerId)) {
-                    $overlay['openvk']['providers'][$providerId]['enabled'] = (bool) $enabled;
-                    continue;
-                }
-
-                if (!self::providerExistsInYaml($providerId)) {
+                if ($providerId === '' || !self::providerExists($providerId)) {
                     continue;
                 }
 
@@ -290,6 +332,81 @@ class GalleryConfig
         }
 
         return ['ok' => true, 'message' => 'Настройки сохранены в storage/auth-settings.json'];
+    }
+
+    private static function migrateUserOpenVKLinks(string $fromId, string $toId): void
+    {
+        $target = self::listProvidersForAdmin()[$toId] ?? null;
+        if ($target === null) {
+            return;
+        }
+
+        $rows = DB::query("SELECT id, content FROM users WHERE content LIKE '%\"openvk\"%'");
+        foreach ($rows as $row) {
+            $content = json_decode((string) $row['content'], true);
+            if (!is_array($content) || empty($content['openvk'][$fromId]) || !is_array($content['openvk'][$fromId])) {
+                continue;
+            }
+
+            $link = $content['openvk'][$fromId];
+            unset($content['openvk'][$fromId]);
+
+            if (empty($content['openvk'][$toId])) {
+                $link['domain'] = $target['domain'];
+                $link['label'] = $target['label'];
+                $link['profile_url'] = OpenVKAuth::profileUrl($link);
+                $content['openvk'][$toId] = $link;
+            }
+
+            DB::query('UPDATE users SET content = :content WHERE id = :id', [
+                ':content' => json_encode($content, JSON_UNESCAPED_UNICODE),
+                ':id' => (int) $row['id'],
+            ]);
+        }
+    }
+
+    /** @param array<string, mixed> $overlayProviders */
+    private static function isProviderRemovedInOverlay(string $id, array $overlayProviders): bool
+    {
+        return !empty($overlayProviders[$id]['removed']);
+    }
+
+    private static function isCustomInOverlay(string $providerId): bool
+    {
+        $overlay = self::loadOverlay();
+        $provider = $overlay['openvk']['providers'][$providerId] ?? null;
+        return is_array($provider) && !empty($provider['custom']) && empty($provider['removed']);
+    }
+
+    /**
+     * @param array<string, mixed> $base
+     * @param array<string, mixed>|null $overlay
+     * @return array<string, mixed>
+     */
+    private static function mergeProviderDefinition(array $base, ?array $overlay): array
+    {
+        if ($overlay === null || !empty($overlay['removed'])) {
+            return $base;
+        }
+
+        if (empty($overlay['override']) && empty($overlay['custom'])) {
+            return $base;
+        }
+
+        return array_merge($base, $overlay);
+    }
+
+    /**
+     * @param array<string, mixed> $provider
+     * @param array<string, mixed>|null $overlay
+     */
+    private static function providerEnabled(array $provider, ?array $overlay): bool
+    {
+        if ($overlay !== null && array_key_exists('enabled', $overlay)) {
+            return (bool) $overlay['enabled'];
+        }
+
+        return !array_key_exists('enabled', $provider) || !empty($provider['enabled']);
     }
 
     /** @param array<string, mixed> $overlay */
@@ -358,7 +475,7 @@ class GalleryConfig
 
     /**
      * @param array<string, mixed> $provider
-     * @return array{source: string, enabled: bool, label: string, domain: string, api_domain: string, accent: string, icon: string}
+     * @return array<string, mixed>
      */
     private static function formatProviderRow(string $id, array $provider, string $source, bool $enabled): array
     {

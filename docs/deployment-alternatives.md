@@ -14,6 +14,8 @@
 | Debian + Apache | Debian 12/13 | Apache 2.4 | [install-debian-12-apache.sh](../deploy/install-debian-12-apache.sh) | [apache/nativegallery.conf](../deploy/apache/nativegallery.conf) |
 | RHEL-семейство + Nginx | Rocky 9, AlmaLinux 9, CentOS Stream 9 | Nginx | [install-rocky-9.sh](../deploy/install-rocky-9.sh) | [nginx/nativegallery-rocky.conf](../deploy/nginx/nativegallery-rocky.conf) |
 | RHEL-семейство + Apache | Rocky 9, AlmaLinux 9, CentOS Stream 9 | httpd | [install-rocky-9-apache.sh](../deploy/install-rocky-9-apache.sh) | [apache/nativegallery-rocky.conf](../deploy/apache/nativegallery-rocky.conf) |
+| Docker Compose | Любой хост с Docker | nginx в контейнере | [docker-compose.yml](../docker-compose.yml) | [docker/nginx.conf](../docker/nginx.conf) |
+| Pterodactyl | Нода с Docker | nginx в egg-образе | [egg-nativegallery.json](../deploy/pterodactyl/egg-nativegallery.json) | переменные панели |
 
 Общая логика (клон, Composer, миграции, `ngallery.yaml`, cron): [deploy/lib/install-common.sh](../deploy/lib/install-common.sh).  
 PHP 8.3 на Debian: репозиторий [packages.sury.org](https://packages.sury.org/php/) — [deploy/lib/debian-php83.sh](../deploy/lib/debian-php83.sh).
@@ -179,7 +181,9 @@ sudo certbot --apache -d example.com
 |-----------|-----------|
 | Shared-хостинг | Не поддерживается (см. README) |
 | Windows + IIS | Не документируется; возможен ручной перенос при наличии PHP 8.3 + MySQL |
-| Docker | Нет официального образа в форке |
+| **Docker** | [docker.md](docker.md) — `Dockerfile`, `docker compose` |
+| **Pterodactyl** | [pterodactyl.md](pterodactyl.md) — egg `deploy/pterodactyl/egg-nativegallery.json` |
+| Ручная установка | [manual-install.md](manual-install.md) — все стеки с полным списком пакетов |
 
 ---
 

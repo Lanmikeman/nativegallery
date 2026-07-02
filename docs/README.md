@@ -10,7 +10,10 @@
 |----------|----------|
 | [configuration.md](configuration.md) | Параметры `ngallery.yaml`, overlay `storage/*.json`, роли, OpenVK |
 | [deployment.md](deployment.md) | Обновление, миграции, права, cron, legacy-заглушки Nginx |
-| [deployment-alternatives.md](deployment-alternatives.md) | Apache, Rocky/AlmaLinux/CentOS — альтернативные скрипты установки |
+| [manual-install.md](manual-install.md) | Ручная установка: все зависимости и пакеты по стекам |
+| [deployment-alternatives.md](deployment-alternatives.md) | Apache, Rocky/AlmaLinux/CentOS — автоскрипты |
+| [docker.md](docker.md) | Docker-образ и docker compose |
+| [pterodactyl.md](pterodactyl.md) | Egg для Pterodactyl Panel |
 | [routes.md](routes.md) | Публичные URL, ЛК, конкурсы, OpenVK, API админки |
 | [releases/1.7.md](releases/1.7.md) | Заметки к релизу 1.7 — музыка, SPA, общие радиостанции |
 | [releases/1.6.md](releases/1.6.md) | Заметки к релизу 1.6 — OpenVK, конкурсы, владелец сервера |
@@ -23,7 +26,9 @@
 - Пример конфигурации: [ngallery-example.yaml](../ngallery-example.yaml)
 - Автоустановка (production): [deploy/install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh)
 - Debian 12/13: [deploy/install-debian-12.sh](../deploy/install-debian-12.sh), [install-debian-12-apache.sh](../deploy/install-debian-12-apache.sh)
-- Альтернативы: [deployment-alternatives.md](deployment-alternatives.md) — Apache, Rocky 9
+- Ручная установка: [manual-install.md](manual-install.md)
+- Альтернативы: [deployment-alternatives.md](deployment-alternatives.md)
+- Docker: [docker-compose.yml](../docker-compose.yml) · Pterodactyl: [egg-nativegallery.json](../deploy/pterodactyl/egg-nativegallery.json)
 - Nginx: [deploy/nginx/nativegallery.conf](../deploy/nginx/nativegallery.conf)
 - Apache: [deploy/apache/nativegallery.conf](../deploy/apache/nativegallery.conf)
 - Cron конкурсов: [deploy/setup-cron.sh](../deploy/setup-cron.sh)

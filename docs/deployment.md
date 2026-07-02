@@ -3,7 +3,8 @@
 Актуально для форка **v1.7**.
 
 **Production:** Ubuntu 24.04 + Nginx (`deploy/install-ubuntu-24.04.sh`).  
-**Альтернативы** (Debian 12/13, Apache, Rocky/AlmaLinux/CentOS): [deployment-alternatives.md](deployment-alternatives.md).
+**Альтернативы** (Debian, Apache, Rocky/CentOS, Docker, Pterodactyl): [deployment-alternatives.md](deployment-alternatives.md).  
+**Ручная установка** (все пакеты по стекам): [manual-install.md](manual-install.md).
 
 ## Обновление между версиями форка
 

@@ -1,0 +1,59 @@
+# NativeGallery — Docker Compose (app + MariaDB)
+# Usage:
+#   cp docker-compose.example.env .env   # or set variables below
+#   docker compose up -d --build
+#   open http://localhost:8080
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nativegallery:latest
+    restart: unless-stopped
+    ports:
+      - "${NG_HTTP_PORT:-8080}:8080"
+    environment:
+      NG_WEB_ROOT: /var/www/html
+      NG_DB_HOST: db
+      NG_DB_NAME: ${NG_DB_NAME:-ngallery}
+      NG_DB_USER: ${NG_DB_USER:-ngallery}
+      NG_DB_PASS: ${NG_DB_PASS:-ngallery_secret}
+      NG_DOMAIN: ${NG_DOMAIN:-localhost}
+      NG_SITE_TITLE: ${NG_SITE_TITLE:-NativeGallery}
+      NG_ADMIN_EMAIL: ${NG_ADMIN_EMAIL:-admin@localhost}
+      NG_TIMEZONE: ${NG_TIMEZONE:-Europe/Moscow}
+      NG_DEBUG: ${NG_DEBUG:-false}
+      NG_AUTO_MIGRATE: ${NG_AUTO_MIGRATE:-1}
+    volumes:
+      - ng_uploads:/var/www/html/uploads
+      - ng_cdn:/var/www/html/cdn
+      - ng_storage:/var/www/html/storage
+      - ng_logs:/var/www/html/logs
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${NG_DB_ROOT_PASS:-root_secret}
+      MYSQL_DATABASE: ${NG_DB_NAME:-ngallery}
+      MYSQL_USER: ${NG_DB_USER:-ngallery}
+      MYSQL_PASSWORD: ${NG_DB_PASS:-ngallery_secret}
+    volumes:
+      - ng_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  ng_uploads:
+  ng_cdn:
+  ng_storage:
+  ng_logs:
+  ng_db:

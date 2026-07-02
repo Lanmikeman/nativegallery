@@ -1,0 +1,151 @@
+{
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-03T00:00:00+00:00",
+    "name": "NativeGallery",
+    "author": "Lanmikeman",
+    "description": "NativeGallery — PHP 8.3 галерея (форк transphoto.org). Nginx + PHP-FPM в контейнере. Требуется внешняя MySQL/MariaDB (отдельный сервер или база на ноде).",
+    "features": null,
+    "docker_images": {
+        "NativeGallery PHP 8.3": "ghcr.io/lanmikeman/nativegallery:latest"
+    },
+    "file_denylist": [],
+    "startup": "/usr/local/bin/start-pterodactyl.sh",
+    "config": {
+        "files": "{\n    \"ngallery.yaml\": {\n        \"parser\": \"yaml\",\n        \"find\": {\n            \"ngallery.root.db.host\": \"{{NG_DB_HOST}}\",\n            \"ngallery.root.db.name\": \"{{NG_DB_NAME}}\",\n            \"ngallery.root.db.login\": \"{{NG_DB_USER}}\",\n            \"ngallery.root.db.password\": \"{{NG_DB_PASS}}\",\n            \"ngallery.root.alloweddomains\": [\"{{NG_DOMAIN}}\"],\n            \"ngallery.root.title\": \"{{NG_SITE_TITLE}}\"\n        }\n    }\n}",
+        "startup": "{\n    \"done\": \"NativeGallery is ready on port 8080\"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# NativeGallery — Pterodactyl install\nset -e\ncd /mnt/server\nREPO=\"${NG_REPO:-https://github.com/Lanmikeman/nativegallery.git}\"\nBRANCH=\"${NG_BRANCH:-main}\"\nif [ ! -f index.php ]; then\n  echo \"[NativeGallery] Cloning ${REPO} (${BRANCH})...\"\n  git clone --depth 1 --branch \"${BRANCH}\" \"${REPO}\" /tmp/ng-src\n  shopt -s dotglob\n  mv /tmp/ng-src/* /mnt/server/\n  rm -rf /tmp/ng-src\nfi\necho \"[NativeGallery] Composer...\"\nexport COMPOSER_ALLOW_SUPERUSER=1\ncomposer install --no-dev --optimize-autoloader --no-interaction\nmkdir -p uploads cdn/temp cdn/previews cdn/image cdn/video logs storage/locks\nchmod -R 775 uploads cdn logs storage 2>/dev/null || true\necho \"[NativeGallery] Done. Set DB variables and start.\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Web root",
+            "description": "Каталог приложения в контейнере (не менять для Pterodactyl).",
+            "env_variable": "NG_WEB_ROOT",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database host",
+            "description": "Хост MySQL/MariaDB (IP другого сервера Pterodactyl или внешней БД).",
+            "env_variable": "NG_DB_HOST",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database name",
+            "description": "Имя базы данных.",
+            "env_variable": "NG_DB_NAME",
+            "default_value": "ngallery",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database user",
+            "description": "Пользователь БД.",
+            "env_variable": "NG_DB_USER",
+            "default_value": "ngallery",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Database password",
+            "description": "Пароль БД.",
+            "env_variable": "NG_DB_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Site domain",
+            "description": "Домен или IP для alloweddomains в ngallery.yaml.",
+            "env_variable": "NG_DOMAIN",
+            "default_value": "localhost",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Site title",
+            "description": "Название сайта.",
+            "env_variable": "NG_SITE_TITLE",
+            "default_value": "NativeGallery",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin email",
+            "description": "Email администратора в конфиге.",
+            "env_variable": "NG_ADMIN_EMAIL",
+            "default_value": "admin@localhost",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Timezone",
+            "description": "Часовой пояс (Europe/Moscow и т.д.).",
+            "env_variable": "NG_TIMEZONE",
+            "default_value": "Europe/Moscow",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto migrate",
+            "description": "Импортировать SQL-миграции при старте (1/0).",
+            "env_variable": "NG_AUTO_MIGRATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Git repository",
+            "description": "URL репозитория (только при установке).",
+            "env_variable": "NG_REPO",
+            "default_value": "https://github.com/Lanmikeman/nativegallery.git",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git branch",
+            "description": "Ветка при установке (main, release-1.7).",
+            "env_variable": "NG_BRANCH",
+            "default_value": "main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ]
+}

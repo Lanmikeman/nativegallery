@@ -31,26 +31,6 @@ if ($mode === 'recent' || $mode === 'date') {
 
 $perPage = UpdateQuery::PER_PAGE;
 $offset = $params['st'];
-
-function renderFilterLine(string $label, array $items, array $params, callable $buildUrl, string $key, $activeValue): void
-{
-    echo '<p class="sm" style="margin:8px 0"><b>' . htmlspecialchars($label) . ':</b> ';
-    $allActive = $activeValue === null;
-    echo $allActive ? '<b>(все)</b>' : '<a href="' . htmlspecialchars($buildUrl([$key => null, 'st' => 0])) . '">(все)</a>';
-
-    foreach ($items as $item) {
-        $id = (int) $item['id'];
-        $isActive = $activeValue !== null && (int) $activeValue === $id;
-        echo ' · ';
-        if ($isActive) {
-            echo '<b>' . htmlspecialchars($item['title'] ?? $item['username'] ?? '') . '</b>';
-        } else {
-            $title = $item['title'] ?? $item['username'] ?? '';
-            echo '<a href="' . htmlspecialchars($buildUrl([$key => $id, 'st' => 0])) . '">' . htmlspecialchars($title) . '</a>';
-        }
-    }
-    echo '</p>';
-}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -133,9 +113,9 @@ function renderFilterLine(string $label, array $items, array $params, callable $
                     <h1><?= $mode === 'date' ? 'Фотографии за ' . UpdateQuery::periodLabel($params) : 'Новые фотографии за ' . UpdateQuery::periodLabel($params) ?></h1>
 
                     <?php
-                    renderFilterLine('Города', $facetCities, $params, $buildUrl, 'cid', $params['cid']);
-                    renderFilterLine('Авторы', $facetAuthors, $params, $buildUrl, 'aid', $params['aid'] ? $params['aid'] : null);
-                    renderFilterLine('Виды сущностей', $facetTypes, $params, $buildUrl, 't', $params['t']);
+                    UpdateQuery::renderFilterLine('Города', $facetCities, $buildUrl, 'cid', $params['cid']);
+                    UpdateQuery::renderFilterLine('Авторы', $facetAuthors, $buildUrl, 'aid', $params['aid'] ? $params['aid'] : null);
+                    UpdateQuery::renderFilterLine('Виды сущностей', $facetTypes, $buildUrl, 't', $params['t']);
                     ?>
 
                     <br>
@@ -175,9 +155,9 @@ function renderFilterLine(string $label, array $items, array $params, callable $
                     } ?>
 
                     <?php
-                    renderFilterLine('Города', $facetCities, $params, $buildUrl, 'cid', $params['cid']);
-                    renderFilterLine('Авторы', $facetAuthors, $params, $buildUrl, 'aid', $params['aid'] ? $params['aid'] : null);
-                    renderFilterLine('Виды сущностей', $facetTypes, $params, $buildUrl, 't', $params['t']);
+                    UpdateQuery::renderFilterLine('Города', $facetCities, $buildUrl, 'cid', $params['cid']);
+                    UpdateQuery::renderFilterLine('Авторы', $facetAuthors, $buildUrl, 'aid', $params['aid'] ? $params['aid'] : null);
+                    UpdateQuery::renderFilterLine('Виды сущностей', $facetTypes, $buildUrl, 't', $params['t']);
                     ?>
                 <?php } ?>
             </td>

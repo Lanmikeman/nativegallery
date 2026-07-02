@@ -103,6 +103,15 @@ class UpdateQuery
         }
     }
 
+    private static function placeContainsCity(mixed $place, string $cityTitle): bool
+    {
+        if ($cityTitle === '' || $place === null || $place === '') {
+            return false;
+        }
+
+        return mb_stripos((string) $place, $cityTitle) !== false;
+    }
+
     public static function fetchPhotos(array $params): array
     {
         [$where, $bind] = self::buildPhotoFilter($params);
@@ -184,7 +193,7 @@ class UpdateQuery
         foreach ($photos as $photo) {
             $matched = false;
             foreach ($geodb as $city) {
-                if ($city['title'] !== '' && mb_stripos($photo['place'], $city['title']) !== false) {
+                if (self::placeContainsCity($photo['place'] ?? null, $city['title'])) {
                     $counts[(int) $city['id']] = ($counts[(int) $city['id']] ?? 0) + 1;
                     $matched = true;
                     break;
@@ -220,7 +229,7 @@ class UpdateQuery
              LEFT JOIN entities_data ed ON ed.id = p.entitydata_id
              LEFT JOIN entities ent ON ent.id = ed.entityid
              WHERE ' . implode(' AND ', $where) . '
-             GROUP BY ent.id, ent.title
+             GROUP BY COALESCE(ent.id, 0), COALESCE(ent.title, \'\')
              ORDER BY ent.title ASC',
             $bind
         );
@@ -250,7 +259,7 @@ class UpdateQuery
             'SELECT DATE(FROM_UNIXTIME(timeupload)) AS upload_date, COUNT(*) AS cnt
              FROM photos
              WHERE moderated = 1
-             GROUP BY upload_date
+             GROUP BY DATE(FROM_UNIXTIME(timeupload))
              ORDER BY upload_date DESC
              LIMIT ' . self::ARCHIVE_DAYS_PER_PAGE . ' OFFSET ' . max(0, $offset)
         );
@@ -290,7 +299,7 @@ class UpdateQuery
             $cityId = 0;
             $cityTitle = '(без города)';
             foreach ($geodb as $city) {
-                if ($city['title'] !== '' && mb_stripos($photo['place'], $city['title']) !== false) {
+                if (self::placeContainsCity($photo['place'] ?? null, $city['title'])) {
                     $cityId = (int) $city['id'];
                     $cityTitle = $city['title'];
                     break;
@@ -354,6 +363,26 @@ class UpdateQuery
 
         $qs = http_build_query($query);
         return '/update' . ($qs ? '?' . $qs : '');
+    }
+
+    public static function renderFilterLine(string $label, array $items, callable $buildUrl, string $key, $activeValue): void
+    {
+        echo '<p class="sm" style="margin:8px 0"><b>' . htmlspecialchars($label) . ':</b> ';
+        $allActive = $activeValue === null;
+        echo $allActive ? '<b>(все)</b>' : '<a href="' . htmlspecialchars($buildUrl([$key => null, 'st' => 0])) . '">(все)</a>';
+
+        foreach ($items as $item) {
+            $id = (int) $item['id'];
+            $isActive = $activeValue !== null && (int) $activeValue === $id;
+            echo ' · ';
+            if ($isActive) {
+                echo '<b>' . htmlspecialchars($item['title'] ?? $item['username'] ?? '') . '</b>';
+            } else {
+                $title = $item['title'] ?? $item['username'] ?? '';
+                echo '<a href="' . htmlspecialchars($buildUrl([$key => $id, 'st' => 0])) . '">' . htmlspecialchars($title) . '</a>';
+            }
+        }
+        echo '</p>';
     }
 
     public static function periodLabel(array $params): string

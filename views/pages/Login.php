@@ -24,6 +24,9 @@ if (Auth::userid() > 0) {
             <td class="main">
                 <center>
                     <h1><b>Авторизация</b></h1>
+                    <?php if (!empty($_GET['ovk_error'])) { ?>
+                        <p style="color:#c00; max-width:420px; margin:0 auto 12px"><?= htmlspecialchars((string) $_GET['ovk_error']) ?></p>
+                    <?php } ?>
                     <div class="mf-center-block mf-label">
 
                         <form id="form" method="post" class="p20i mf-center-block-wide mf-label">
@@ -45,6 +48,12 @@ if (Auth::userid() > 0) {
                         </form>
 
                         <div style="margin-top:15px"><a href="/register" class="mf-button">Регистрация</a></div>
+
+                        <?php
+                        $ovkMode = 'login';
+                        $ovkReturn = (string) ($_GET['return'] ?? '/');
+                        include $_SERVER['DOCUMENT_ROOT'] . '/views/components/OpenVKProviderButtons.php';
+                        ?>
                     </div><br />
 
                     <script>

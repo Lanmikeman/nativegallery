@@ -20,6 +20,9 @@ class Routes
         Router::get('/page/$id', 'MainController@page');
         Router::post('/api/login', 'ApiController@login');
         Router::post('/api/register', 'ApiController@register');
+        Router::get('/auth/openvk/start', 'AuthController@openvkStart');
+        Router::get('/auth/callback', 'AuthController@openvkCallback');
+        Router::post('/api/auth/openvk', 'ApiController@openvkauth');
         Router::get('/api/photo/stats', 'ApiController@photostats');
         Router::get('/about', 'MainController@about');
         Router::get('/rules', 'MainController@rules');

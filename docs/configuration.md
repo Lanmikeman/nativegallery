@@ -188,6 +188,40 @@ contests:
 
 Cron: `deploy/setup-cron.sh` → задача каждые 5 минут для `ExecContests.php`.
 
+## Вход через OpenVK
+
+```yaml
+openvk:
+  enabled: true
+  client_name: 'CTTC Gallery'
+  redirect_uri: ''
+  response_type: 'php'
+  auto_register: true
+  providers:
+    openvk_org:
+      label: 'OpenVK.org'
+      domain: 'https://openvk.org'
+      accent: '#5181b8'
+      icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
+    vepurovk:
+      label: 'VepurOVK'
+      domain: 'https://vepurovk.xyz'
+      accent: '#45668e'
+      icon: 'https://vepurovk.xyz/assets/packages/static/openvk/img/favicon.ico'
+```
+
+| Параметр | Описание |
+|----------|----------|
+| `enabled` | Показывать кнопки входа и вкладку привязки в профиле |
+| `client_name` | Название сайта на странице подтверждения OpenVK |
+| `redirect_uri` | Callback URL; пусто = `https://ВАШ_ДОМЕН/auth/callback` |
+| `response_type` | `php` (токен в query) или `token` (токен в `#`, нужен JS) |
+| `auto_register` | Создавать локальный аккаунт при первом входе через OpenVK |
+| `providers.*.accent` | Цвет кнопки входа |
+| `providers.*.icon` | Favicon/иконка инстанса |
+
+Привязка существующего аккаунта: `/lk/profile?type=OpenVK`.
+
 ## WebSockets
 
 ```yaml

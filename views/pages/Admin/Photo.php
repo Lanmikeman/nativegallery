@@ -52,7 +52,7 @@ use \App\Models\User;
             </div>
                     <script src="/js/diff.js"></script>
                     <script src="/js/pwrite-compare.js"></script>
-                 <div id="moderate__block"class="active__block" >
+                 <div id="moderate__block" class="active__block">
                     <div class="p20w" style="display:block">
                         <table class="table">
                             <tbody>
@@ -249,7 +249,47 @@ use \App\Models\User;
                         </table>
                     </div></div>
                     <div style="display: none;" id="full__block">
-                      fgdfg
+                    <div class="p20w" style="display:block">
+                        <p class="sm text-muted">Последние 200 фотографий. Для модерации очереди используйте вкладку «Ожидают модерации».</p>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th width="100">Изображение</th>
+                                    <th width="45%">Информация</th>
+                                    <th width="20%">Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                                <?php
+                                $allPhotos = DB::query('SELECT * FROM photos ORDER BY id DESC LIMIT 200');
+                                foreach ($allPhotos as $p) {
+                                    $moderated = (int) $p['moderated'];
+                                    if ($moderated === 0) {
+                                        $color = 's0';
+                                        $status = 'Ожидает модерации';
+                                    } elseif ($moderated === 2) {
+                                        $color = 's15';
+                                        $status = 'Отклонено';
+                                    } else {
+                                        $color = 's12';
+                                        $status = 'Опубликовано';
+                                    }
+                                    $author = new User((int) $p['user_id']);
+                                    echo '<tr id="pht-full' . (int) $p['id'] . '" class="' . $color . '">';
+                                    echo '<td><a href="/photo/' . (int) $p['id'] . '/" target="_blank" class="prw"><img src="' . htmlspecialchars((string) $p['photourl']) . '" class="f" alt=""></a></td>';
+                                    echo '<td><p><span style="word-spacing:-1px"><b>' . htmlspecialchars((string) $p['place']) . '</b></span></p>';
+                                    echo '<p class="sm"><b>' . Date::zmdate((int) $p['posted_at']) . '</b><br>Автор: <a href="/author/' . (int) $p['user_id'] . '/">' . htmlspecialchars((string) $author->i('username')) . '</a></p></td>';
+                                    echo '<td>' . htmlspecialchars($status) . '</td><td class="c">';
+                                    if ($moderated === 0) {
+                                        echo '<a href="#" onclick="changeTab(\'moderate\'); return false;" class="btn btn-sm btn-outline-primary">К модерации</a>';
+                                    } else {
+                                        echo '<span class="sm text-muted">—</span>';
+                                    }
+                                    echo '</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
                     </div>
 <script>
 function photoAction(photo_id, decline_reason, iRate, kRate, mod) {

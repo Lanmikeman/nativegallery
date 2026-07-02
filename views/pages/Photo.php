@@ -147,16 +147,21 @@ if ($photo->i('id') !== null) {
                                         <?php }
 
                                         foreach ((array) ($photo->content('contests') ?? []) as $c) {
-                                            if ($c['place'] === 1) {
-                                                $img = '3';
+                                            $place = (int) ($c['place'] ?? 0);
+                                            $icon = match ($place) {
+                                                1 => 'vs3',
+                                                2 => 'vs2',
+                                                3 => 'vs1',
+                                                default => null,
+                                            };
+                                            $label = $place > 0
+                                                ? $place . '-е место на фотоконкурсе'
+                                                : 'Участие в фотоконкурсе';
+                                            echo '<a class="underphoto" style="font-weight:bold" href="/pk.php?pid=' . (int) $id . '&amp;type=d">';
+                                            if ($icon !== null) {
+                                                echo '<img style="margin-top:-4px" src="/static/img/' . $icon . '.png"> &nbsp;';
                                             }
-                                            if ($c['place'] === 2) {
-                                                $img = '2';
-                                            }
-                                            if ($c['place'] === 3) {
-                                                $img = '1';
-                                            }
-                                            echo '<a class="underphoto" style="font-weight:bold" href="/pk.php?pid=2068816&amp;type=d"><img style="margin-top:-4px" src="/static/img/vs' . $img . '.png"> &nbsp;' . $c['place'] . '-е место на фотоконкурсе</a>';
+                                            echo htmlspecialchars($label) . '</a>';
                                         }
 
 

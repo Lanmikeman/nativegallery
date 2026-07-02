@@ -33,4 +33,9 @@ class ContestsController
         Page::set('Contests/VotingRating');
     }
 
+    public static function pk()
+    {
+        Page::set('Contests/PkReport');
+    }
+
 }

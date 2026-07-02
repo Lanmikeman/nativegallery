@@ -28,4 +28,4 @@ function get_current_git_commit($branch = 'main')
 
 
         </td>
-
+<?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/MusicPlayer.php'; ?>

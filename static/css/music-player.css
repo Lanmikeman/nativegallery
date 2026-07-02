@@ -1,0 +1,180 @@
+.ng-music-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: var(--theme-bg-color, #2a2a2a);
+    border-top: 1px solid var(--theme-border-color, #444);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
+    font-size: 13px;
+    color: var(--theme-text-color, #eee);
+}
+
+.ng-music-bar.ng-music-hidden {
+    display: none;
+}
+
+.ng-music-bar__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.ng-music-bar__btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.ng-music-bar__btn:hover {
+    background: var(--theme-bg-hover-color, rgba(255, 255, 255, 0.1));
+}
+
+.ng-music-bar__btn.ng-music-active {
+    color: var(--theme-accent-color, #6af);
+}
+
+.ng-music-bar__info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ng-music-bar__title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ng-music-bar__artist {
+    opacity: 0.75;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ng-music-bar__volume {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    max-width: 120px;
+}
+
+.ng-music-bar__volume input[type="range"] {
+    width: 80px;
+    vertical-align: middle;
+}
+
+.ng-music-page {
+    padding: 20px;
+}
+
+.ng-music-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.ng-music-tab {
+    padding: 8px 16px;
+    border: 1px solid var(--theme-border-color, #ccc);
+    background: var(--theme-bg-color, #fff);
+    color: inherit;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.ng-music-tab.active {
+    background: var(--theme-bg-hover-color, #e8eef5);
+    font-weight: 600;
+}
+
+.ng-music-panel {
+    display: none;
+}
+
+.ng-music-panel.active {
+    display: block;
+}
+
+.ng-music-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ng-music-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--theme-border-color, #ddd);
+}
+
+.ng-music-list li:hover {
+    background: var(--theme-bg-hover-color, #f5f5f5);
+}
+
+.ng-music-list__actions {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.ng-music-form {
+    max-width: 520px;
+    margin-bottom: 24px;
+}
+
+.ng-music-form label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.ng-music-form input[type="text"],
+.ng-music-form input[type="url"],
+.ng-music-form input[type="file"],
+.ng-music-form textarea {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.ng-music-form textarea {
+    min-height: 120px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.ng-music-empty {
+    opacity: 0.7;
+    padding: 16px;
+}
+
+body.ng-music-bar-visible {
+    padding-bottom: 56px;
+}
+
+@media (max-width: 600px) {
+    .ng-music-bar__volume {
+        display: none;
+    }
+}

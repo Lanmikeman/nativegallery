@@ -76,6 +76,7 @@ class Routes
             Router::get('/lk/editimage', 'ProfileController@editimage');
             Router::get('/lk/editimage.php', 'ProfileController@editimage');
             Router::get('/fav_authors', 'MainController@favauthors');
+            Router::get('/music', 'MusicController@index');
 
             Router::get('/messages', 'MessagesController@i');
 
@@ -97,6 +98,12 @@ class Routes
             Router::any('/vehicle/dbedit', 'VehicleController@dbedit');
             Router::any('/vehicle/$id', 'VehicleController@i');
             Router::post('/api/upload', 'ApiController@upload');
+            Router::post('/api/audio/upload', 'ApiController@audioupload');
+            Router::post('/api/audio/stream', 'ApiController@audiostream');
+            Router::post('/api/audio/url', 'ApiController@audiourl');
+            Router::get('/api/audio/library', 'ApiController@audiolibrary');
+            Router::post('/api/audio/delete', 'ApiController@audiodelete');
+            Router::post('/api/audio/playlist', 'ApiController@audioplaylist');
             Router::post('/api/photo/edit', 'ApiController@photoedit');
             Router::post('/api/profile/update', 'ApiController@updateprofile');
             Router::post('/api/photo/comment', 'ApiController@photocomment');

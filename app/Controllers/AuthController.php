@@ -42,20 +42,21 @@ class AuthController
             return;
         }
 
-        $token = (string) ($_GET['access_token'] ?? '');
+        $token = OpenVKAuth::extractAccessToken();
         $userId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
+        $state = isset($_GET['state']) ? (string) $_GET['state'] : null;
 
         if ($token !== '' && OpenVKAuth::responseType() === 'php') {
-            self::finish($token, $userId);
+            self::finish($token, $userId, $state);
             return;
         }
 
         Page::set('Auth/Callback');
     }
 
-    public static function finish(string $token, ?int $userId): void
+    public static function finish(string $token, ?int $userId, ?string $state = null): void
     {
-        $result = OpenVKAuth::complete($token, $userId);
+        $result = OpenVKAuth::complete($token, $userId, $state);
 
         if ((int) ($result['errorcode'] ?? 1) !== 0) {
             $redirect = (string) ($result['redirect'] ?? '/login');

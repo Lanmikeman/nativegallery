@@ -198,11 +198,12 @@ openvk:
   response_type: 'php'
   auto_register: true
   providers:
-    openvk_org:
-      label: 'OpenVK.org'
-      domain: 'https://openvk.org'
-      accent: '#5181b8'
-      icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
+        openvk_org:
+          label: 'OpenVK.org'
+          domain: 'https://openvk.org'
+          api_domain: 'https://api.openvk.org'
+          accent: '#5181b8'
+          icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
     vepurovk:
       label: 'VepurOVK'
       domain: 'https://vepurovk.xyz'
@@ -217,6 +218,7 @@ openvk:
 | `redirect_uri` | Callback URL; пусто = `https://ВАШ_ДОМЕН/auth/callback` |
 | `response_type` | `php` (токен в query) или `token` (токен в `#`, нужен JS) |
 | `auto_register` | Создавать локальный аккаунт при первом входе через OpenVK |
+| `providers.*.api_domain` | API-хост (для openvk.org обязательно `https://api.openvk.org`) |
 | `providers.*.accent` | Цвет кнопки входа |
 | `providers.*.icon` | Favicon/иконка инстанса |
 

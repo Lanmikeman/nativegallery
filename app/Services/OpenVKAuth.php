@@ -4,6 +4,8 @@ namespace App\Services;
 
 class OpenVKAuth
 {
+    private static ?string $lastApiError = null;
+
     public static function isEnabled(): bool
     {
         return !empty(NGALLERY['root']['openvk']['enabled'])
@@ -28,10 +30,12 @@ class OpenVKAuth
                 continue;
             }
             $domain = rtrim((string) $provider['domain'], '/');
+            $apiDomain = rtrim((string) ($provider['api_domain'] ?? self::defaultApiDomain($domain)), '/');
             $resolved[$id] = array_merge([
                 'id' => (string) $id,
                 'label' => (string) ($provider['label'] ?? $id),
                 'domain' => $domain,
+                'api_domain' => $apiDomain,
                 'accent' => (string) ($provider['accent'] ?? '#5181b8'),
                 'icon' => (string) ($provider['icon'] ?? ($domain . '/assets/packages/static/openvk/img/favicon.ico')),
             ], $provider);
@@ -80,10 +84,13 @@ class OpenVKAuth
             throw new \InvalidArgumentException('Unknown OpenVK provider');
         }
 
+        $returnUrl = (string) ($_GET['return'] ?? $_GET['ref'] ?? '/');
+        $state = self::buildState($providerId, $mode === 'link' ? 'link' : 'login', $returnUrl);
+
         $_SESSION['ovk_provider'] = $providerId;
         $_SESSION['ovk_mode'] = $mode === 'link' ? 'link' : 'login';
-        $_SESSION['ovk_state'] = GenerateRandomStr::gen_uuid();
-        $_SESSION['ovk_return'] = (string) ($_GET['return'] ?? $_GET['ref'] ?? '/');
+        $_SESSION['ovk_state'] = $state;
+        $_SESSION['ovk_return'] = $returnUrl;
 
         return $provider['domain'] . '/authorize?' . http_build_query([
             'client_name' => self::clientName(),
@@ -91,12 +98,48 @@ class OpenVKAuth
             'display' => 'page',
             'response_type' => self::responseType(),
             'revoke' => 0,
-            'state' => $_SESSION['ovk_state'],
+            'state' => $state,
         ]);
     }
 
-    public static function complete(string $accessToken, ?int $reportedUserId = null): array
+    public static function restoreContext(?string $state): void
     {
+        if (!empty($_SESSION['ovk_provider'])) {
+            return;
+        }
+
+        $parsed = self::parseState($state);
+        if ($parsed === null) {
+            return;
+        }
+
+        $_SESSION['ovk_provider'] = $parsed['provider'];
+        $_SESSION['ovk_mode'] = $parsed['mode'];
+        $_SESSION['ovk_return'] = $parsed['return'];
+    }
+
+    public static function extractAccessToken(): string
+    {
+        if (!empty($_GET['access_token'])) {
+            return trim((string) $_GET['access_token']);
+        }
+        if (!empty($_GET['token'])) {
+            return trim((string) $_GET['token']);
+        }
+
+        $query = (string) ($_SERVER['QUERY_STRING'] ?? '');
+        if (preg_match('/(?:^|&)access_token=([^&]*)/', $query, $matches)) {
+            return trim(rawurldecode($matches[1]));
+        }
+
+        return '';
+    }
+
+    public static function complete(string $accessToken, ?int $reportedUserId = null, ?string $state = null): array
+    {
+        self::restoreContext($state);
+        self::$lastApiError = null;
+
         $providerId = (string) ($_SESSION['ovk_provider'] ?? '');
         $mode = (string) ($_SESSION['ovk_mode'] ?? 'login');
         $returnUrl = (string) ($_SESSION['ovk_return'] ?? '/');
@@ -110,9 +153,14 @@ class OpenVKAuth
             return self::error('Токен OpenVK не получен.');
         }
 
-        $profile = self::fetchProfile($provider['domain'], $accessToken);
+        $apiDomain = (string) ($provider['api_domain'] ?? $provider['domain']);
+        $profile = self::fetchProfile($apiDomain, $accessToken, $reportedUserId);
         if ($profile === null) {
-            return self::error('Не удалось проверить токен OpenVK.');
+            $message = 'Не удалось проверить токен OpenVK.';
+            if (!empty(NGALLERY['root']['debug']) && self::$lastApiError) {
+                $message .= ' (' . self::$lastApiError . ')';
+            }
+            return self::error($message);
         }
 
         $ovkUserId = (int) ($profile['id'] ?? 0);
@@ -232,19 +280,75 @@ class OpenVKAuth
         return $content['openvk'];
     }
 
-    private static function fetchProfile(string $domain, string $accessToken): ?array
+    private static function defaultApiDomain(string $domain): string
     {
-        $response = self::apiRequest($domain, 'Account.getProfileInfo', $accessToken);
-        if (isset($response['response']) && is_array($response['response'])) {
-            return $response['response'];
+        if (preg_match('#^https?://(www\.)?openvk\.org$#i', $domain)) {
+            return 'https://api.openvk.org';
         }
 
-        $userResponse = self::apiRequest($domain, 'Users.get', $accessToken, [
-            'user_ids' => '0',
-            'fields' => 'photo_200,screen_name,domain',
-        ]);
-        if (isset($userResponse['response'][0]) && is_array($userResponse['response'][0])) {
-            return $userResponse['response'][0];
+        return $domain;
+    }
+
+    private static function buildState(string $providerId, string $mode, string $returnUrl): string
+    {
+        $payload = $providerId . '|' . $mode . '|' . base64_encode($returnUrl);
+        return rtrim(strtr(base64_encode($payload), '+/', '-_'), '=');
+    }
+
+    private static function parseState(?string $state): ?array
+    {
+        if ($state === null || $state === '') {
+            return null;
+        }
+
+        $decoded = base64_decode(strtr($state, '-_', '+/'), true);
+        if ($decoded === false) {
+            return null;
+        }
+
+        $parts = explode('|', $decoded, 3);
+        if (count($parts) < 2 || self::provider($parts[0]) === null) {
+            return null;
+        }
+
+        return [
+            'provider' => $parts[0],
+            'mode' => $parts[1] === 'link' ? 'link' : 'login',
+            'return' => isset($parts[2]) ? (string) base64_decode($parts[2]) : '/',
+        ];
+    }
+
+    private static function fetchProfile(string $apiDomain, string $accessToken, ?int $userId = null): ?array
+    {
+        foreach (['Account.getProfileInfo', 'account.getProfileInfo'] as $method) {
+            $response = self::apiRequest($apiDomain, $method, $accessToken);
+            if (isset($response['response']) && is_array($response['response'])) {
+                $profile = $response['response'];
+                if (!empty($profile['id']) || !empty($profile['first_name'])) {
+                    if (empty($profile['id']) && $userId > 0) {
+                        $profile['id'] = $userId;
+                    }
+                    return $profile;
+                }
+            }
+        }
+
+        $userIds = [];
+        if ($userId > 0) {
+            $userIds[] = (string) $userId;
+        }
+        $userIds[] = '0';
+
+        foreach ($userIds as $uid) {
+            foreach (['Users.get', 'users.get'] as $method) {
+                $userResponse = self::apiRequest($apiDomain, $method, $accessToken, [
+                    'user_ids' => $uid,
+                    'fields' => 'photo_200,photo_100,screen_name,domain,first_name,last_name',
+                ]);
+                if (isset($userResponse['response'][0]) && is_array($userResponse['response'][0])) {
+                    return $userResponse['response'][0];
+                }
+            }
         }
 
         return null;
@@ -252,25 +356,53 @@ class OpenVKAuth
 
     private static function apiRequest(string $domain, string $method, string $accessToken, array $params = []): ?array
     {
-        $query = array_merge($params, ['access_token' => $accessToken]);
+        $query = array_merge($params, [
+            'access_token' => $accessToken,
+            'v' => '5.126',
+        ]);
         $url = rtrim($domain, '/') . '/method/' . $method . '?' . http_build_query($query);
 
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 15,
+            CURLOPT_TIMEOUT => 20,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_USERAGENT => 'NativeGallery/OpenVKAuth',
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; NativeGallery/1.4; +https://github.com/Lanmikeman/nativegallery)',
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
         ]);
         $body = curl_exec($ch);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
         if ($body === false || $body === '') {
+            self::$lastApiError = $curlError !== '' ? $curlError : 'пустой ответ API';
+            return null;
+        }
+
+        if (str_starts_with(ltrim($body), '<')) {
+            self::$lastApiError = 'API вернул HTML вместо JSON (проверьте api_domain)';
             return null;
         }
 
         $decoded = json_decode($body, true);
-        if (!is_array($decoded) || isset($decoded['error'])) {
+        if (!is_array($decoded)) {
+            self::$lastApiError = 'некорректный JSON от API';
+            return null;
+        }
+
+        if (isset($decoded['error_code']) && (int) $decoded['error_code'] !== 0) {
+            self::$lastApiError = (string) ($decoded['error_msg'] ?? 'ошибка API #' . $decoded['error_code']);
+            return null;
+        }
+
+        if (isset($decoded['error'])) {
+            $error = $decoded['error'];
+            if (is_array($error)) {
+                self::$lastApiError = (string) ($error['error_msg'] ?? $error['message'] ?? 'ошибка API');
+            } else {
+                self::$lastApiError = 'ошибка API #' . (string) ($decoded['error_code'] ?? '');
+            }
             return null;
         }
 

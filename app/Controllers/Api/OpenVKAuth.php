@@ -29,10 +29,11 @@ class OpenVKAuth
             }
         }
 
-        $token = (string) ($payload['access_token'] ?? $_POST['access_token'] ?? '');
+        $token = trim((string) ($payload['access_token'] ?? $_POST['access_token'] ?? OpenVKAuthService::extractAccessToken()));
         $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : (isset($_POST['user_id']) ? (int) $_POST['user_id'] : null);
+        $state = isset($payload['state']) ? (string) $payload['state'] : (isset($_GET['state']) ? (string) $_GET['state'] : null);
 
-        $result = OpenVKAuthService::complete($token, $userId);
+        $result = OpenVKAuthService::complete($token, $userId, $state);
         echo Json::return($result);
     }
 

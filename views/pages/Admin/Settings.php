@@ -131,12 +131,12 @@ function renderInputs($data, $prefix = '')
                                 <?php
                                 foreach (NGALLERY_TASKS as $nt) {
                                     if ($nt['type'] === 'cron') {
-                                         $nt = $nt;
+                                        $handler = (string) $nt['handler'];
                                     echo '<tr><td>
 
                                        '.$nt['id'].'
-                                    </td><td>
-                                       '.$task->getTaskStatus($nt['id'], "php {$nt['handler']}").'
+                                    </td><td id="task-status-'.$nt['id'].'">
+                                       '.$task->getTaskStatus($nt['id'], null, $handler).'
                                     </td><td class="c">
                                         <a onclick="taskManager(`'.$nt['id'].'`, 1)" class="btn btn-sm btn-primary">Запустить</a> <a onclick="taskManager(`'.$nt['id'].'`, 0)" class="btn btn-sm btn-danger">Остановить</a>
                                     </td> <tr>';
@@ -160,13 +160,18 @@ function renderInputs($data, $prefix = '')
     function taskManager(id, type) {
         $.ajax({
             type: "GET",
-            url: '/api/admin/settings/taskmanager?id='+id+'&type='+type,
+            url: '/api/admin/settings/taskmanager?id=' + encodeURIComponent(id) + '&type=' + type,
+            dataType: 'json',
             success: function(response) {
-                Notify.noty('success', 'OK!');
-
-
+                const message = response.message || (response.errorcode === 0 ? 'Готово' : 'Ошибка');
+                Notify.noty(response.errorcode === 0 ? 'success' : 'error', message);
+                if (response.errorcode === 0) {
+                    window.location.reload();
+                }
+            },
+            error: function() {
+                Notify.noty('error', 'Ошибка сети');
             }
-
         });
     }
     </script>

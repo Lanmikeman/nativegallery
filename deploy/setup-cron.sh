@@ -34,6 +34,20 @@ CRON_LINE="*/5 * * * * www-data php ${TASK_SCRIPT} >> ${LOG_DIR}/cron.log 2>&1"
 echo "${CRON_LINE}" > "${CRON_FILE}"
 chmod 644 "${CRON_FILE}"
 
+MARKER_FILE="${NG_WEB_ROOT}/storage/cron-tasks.json"
+mkdir -p "${NG_WEB_ROOT}/storage"
+cat > "${MARKER_FILE}" <<EOF
+{
+    "ExecContests": {
+        "handler": "/app/Controllers/Exec/Tasks/ExecContests.php",
+        "source": "cron.d",
+        "installed_at": $(date +%s)
+    }
+}
+EOF
+chown www-data:www-data "${MARKER_FILE}"
+chmod 664 "${MARKER_FILE}"
+
 echo "Cron installed:"
 cat "${CRON_FILE}"
 echo ""

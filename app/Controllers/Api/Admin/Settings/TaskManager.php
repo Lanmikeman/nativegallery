@@ -2,36 +2,54 @@
 
 namespace App\Controllers\Api\Admin\Settings;
 
-
-
-use App\Services\{Auth, Router, GenerateRandomStr, DB, Json, EXIF, TaskScheduler};
-use App\Models\{User, Vote, Photo};
-
+use App\Services\{Json, TaskScheduler};
 
 class TaskManager
 {
     public function __construct()
     {
+        $taskId = trim((string) ($_GET['id'] ?? ''));
+        $action = (int) ($_GET['type'] ?? -1);
+
+        if ($taskId === '' || ($action !== 0 && $action !== 1)) {
+            echo Json::return([
+                'errorcode' => 1,
+                'error' => 1,
+                'message' => 'Некорректные параметры',
+            ]);
+            return;
+        }
+
         $task = new TaskScheduler();
+        $matched = false;
+
         foreach (NGALLERY_TASKS as $t) {
-            $id = $_GET['id'];
-            if (isset($t['id']) && $t['id'] == $id) {
-                if ($_GET['type'] === 0) {
-                    $task->removeTask($t['id'], "php ".$_SERVER['DOCUMENT_ROOT'].$t['handler']);
-                } else {
-                    $task->addTask(
-                        $t['id'],
-                        "php ".$_SERVER['DOCUMENT_ROOT'].$t['handler']." >> ".$_SERVER['DOCUMENT_ROOT'].NGALLERY['root']['logslocation']." 2>&1",
-                        "* * * * *"
-                    );
-                }
-                echo json_encode(
-                    array(
-                        'errorcode' => 0,
-                        'error' => 0
-                    )
-                );
+            if (($t['id'] ?? '') !== $taskId || ($t['type'] ?? '') !== 'cron') {
+                continue;
             }
+
+            $matched = true;
+            $handler = (string) ($t['handler'] ?? '');
+            $command = $task->cronJobCommand($handler);
+
+            $result = $action === 1
+                ? $task->addTask($taskId, $command, '*/5 * * * *', $handler)
+                : $task->removeTask($taskId, $command, $handler);
+
+            echo Json::return([
+                'errorcode' => $result['ok'] ? 0 : 1,
+                'error' => $result['ok'] ? 0 : 1,
+                'message' => $result['message'],
+            ]);
+            return;
+        }
+
+        if (!$matched) {
+            echo Json::return([
+                'errorcode' => 1,
+                'error' => 1,
+                'message' => 'Задача не найдена',
+            ]);
         }
     }
 }

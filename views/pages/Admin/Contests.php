@@ -6,7 +6,8 @@ use \App\Models\User;
 $task = new TaskScheduler();
 
 $contestCreate = true;
-if (!$task->isTaskExists("ExecContests", "php ".$_SERVER['DOCUMENT_ROOT'].$task->findHandlerById(NGALLERY_TASKS, 'ExecContests'))) {
+$execContestsHandler = $task->findHandlerById(NGALLERY_TASKS, 'ExecContests') ?? '/app/Controllers/Exec/Tasks/ExecContests.php';
+if (!$task->isTaskExists('ExecContests', null, $execContestsHandler)) {
     $contestCreate = false;
 }
 ?>

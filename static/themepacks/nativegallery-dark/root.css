@@ -4,7 +4,25 @@
     --theme-body-color: #222;
     --theme-main-color: #222;
     --theme-text-color: #eee;
-	--theme-form-color: #333;
+    --theme-form-color: #333;
+
+    --theme-bg-color:           #3d3d3d;
+    --theme-bg-hover-color:     #555;
+    --theme-link-color:         #9ec8ef;
+    --theme-link-visited-color: #b8b0d8;
+    --theme-link-hover-bg-color: rgba(100, 160, 220, .22);
+    --theme-link-underline-color: rgba(140, 190, 240, .35);
+    --theme-link-underline-visited-color: rgba(160, 150, 200, .35);
+    --theme-preview-hover-bg-color: rgba(120, 120, 120, 0.55);
+
+    --theme-border-color: #555;
+    --theme-muted-color: #aaa;
+    --theme-input-bg: #1a1a1a;
+    --theme-input-text: #eee;
+    --theme-input-border: #555;
+    --theme-tab-color: #ccc;
+    --theme-tab-active-color: #fff;
+    --theme-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 h1, h2, h3, h4, #mm-bar { color:#fff; }
@@ -316,5 +334,7 @@ a.underphoto:hover { background-color:#222; }
   color: #d0d0d0;
 }
 .modal-content {
-    background-color: #333333;
+    background-color: var(--theme-form-color);
+    color: var(--theme-text-color);
+    border-color: var(--theme-border-color);
 }

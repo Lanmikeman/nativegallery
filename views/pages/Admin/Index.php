@@ -27,7 +27,7 @@ $cacheBust = NGALLERY['root']['cloudflare-caching'] === true ? '?' . time() : ''
     <script src="/static/js/changeTab.js<?= $cacheBust ?>" defer></script>
 </head>
 
-<body>
+<body class="admin-page">
     <div id="backgr"></div>
     <table class="tmain">
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'; ?>

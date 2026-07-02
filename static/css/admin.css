@@ -1,3 +1,8 @@
+body.admin-page {
+    color: var(--theme-text-color);
+    background-color: var(--theme-body-color);
+}
+
 .admin-layout {
     display: flex;
     gap: 20px;
@@ -8,13 +13,14 @@
 .admin-nav {
     flex: 0 0 210px;
     background-color: var(--theme-form-color);
-    border: 1px solid #c8c8c8;
+    border: 1px solid var(--theme-border-color);
     box-sizing: border-box;
+    color: var(--theme-text-color);
 }
 
 .admin-nav__head {
     padding: 12px 14px 10px;
-    border-bottom: 1px solid #c8c8c8;
+    border-bottom: 1px solid var(--theme-border-color);
     background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)) var(--theme-bg-color);
     color: var(--theme-fg-color);
 }
@@ -25,6 +31,7 @@
     font-size: 24px;
     font-weight: normal;
     line-height: 1.1;
+    color: inherit;
 }
 
 .admin-nav__back {
@@ -88,10 +95,34 @@
 .admin-panel {
     flex: 1;
     min-width: 0;
+    color: var(--theme-text-color);
+}
+
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3,
+.admin-panel h4,
+.admin-panel h5,
+.admin-panel h6,
+.admin-panel p,
+.admin-panel li,
+.admin-panel label,
+.admin-panel th,
+.admin-panel td {
+    color: inherit;
 }
 
 .admin-panel h1 {
     margin-top: 0;
+}
+
+.admin-panel .text-muted {
+    color: var(--theme-muted-color) !important;
+}
+
+.admin-panel code {
+    color: inherit;
+    background-color: rgba(127, 127, 127, 0.15);
 }
 
 .admin-panel .btn {
@@ -106,30 +137,66 @@
 }
 
 .admin-panel .btn-primary:hover,
-.admin-panel .btn-primary:focus {
+.admin-panel .btn-primary:focus,
+.admin-panel .btn-primary:active {
     background-color: var(--theme-bg-hover-color);
     border-color: var(--theme-bg-hover-color);
     color: var(--theme-fg-color);
 }
 
 .admin-panel .btn-outline-primary {
-    color: var(--theme-bg-color);
+    color: var(--theme-tab-active-color, var(--theme-bg-color));
     border-color: var(--theme-bg-color);
 }
 
-.admin-panel .btn-outline-primary:hover {
+.admin-panel .btn-outline-primary:hover,
+.admin-panel .btn-outline-primary:focus {
     background-color: var(--theme-bg-color);
     border-color: var(--theme-bg-color);
     color: var(--theme-fg-color);
 }
 
+.admin-panel .btn-outline-dark,
+.admin-panel .btn-outline-secondary {
+    color: var(--theme-text-color);
+    border-color: var(--theme-border-color);
+}
+
+.admin-panel .btn-outline-dark:hover,
+.admin-panel .btn-outline-secondary:hover {
+    background-color: var(--theme-bg-color);
+    border-color: var(--theme-bg-color);
+    color: var(--theme-fg-color);
+}
+
+.admin-panel .btn-secondary {
+    background-color: var(--theme-border-color);
+    border-color: var(--theme-border-color);
+    color: var(--theme-text-color);
+}
+
+.admin-panel .btn-danger {
+    color: #fff;
+}
+
 .admin-panel .table {
     background-color: var(--theme-form-color);
+    color: var(--theme-text-color);
     margin-top: 10px;
+    border-color: var(--theme-border-color);
+    --bs-table-color: var(--theme-text-color);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--theme-border-color);
+    --bs-table-striped-color: var(--theme-text-color);
+    --bs-table-striped-bg: rgba(127, 127, 127, 0.08);
+    --bs-table-hover-color: var(--theme-text-color);
+    --bs-table-hover-bg: var(--theme-link-hover-bg-color);
 }
 
 .admin-panel .table > :not(caption) > * > * {
     background-color: transparent;
+    color: var(--theme-text-color);
+    border-color: var(--theme-border-color);
 }
 
 .admin-panel .table thead th {
@@ -137,40 +204,135 @@
     font-size: 17px;
     background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)) var(--theme-bg-color);
     color: var(--theme-fg-color);
-    border-color: #bbb;
+    border-color: var(--theme-border-color);
+}
+
+.admin-panel .table a:not(.btn) {
+    color: var(--theme-link-color);
+}
+
+.admin-panel .table a:not(.btn):visited {
+    color: var(--theme-link-visited-color);
 }
 
 .admin-panel .card {
-    border-color: #c8c8c8;
+    border-color: var(--theme-border-color);
     background-color: var(--theme-form-color);
+    color: var(--theme-text-color);
+}
+
+.admin-panel .card-body {
+    color: var(--theme-text-color);
 }
 
 .admin-panel .form-control,
-.admin-panel .form-select {
+.admin-panel .form-select,
+.admin-panel textarea.form-control {
     font-family: var(--default-font);
     font-size: 13px;
+    background-color: var(--theme-input-bg);
+    color: var(--theme-input-text);
+    border-color: var(--theme-input-border);
+}
+
+.admin-panel .form-control:focus,
+.admin-panel .form-select:focus,
+.admin-panel textarea.form-control:focus {
+    background-color: var(--theme-input-bg);
+    color: var(--theme-input-text);
+    border-color: var(--theme-bg-hover-color);
+    box-shadow: 0 0 0 0.2rem rgba(127, 127, 127, 0.25);
+}
+
+.admin-panel .form-control::placeholder,
+.admin-panel textarea.form-control::placeholder {
+    color: var(--theme-muted-color);
+    opacity: 1;
+}
+
+.admin-panel .form-label,
+.admin-panel .form-text {
+    color: var(--theme-text-color);
+}
+
+.admin-panel .form-text {
+    opacity: 0.85;
 }
 
 .admin-panel .v-tab {
     font-family: var(--narrow-font);
     font-size: 18px;
+    color: var(--theme-tab-color, var(--theme-text-color));
 }
 
 .admin-panel .v-tab--active {
-    color: var(--theme-bg-color);
+    color: var(--theme-tab-active-color, var(--theme-bg-color));
 }
 
 .admin-panel .v-tab--active .v-tab__label::after {
-    background-color: var(--theme-bg-color);
+    background-color: var(--theme-tab-active-color, var(--theme-bg-color));
+}
+
+.admin-panel .modal-content {
+    background-color: var(--theme-form-color);
+    color: var(--theme-text-color);
+    border-color: var(--theme-border-color);
 }
 
 .admin-panel .modal-header {
     background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)) var(--theme-bg-color);
     color: var(--theme-fg-color);
+    border-bottom-color: var(--theme-border-color);
 }
 
 .admin-panel .modal-title {
     font-family: var(--narrow-font);
+    color: inherit;
+}
+
+.admin-panel .modal-body,
+.admin-panel .modal-footer {
+    background-color: var(--theme-form-color);
+    color: var(--theme-text-color);
+    border-color: var(--theme-border-color);
+}
+
+.admin-panel .btn-close {
+    filter: var(--theme-btn-close-filter);
+}
+
+.admin-panel .alert {
+    border-color: var(--theme-border-color);
+}
+
+.admin-panel .alert-warning {
+    background-color: rgba(255, 193, 7, 0.18);
+    color: var(--theme-text-color);
+}
+
+.admin-panel .alert-danger {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: var(--theme-text-color);
+}
+
+.admin-panel .alert-success {
+    background-color: rgba(25, 135, 84, 0.15);
+    color: var(--theme-text-color);
+}
+
+.admin-panel .alert-secondary {
+    background-color: rgba(127, 127, 127, 0.12);
+    color: var(--theme-text-color);
+}
+
+.admin-panel .alert-dark {
+    background-color: var(--theme-bg-color);
+    color: var(--theme-fg-color);
+    border-color: var(--theme-bg-hover-color);
+}
+
+.admin-panel .badge {
+    font-family: var(--default-font);
 }
 
 @media screen and (max-width: 900px) {
@@ -194,8 +356,8 @@
     .admin-nav__link {
         padding: 5px 10px;
         font-size: 15px;
-        border: 1px solid #ddd;
-        background-color: #fff;
+        border: 1px solid var(--theme-border-color);
+        background-color: var(--theme-form-color);
     }
 
     .admin-nav__link--active {

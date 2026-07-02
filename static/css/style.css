@@ -7,6 +7,15 @@
 
     --theme-form-color: #fff;
 
+    --theme-border-color: #c8c8c8;
+    --theme-muted-color: #666;
+    --theme-input-bg: var(--theme-form-color);
+    --theme-input-text: var(--theme-text-color);
+    --theme-input-border: #bbb;
+    --theme-tab-color: var(--theme-text-color);
+    --theme-tab-active-color: var(--theme-bg-color);
+    --theme-btn-close-filter: none;
+
 	--default-font: Verdana,Tahoma,Arial,Helvetica,sans-serif;
 	--narrow-font: PT Sans Narrow,Arial Narrow,Arial,Helvetica,sans-serif;
 
@@ -37,7 +46,7 @@ p, h1, h2, h3 { margin:13px 0; }
 h1 { font-size:36px; font-weight:normal; margin:11px 0; }
 h2 { font-size:28px; font-weight:normal; }
 h3 { font-size:22px; font-weight:normal; }
-h4 { font-size:20px; font-weight:bold; margin:0 0 10px; color:#333; }
+h4 { font-size:20px; font-weight:bold; margin:0 0 10px; color:var(--theme-text-color); }
 h4:last-child { margin:0; }
 
 ul.straight { margin:0; padding:0; list-style:none; }

@@ -99,7 +99,10 @@
 | `/admin?type=Models` | Заявки на изменение БД |
 | `/admin?type=Contests` | Фотоконкурсы |
 | `/admin?type=GeoDB` | GeoDB |
-| `/admin?type=AuthSettings` | Регистрация и внешняя авторизация (OpenVK) |
+| `/admin?type=AuthSettings` | Регистрация, OpenVK, добавление кастомных инстансов |
+| `POST /api/admin/settings/auth/providers` | Добавить инстанс OpenVK |
+| `POST /api/admin/settings/auth/providers/{id}` | Изменить кастомный инстанс |
+| `POST /api/admin/settings/auth/providers/{id}/delete` | Удалить кастомный инстанс |
 | `/admin?type=UserEdit&user_id=` | Права пользователя |
 | `/admin?type=Settings` | Настройки |
 

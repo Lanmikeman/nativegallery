@@ -50,6 +50,7 @@ use \App\Controllers\Api\Admin\Contests\ForceClose as AdminContestsForceClose;
 use \App\Controllers\Api\Admin\Contests\Cancel as AdminContestsCancel;
 use \App\Controllers\Api\Admin\Settings\TaskManager as AdminTaskManager;
 use \App\Controllers\Api\Admin\Settings\Auth as AdminSettingsAuth;
+use \App\Controllers\Api\Admin\Settings\AuthProvider as AdminSettingsAuthProvider;
 use \App\Controllers\Api\Admin\Users\Update as AdminUserUpdate;
 use \App\Controllers\Api\Messages\GetChats as MSGGetChats;
 use \App\Controllers\Api\Messages\UploadFile as MSGUpload;
@@ -192,6 +193,9 @@ class ApiController
     }
     public static function adminsettingsauth() {
         return new AdminSettingsAuth();
+    }
+    public static function adminsettingsauthprovider() {
+        return new AdminSettingsAuthProvider();
     }
     public static function adminuseredit() {
         return new AdminUserUpdate();

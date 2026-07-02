@@ -128,6 +128,9 @@ class Routes
                 Router::post('/api/admin/contests/cancel', 'ApiController@admincontestscancel');
                 Router::any('/api/admin/settings/taskmanager', 'ApiController@admintaskmanager');
                 Router::post('/api/admin/settings/auth', 'ApiController@adminsettingsauth');
+                Router::post('/api/admin/settings/auth/providers', 'ApiController@adminsettingsauthprovider');
+                Router::post('/api/admin/settings/auth/providers/$id', 'ApiController@adminsettingsauthprovider');
+                Router::post('/api/admin/settings/auth/providers/$id/delete', 'ApiController@adminsettingsauthprovider');
                 Router::post('/api/admin/users/$id/edit', 'ApiController@adminuseredit');
             }
             Router::get('/logout', 'MainController@logout');

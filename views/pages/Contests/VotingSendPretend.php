@@ -71,7 +71,7 @@ foreach ($photos as $photo) {
                                             'SELECT title FROM contests_themes WHERE id = :id',
                                             [':id' => (int) $contest['themeid']]
                                         );
-                                        $themeTitle = $themeRows[0]['title'] ?? '—';
+                                        $themeTitle = ($themeRows[0] ?? [])['title'] ?? '—';
                                         ?>
                                         <tr>
                                             <td class="ds">

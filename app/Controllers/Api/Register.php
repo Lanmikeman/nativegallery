@@ -275,6 +275,15 @@ class Register
 
     public function __construct()
     {
+        if (empty(NGALLERY['root']['registration']['access']['public'])) {
+            echo Json::return([
+                'errorcode' => 1,
+                'error' => 1,
+                'message' => 'Регистрация отключена администратором',
+            ]);
+            return;
+        }
+
         $ip = $_SERVER['REMOTE_ADDR'];
         $lockFile = $_SERVER['DOCUMENT_ROOT'] . '/lock/request_lock_' . $ip;
         file_put_contents($lockFile, 'lock');

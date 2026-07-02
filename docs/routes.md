@@ -99,6 +99,8 @@
 | `/admin?type=Models` | Заявки на изменение БД |
 | `/admin?type=Contests` | Фотоконкурсы |
 | `/admin?type=GeoDB` | GeoDB |
+| `/admin?type=AuthSettings` | Регистрация и внешняя авторизация (OpenVK) |
+| `/admin?type=UserEdit&user_id=` | Права пользователя |
 | `/admin?type=Settings` | Настройки |
 
 ### API админки (новости)

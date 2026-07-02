@@ -206,12 +206,14 @@ openvk:
   auto_register: true
   providers:
     openvk_org:
+      enabled: true
       label: 'OpenVK.org'
       domain: 'https://openvk.org'
       api_domain: 'https://api.openvk.org'
       accent: '#5181b8'
       icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
     vepurovk:                    # второй инстанс OVK (production-сервер форка)
+      enabled: true
       label: 'VepurOVK'
       domain: 'https://vepurovk.xyz'
       accent: '#45668e'
@@ -225,9 +227,12 @@ openvk:
 | `redirect_uri` | Callback URL; пусто = `https://ВАШ_ДОМЕН/auth/callback` |
 | `response_type` | `php` (токен в query) или `token` (токен в `#`, нужен JS) |
 | `auto_register` | Создавать локальный аккаунт при первом входе через OpenVK |
+| `providers.*.enabled` | Включить инстанс (кнопка на `/login`); по умолчанию `true` |
 | `providers.*.api_domain` | API-хост (для openvk.org обязательно `https://api.openvk.org`) |
 | `providers.*.accent` | Цвет кнопки входа |
 | `providers.*.icon` | Favicon/иконка инстанса |
+
+Управление из админки: `/admin?type=AuthSettings` (только для `admin = 1`).
 
 Привязка существующего аккаунта: `/lk/profile?type=OpenVK`.
 

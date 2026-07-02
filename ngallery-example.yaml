@@ -81,6 +81,7 @@ ngallery:
       auto_register: true
       providers:
         openvk_org:
+          enabled: true
           label: 'OpenVK.org'
           domain: 'https://openvk.org'
           api_domain: 'https://api.openvk.org'
@@ -88,6 +89,7 @@ ngallery:
           icon: 'https://openvk.org/assets/packages/static/openvk/img/favicon.ico'
         # второй инстанс OVK — подключён на production-сервере форка как пример
         vepurovk:
+          enabled: true
           label: 'VepurOVK'
           domain: 'https://vepurovk.xyz'
           accent: '#45668e'

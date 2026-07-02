@@ -29,6 +29,9 @@ class OpenVKAuth
             if (!is_array($provider) || empty($provider['domain'])) {
                 continue;
             }
+            if (array_key_exists('enabled', $provider) && !$provider['enabled']) {
+                continue;
+            }
             $domain = rtrim((string) $provider['domain'], '/');
             $apiDomain = rtrim((string) ($provider['api_domain'] ?? self::defaultApiDomain($domain)), '/');
             $resolved[$id] = array_merge([

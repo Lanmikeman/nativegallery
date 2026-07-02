@@ -104,6 +104,10 @@ if ($nonreviewedentities > 0) {
                             <i class="bx bx-file-blank nav__icon"></i>
                             <span class="nav__name">Страницы</span>
                         </!--a-->
+                        <a href="/admin?type=AuthSettings" class="nav__link">
+                            <i class="bx bx-key nav__icon"></i>
+                            <span class="nav__name">Авторизация</span>
+                        </a>
                         <a href="/admin?type=Settings" class="nav__link">
                             <i class="bx bx-cog nav__icon"></i>
                             <span class="nav__name">Настройки<span class="badge text-bg-warning">BETA</span></span>

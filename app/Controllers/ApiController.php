@@ -49,6 +49,8 @@ use \App\Controllers\Api\Admin\Contests\Create as AdminContestsCreate;
 use \App\Controllers\Api\Admin\Contests\ForceClose as AdminContestsForceClose;
 use \App\Controllers\Api\Admin\Contests\Cancel as AdminContestsCancel;
 use \App\Controllers\Api\Admin\Settings\TaskManager as AdminTaskManager;
+use \App\Controllers\Api\Admin\Settings\Auth as AdminSettingsAuth;
+use \App\Controllers\Api\Admin\Users\Update as AdminUserUpdate;
 use \App\Controllers\Api\Messages\GetChats as MSGGetChats;
 use \App\Controllers\Api\Messages\UploadFile as MSGUpload;
 use \App\Controllers\Api\Messages\GetUsers as MSGGetUsers;
@@ -187,6 +189,12 @@ class ApiController
     }
     public static function admintaskmanager() {
         return new AdminTaskManager();
+    }
+    public static function adminsettingsauth() {
+        return new AdminSettingsAuth();
+    }
+    public static function adminuseredit() {
+        return new AdminUserUpdate();
     }
     public static function vehiclesload() {
         return new VehiclesLoad();

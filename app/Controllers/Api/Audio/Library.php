@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Controllers\Api\Audio;
+
+use App\Services\{Auth, Json, AudioLibrary};
+
+class Library
+{
+    public function __construct()
+    {
+        $userId = Auth::userid();
+        if ($userId <= 0) {
+            echo Json::return(['errorcode' => 'NO_AUTH', 'error' => 1, 'message' => 'Требуется авторизация']);
+            return;
+        }
+
+        echo Json::return([
+            'errorcode' => 0,
+            'error' => 0,
+            'library' => AudioLibrary::libraryForUser($userId),
+            'tables_exist' => AudioLibrary::tablesExist(),
+        ]);
+    }
+}

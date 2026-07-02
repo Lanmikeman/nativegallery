@@ -7,7 +7,7 @@ $themeManager = new ThemeManager();
 $themeManager->loadThemes();
 
 $stylesheet = $themeManager->getThemeStylesheet();
-$userLoggedIn = Auth::userid() > 0;
+$musicUserLoggedIn = Auth::userid() > 0;
 ?>
 
 <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -30,7 +30,9 @@ $userLoggedIn = Auth::userid() > 0;
     <link rel="stylesheet" href="<?= ng_asset('/static/css/map.css') ?>">
     <link rel="stylesheet" href="<?= ng_asset('/static/css/jquery-ui-1.8.20.custom.css') ?>">
     <link rel="stylesheet" href="<?= ng_asset('/static/css/progress.css') ?>">
-
+    <?php if ($musicUserLoggedIn) { ?>
+    <link rel="stylesheet" href="<?= ng_asset('/static/css/music-player.css') ?>">
+    <?php } ?>
     <script src="<?= ng_asset('/static/js/jquery.js') ?>" data-restart></script>
     <script src="<?= ng_asset('/static/js/jquery.form.min.js') ?>" data-restart></script>
     <script src="<?= ng_asset('/static/js/core.js') ?>" data-restart></script>
@@ -41,7 +43,8 @@ $userLoggedIn = Auth::userid() > 0;
     <script src="<?= ng_asset('/static/js/imageupload.js') ?>" data-restart></script>
     <script src="<?= ng_asset('/static/js/progress.js') ?>" data-restart></script>
     <script src="<?= ng_asset('/static/js/notie.js') ?>" data-restart></script>
-    <?php if ($userLoggedIn) { ?>
+    <?php if ($musicUserLoggedIn) { ?>
+    <script src="<?= ng_asset('/static/js/music-player.js') ?>"></script>
     <script src="<?= ng_asset('/static/js/routing.js') ?>"></script>
     <?php } ?>
     <script src="<?= ng_asset('/static/js/photo.js') ?>" data-restart></script>

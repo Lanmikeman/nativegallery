@@ -69,6 +69,7 @@
         <button onclick="document.getElementById('bodypost').value += '[link=] [/link]';" type="button" class="btn btn-primary btn-sm mb-2" style="margin-right: 36px;"><i class="bx bx-link"></i></button>
         <button href="#" data-bs-toggle="modal" data-bs-target="#pickImageModal" type="button" class="btn btn-primary btn-sm mb-2" style="margin-right: 6px;"><i class="bx bx-image-alt"></i></button>
         <button href="#" data-bs-toggle="modal" data-bs-target="#pickVideoModal" type="button" class="btn btn-primary btn-sm mb-2" style="margin-right: 6px;"><i class="bx bx-video"></i></button>
+        <button href="#" data-bs-toggle="modal" data-bs-target="#pickMusicModal" type="button" class="btn btn-primary btn-sm mb-2" style="margin-right: 6px;"><i class="bx bx-music"></i></button>
         </div>
         <textarea id="bodypost" class="form-control" name="bodypost" placeholder="Вы можете написать свою историю" cols="30" rows="10"></textarea>
         <div class="btn-group" role="group" aria-label="Basic example">
@@ -103,6 +104,26 @@
             
       </div>
       </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="pickMusicModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Прикрепление музыки</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <div class="mb-3">
+                <input id="filebody" type="file" name="filebody" class="form-control" type="file">
+            </div>
+      </div>
+      <div class="modal-footer">
+        <div><button type="button" class="btn-r btn-secondary" data-bs-dismiss="modal">Отмена</button></div>
+        <div id="r"><button id="t" type="submit" class="btn btn-primary">Прикрепить</button></div>
+            
+      </div>
     </div>
   </div>
 </div>

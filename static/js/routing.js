@@ -10,6 +10,7 @@
 
   const PERMANENT_SCRIPTS = [
     "/static/js/jquery.js",
+    "/static/js/music-player.js",
     "/static/js/routing.js",
   ];
 
@@ -67,7 +68,9 @@
   }
 
   function handleClick(e) {
-    if (e.target.closest("#prev, #next, #photobar")) {
+    if (e.target.closest(
+      "#ng-music-bar, .ng-music-page, #prev, #next, #photobar, [data-action], [data-play-item], [data-queue-item], [data-play-playlist], [data-play-pl-item]"
+    )) {
       return;
     }
 

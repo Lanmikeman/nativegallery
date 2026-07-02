@@ -455,6 +455,36 @@ use App\Services\{Router, Auth};
                                         <br>
                                     </div>
 
+                                    <div id="audios" class="tabcontent" style="display: none;">
+                                        <h2>Слушайте аудиозаписи</h2>
+
+                                        <ul class="listing">
+                                            <li><span>Вы можете слушать аудиозаписи в разделе "Мои Аудиозаписи"</span></li>
+                                            <li><span>Этот раздел также регулируется настройками приватности</span></li>
+                                            <li><span>Самые прослушиваемые песни находятся во вкладке "Популярное", а недавно загруженные — во вкладке "Новое"</span></li>
+                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios.png" width="440">
+                                        </ul>
+
+                                        <ul class="listing">
+                                            <li><span>Чтобы добавить песню в свою коллекцию, наведите на неё и нажмите на плюс. Найти нужную песню можно в поиске</span></li>
+                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios_search.png" width="440">
+                                            <li><span>Если вы не можете найти нужную песню, вы можете загрузить её самостоятельно</span></li>
+                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios_upload.png" width="440">
+                                        </ul>
+
+                                        <p class="big"><b>Важно:</b> песня не должна нарушать авторские права</p>
+
+                                        <h2>Создавайте плейлисты</h2>
+
+                                        <ul class="listing">
+                                            <li><span>Вы можете создавать сборники треков во вкладке "Мои плейлисты"</span></li>
+                                            <li><span>Можно также добавлять чужие плейлисты в свою коллекцию</span></li>
+                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios_playlists.png" width="440">
+                                        </ul>
+
+                                        <br>
+                                    </div>
+
                                     <div id="news" class="tabcontent" style="display: none;">
                                         <h2>Следите за тем, что пишут ваши друзья</h2>
 

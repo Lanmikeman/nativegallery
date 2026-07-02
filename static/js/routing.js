@@ -12,6 +12,7 @@
     "/static/js/jquery.js",
     "/static/js/music-player.js",
     "/static/js/routing.js",
+    "/static/js/comments.js",
   ];
 
   const SKIP_PATH_PREFIXES = ["/api/", "/auth/", "/logout"];
@@ -263,6 +264,7 @@
       executeScriptsIn(currMain);
       executeScriptsIn(pmainEl);
 
+      reloadStylesheets(doc);
       reloadExternalScripts(doc);
       reloadScopedScripts(doc, currMain, pmainEl);
 
@@ -278,6 +280,38 @@
       console.error("SPA updatePage error:", err);
       return false;
     }
+  }
+
+  function reloadStylesheets(doc) {
+    const loadedPaths = new Set(
+      Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map((link) => {
+        try {
+          return new URL(link.href, location.origin).pathname;
+        } catch {
+          return link.getAttribute("href") || "";
+        }
+      })
+    );
+
+    doc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+      const href = link.getAttribute("href");
+      if (!href) return;
+
+      let pathname = href;
+      try {
+        pathname = new URL(href, location.origin).pathname;
+      } catch {
+        return;
+      }
+
+      if (loadedPaths.has(pathname)) return;
+
+      const newLink = document.createElement("link");
+      newLink.rel = "stylesheet";
+      newLink.href = href;
+      document.head.appendChild(newLink);
+      loadedPaths.add(pathname);
+    });
   }
 
   function reloadExternalScripts(doc) {

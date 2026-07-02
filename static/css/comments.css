@@ -80,12 +80,36 @@
 
 .pc-links, .pc-topost { font-size:11px; }
 
-/*@media (min-width:700px)
-{*/
-.p-comment { display:flex; margin-bottom:15px; }
+.p-comment {
+	display:flex;
+	flex-direction:row;
+	align-items:flex-start;
+	margin-bottom:15px;
+}
 
-.pc-photo  { width:250px; padding:15px; }
-.pc-content { display:flex; flex-direction:column; flex-grow:1; position:relative; }
+.pc-photo {
+	flex:0 0 250px;
+	width:250px;
+	max-width:250px;
+	padding:15px;
+	box-sizing:border-box;
+}
+
+.pc-photo img.f {
+	display:block;
+	width:100%;
+	max-width:250px;
+	height:auto;
+}
+
+.pc-content {
+	display:flex;
+	flex-direction:column;
+	flex:1 1 auto;
+	min-width:0;
+	min-height:120px;
+	position:relative;
+}
 
 .pc-text   { padding:13px 15px 20px 5px; flex-grow:1; }
 .pc-links  { padding:0 0 15px 5px; }
@@ -95,19 +119,24 @@
 .comment-votes-block { float:right; display:flex; position:relative; }
 
 .cmt-cons, .cmt-mark { margin-right:11px; }
-/*}
 
 @media (max-width:700px)
 {
-	.p-comment { display:flex; flex-direction:column; align-items:center; }
+	.p-comment { flex-direction:column; align-items:center; }
 
-	.pc-photo   { padding-bottom:7px; }
-	.pc-content { display:flex; flex-wrap:wrap; }
+	.pc-photo {
+		flex:0 0 auto;
+		width:100%;
+		max-width:250px;
+		padding-bottom:7px;
+	}
+
+	.pc-content { flex-wrap:wrap; min-height:0; }
 
 	.pc-text   { order:2; width:100%; border-top:solid 1px #ddd; border-bottom:solid 1px #ddd; padding:10px 0; margin-bottom:7px; }
 	.pc-links  { order:1; width:100%; text-align:center; padding-bottom:10px; }
-	.pc-topost { order:3; margin-top:3px; flex-grow:1; }
-	.pc-compl  { order:4; margin-top:3px; }99999
+	.pc-topost { order:3; position:static; margin-top:3px; flex-grow:1; }
+	.pc-compl  { order:4; position:static; margin-top:3px; }
 
 	.cmt-aname { display:block; }
 	.cmt-dot   { display:none !important; }
@@ -149,5 +178,5 @@
 	.pb_tools > .s3 { display:block; position:static !important; font-size:11px; padding:0 !important; margin:3px 0 0 0 !important; background:transparent; color:#bbb !important; }
 
 	.pc_pre { display:none; }
-	.message_text.feed { margin-top:10px; }
-}*/
+	.message-text.feed { margin-top:10px; }
+}

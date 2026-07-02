@@ -695,7 +695,6 @@ function setupAutocomplete() {
 
   const form = document.getElementById("f1");
   if (!form) {
-    console.error("Форма #f1 не найдена!");
     return;
   }
 

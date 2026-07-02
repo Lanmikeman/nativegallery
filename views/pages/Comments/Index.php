@@ -22,35 +22,6 @@ use \App\Models\{User, Photo, Vote};
         <tr>
             <td class="main">
                 <h1>Лента комментариев</h1>
-                <script src="/js/jquery-ui.js?1633005526"></script>
-                <script src="/js/selector.js?1730197663"></script>
-                <script>
-                    $(document).ready(function() {
-                        $('#cname').citySelector('cid', {
-                            defaultLabel: 'Все города'
-                        });
-                        $('#type').val(0).change(function() {
-                            $(this).attr('class', $('option:selected', this).attr('class'));
-                        }).change();
-
-                        $('#applyFilter').on('click', function() {
-                            var cid = $('#cid').val();
-                            var type = $('#type').val();
-                            var redir = '/comments.php';
-
-                            if (cid > 0 || type > 0) {
-                                redir = redir + '?';
-                                if (cid > 0) {
-                                    redir = redir + 'cid=' + cid;
-                                    if (type > 0) redir = redir + '&';
-                                }
-                                if (type > 0) redir = redir + 't=' + type;
-                            }
-
-                            window.location.href = redir;
-                        });
-                    });
-                </script>
                 <div id="upd_anchor"></div>
                 <?php
                 $comments = DB::query('SELECT * FROM photos_comments ORDER BY id DESC LIMIT 30');
@@ -108,7 +79,6 @@ use \App\Models\{User, Photo, Vote};
                 
                
                 <div id="scroll_anchor"></div>
-                <script src="/js/endless.js?031021"></script>
                 <script>
                     var ltime = 1739362440;
                     var last_k = 20;

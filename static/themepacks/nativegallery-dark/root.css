@@ -265,6 +265,9 @@ a.underphoto:hover { background-color:#222; }
 .w-rating.active { background-color:#222; }
 
 .w-rating-ext div { background-color:#222; }
+
+.p-comment .pc-text { color:var(--theme-text-color); }
+.p-comment .rank { color:var(--theme-muted-color); }
 .w-btn.voted, .w-btn.voted:hover { background-color:#444 !important; }
 
 .no-politics { color:#fd7272; }

@@ -85,9 +85,6 @@ if ($photo->i('id') !== null) {
             <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
             <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
-            <script src="/static/js/comments.js<?php if (NGALLERY['root']['cloudflare-caching'] === true) {
-                                                    echo '?' . time();
-                                                } ?>" defer></script>
             <link
                 rel="stylesheet"
                 href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />

@@ -24,6 +24,7 @@ $musicEnabled = $musicUserLoggedIn && AudioLibrary::isEnabled();
     <link rel="stylesheet" href="<?= ng_asset('/static/css/photo.css') ?>">
     <link rel="stylesheet" href="<?= ng_asset('/static/css/notie.css') ?>">
     <link rel="stylesheet" href="<?= ng_asset('/static/css/comments.css') ?>">
+    <script src="<?= ng_asset('/static/js/comments.js') ?>" data-restart></script>
     <?php
     if ($stylesheet) { ?>
     <link rel="stylesheet" href="<?= ng_asset($stylesheet) ?>">

@@ -68,7 +68,9 @@ CREATE TABLE `login_tokens` (
 CREATE TABLE `news` (
   `id` int NOT NULL,
   `body` text NOT NULL,
-  `time` int NOT NULL
+  `time` int NOT NULL,
+  `edited_at` int NOT NULL DEFAULT '0',
+  `edited_by` int NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------

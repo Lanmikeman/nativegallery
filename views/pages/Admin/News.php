@@ -32,6 +32,30 @@ use \App\Models\User;
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="editNewsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5"><b>Редактировать новость</b></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-news-id" value="">
+                <div class="mb-3">
+                    <label for="edit-body" class="form-label">Содержание</label>
+                    <textarea class="form-control" id="edit-body" name="edit-body" rows="8"></textarea>
+                    <div class="form-text">Дата публикации не меняется. После сохранения будет указано, кто и когда отредактировал запись.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</a>
+                <a href="#" onclick="updateNews(); return false;" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="news">
     <?php
     $news = DB::query('SELECT * FROM news ORDER BY id');

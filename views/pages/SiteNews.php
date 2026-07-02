@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\{DB, Date};
+use App\Services\{DB, SiteNews};
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -23,10 +23,7 @@ use App\Services\{DB, Date};
                     echo '<p class="sm"><i>Новостей пока нет. Администратор может добавить их в разделе <a href="/admin?type=News">Админ → Новости сайта</a>.</i></p>';
                 } else {
                     foreach ($news as $n) {
-                        echo '<div class="p20" style="margin-bottom:10px">';
-                        echo '<h4>' . Date::chronologyDate((int) $n['time']) . '</h4>';
-                        echo '<div class="break-links">' . $n['body'] . '</div>';
-                        echo '</div>';
+                        echo SiteNews::renderItemHtml($n, 'chronology');
                     }
                 }
                 ?>

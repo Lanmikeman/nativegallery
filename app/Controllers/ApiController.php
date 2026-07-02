@@ -31,6 +31,8 @@ use \App\Controllers\Api\Users\EmailVerify as EmailVerify;
 use \App\Controllers\Api\Users\Search as UsersSearch;
 use \App\Controllers\Api\Admin\Images\SetVisibility as AdminPhotoSetVisibility;
 use \App\Controllers\Api\Admin\News\Create as AdminCreateNews;
+use \App\Controllers\Api\Admin\News\Get as AdminGetNews;
+use \App\Controllers\Api\Admin\News\Update as AdminUpdateNews;
 use \App\Controllers\Api\Admin\News\Load as AdminLoadNews;
 use \App\Controllers\Api\Admin\News\Delete as AdminDeleteNews;
 use \App\Controllers\Api\Admin\Chronology\Create as AdminCreateChronology;
@@ -134,6 +136,12 @@ class ApiController
     }
     public static function admincreatenews() {
         return new AdminCreateNews();
+    }
+    public static function admingetnews() {
+        return new AdminGetNews();
+    }
+    public static function admineditnews() {
+        return new AdminUpdateNews();
     }
     public static function admindeletenews() {
         return new AdminDeleteNews();

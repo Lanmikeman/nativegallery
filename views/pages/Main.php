@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\{DB, Auth, Date, Json};
+use App\Services\{DB, Auth, Date, Json, SiteNews};
 use App\Models\{User, Vote, Comment};
 use App\Controllers\Exec\Tasks\ExecContests;
 
@@ -251,8 +251,9 @@ LIMIT 10;');
                                 $news = DB::query('SELECT * FROM news ORDER BY id DESC LIMIT 10');
                                 foreach ($news as $n) {
                                     echo '<div class="ix-news-item"><b>' . Date::zmdate($n['time']) . '</b>
-                                    <div class="break-links" style="padding-top:3px">' . $n['body'] . '</div>
-                                </div>';
+                                    <div class="break-links" style="padding-top:3px">' . $n['body'] . '</div>';
+                                    echo SiteNews::editNoticeHtml($n);
+                                    echo '</div>';
                                 }
                                 ?>
                             </div>

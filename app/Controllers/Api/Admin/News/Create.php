@@ -12,7 +12,10 @@ class Create
 {
     public function __construct()
     {
-        DB::query('INSERT INTO news VALUES (\'0\', :body, :time)', array(':body' => $_POST['body'], ':time' => time()));
+        DB::query(
+            'INSERT INTO news (body, time, edited_at, edited_by) VALUES (:body, :time, 0, 0)',
+            [':body' => $_POST['body'], ':time' => time()]
+        );
         echo json_encode(
             array(
                 'errorcode' => 0,

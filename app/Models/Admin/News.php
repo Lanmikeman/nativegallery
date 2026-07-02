@@ -1,6 +1,6 @@
 <?php
 namespace App\Models\Admin;
-use \App\Services\{DB, Date};
+use \App\Services\{DB, Date, SiteNews};
 
 class News {
 
@@ -19,9 +19,18 @@ class News {
         return $this->table->$key ?? null;
     }
     public function view() {
-        echo '<div class="card mb-3"><div class="card-body"><i>'
-            . Date::zmdate($this->table->time) . '</i><br>' 
-            . $this->table->body 
-            . '<br><a class="btn btn-danger mt-3" href="#" onclick="deleteNews('.$this->id.'); return false;">Удалить</a></div></div>';
+        echo '<div class="card mb-3"><div class="card-body">';
+        echo '<i>' . Date::zmdate((int) ($this->table->time ?? 0)) . '</i>';
+        if (!empty($this->table->edited_at)) {
+            echo '<div class="sm text-muted" style="margin-top:4px">Отредактировано '
+                . htmlspecialchars(Date::zmdate((int) $this->table->edited_at))
+                . ' — ' . htmlspecialchars(SiteNews::editorName((int) ($this->table->edited_by ?? 0)))
+                . '</div>';
+        }
+        echo '<div class="mt-2">' . ($this->table->body ?? '') . '</div>';
+        echo '<div class="mt-3">';
+        echo '<a class="btn btn-secondary me-2" href="#" onclick="openEditNews(' . $this->id . '); return false;">Редактировать</a>';
+        echo '<a class="btn btn-danger" href="#" onclick="deleteNews(' . $this->id . '); return false;">Удалить</a>';
+        echo '</div></div></div>';
     }
 }

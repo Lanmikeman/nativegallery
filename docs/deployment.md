@@ -16,9 +16,10 @@ composer install --no-dev --optimize-autoloader
 mysql -u USER -p DATABASE < sqlcore/sql_0005.sql   # chronology, site_links
 mysql -u USER -p DATABASE < sqlcore/sql_0006.sql   # closure_meta у конкурсов
 mysql -u USER -p DATABASE < sqlcore/sql_0007.sql   # photo_id в entities_requests
+mysql -u USER -p DATABASE < sqlcore/sql_0008.sql   # edited_at/edited_by у news
 ```
 
-Полный список при чистой установке: `base.sql` → `sql_0001.sql` … → `sql_0007.sql`.
+Полный список при чистой установке: `base.sql` → `sql_0001.sql` … → `sql_0008.sql`.
 
 ## Каталоги и права
 

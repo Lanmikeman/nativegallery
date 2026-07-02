@@ -240,7 +240,58 @@ const createNews = () => {
     },
     success: function (response) {
       Notify.noty("success", "OK!");
+      $("#body").val("");
       loadNews();
+    },
+  });
+};
+
+const openEditNews = (postId) => {
+  $.ajax({
+    type: "GET",
+    url: "/api/admin/news/" + postId,
+    success: function (response) {
+      var jsonData = typeof response === "string" ? JSON.parse(response) : response;
+      if (parseInt(jsonData.errorcode, 10) !== 0 || !jsonData.news) {
+        Notify.noty("danger", jsonData.message || "Не удалось загрузить новость");
+        return;
+      }
+      $("#edit-news-id").val(postId);
+      $("#edit-body").val(jsonData.news.body || "");
+      var modal = new bootstrap.Modal(document.getElementById("editNewsModal"));
+      modal.show();
+    },
+    error: function () {
+      Notify.noty("danger", "Ошибка загрузки новости");
+    },
+  });
+};
+
+const updateNews = () => {
+  var postId = $("#edit-news-id").val();
+  var body = $("#edit-body").val();
+  if (!postId) {
+    Notify.noty("danger", "Новость не выбрана");
+    return;
+  }
+  $.ajax({
+    type: "POST",
+    url: "/api/admin/news/" + postId + "/edit",
+    data: { body: body },
+    success: function (response) {
+      var jsonData = typeof response === "string" ? JSON.parse(response) : response;
+      if (parseInt(jsonData.errorcode, 10) !== 0) {
+        Notify.noty("danger", jsonData.message || "Не удалось сохранить");
+        return;
+      }
+      Notify.noty("success", "Новость обновлена");
+      var modalEl = document.getElementById("editNewsModal");
+      var modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      loadNews();
+    },
+    error: function () {
+      Notify.noty("danger", "Ошибка сохранения");
     },
   });
 };

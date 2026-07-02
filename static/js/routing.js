@@ -14,7 +14,6 @@
     "/static/js/routing.js",
   ];
 
-  const CONTENT_SELECTORS = ["td.main", "#pmain"];
   const SKIP_PATH_PREFIXES = ["/api/", "/auth/", "/logout"];
 
   const loadedScriptSrcs = new Set();
@@ -28,9 +27,17 @@
 
   const loader = createLoader();
 
+  function isPhotoPath(path) {
+    return /\/photo\/\d+/.test(path);
+  }
+
   function normalizeNavUrl(url) {
     const u = new URL(url, location.origin);
     return u.pathname + u.search;
+  }
+
+  function getTmain() {
+    return document.querySelector("table.tmain");
   }
 
   function shouldIntercept(link, event) {
@@ -115,51 +122,94 @@
     return await response.text();
   }
 
+  function removeTmainFooterRow() {
+    const tmain = getTmain();
+    if (!tmain) return;
+    tmain.querySelectorAll("tr").forEach((tr) => {
+      if (tr.querySelector("td.footer")) tr.remove();
+    });
+  }
+
+  function ensureTmainFooterRow(footerHtml) {
+    const tmain = getTmain();
+    if (!tmain) return;
+
+    let footerTr = Array.from(tmain.querySelectorAll("tr")).find((tr) => tr.querySelector("td.footer"));
+    if (!footerTr) {
+      footerTr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.className = "footer";
+      footerTr.appendChild(td);
+      tmain.appendChild(footerTr);
+    }
+
+    const td = footerTr.querySelector("td.footer");
+    if (td && footerHtml !== undefined) {
+      td.innerHTML = footerHtml;
+    }
+  }
+
+  function removePmain() {
+    const pmain = document.querySelector("#pmain");
+    if (pmain) pmain.remove();
+  }
+
+  function replacePmain(doc) {
+    removePmain();
+    const newPmain = doc.querySelector("#pmain");
+    if (!newPmain) return;
+
+    const tmain = getTmain();
+    const clone = newPmain.cloneNode(true);
+    if (tmain && tmain.parentNode) {
+      tmain.parentNode.insertBefore(clone, tmain.nextSibling);
+    } else {
+      document.body.appendChild(clone);
+    }
+  }
+
+  function cleanupOrphanFooterTables() {
+    document.querySelectorAll("body > table").forEach((tbl) => {
+      if (tbl.classList.contains("tmain")) return;
+      if (tbl.querySelector("td.footer")) tbl.remove();
+    });
+  }
+
+  function updateMainContent(doc) {
+    const currMain = document.querySelector("table.tmain td.main");
+    const newMain = doc.querySelector("td.main");
+    if (!currMain || !newMain) return false;
+    currMain.innerHTML = newMain.innerHTML;
+    return true;
+  }
+
   function updatePage(html, url, isHistoryNavigation) {
     try {
       const doc = new DOMParser().parseFromString(html, "text/html");
       const newTitle = doc.title;
       const newPath = new URL(url, location.origin).pathname;
+      const photoPage = isPhotoPath(newPath);
 
-      let contentUpdated = false;
-      CONTENT_SELECTORS.forEach((selector) => {
-        const container = document.querySelector(selector);
-        const newContent = doc.querySelector(selector);
-        if (container && newContent) {
-          container.innerHTML = newContent.innerHTML;
-          contentUpdated = true;
-        }
-      });
-
-      if (!contentUpdated) {
-        console.warn("SPA: td.main / #pmain not found in response");
+      if (!updateMainContent(doc)) {
+        console.warn("SPA: td.main not found");
         return false;
       }
 
-      const currPmain = document.querySelector("#pmain");
-      const newPmain = doc.querySelector("#pmain");
-      if (!currPmain && newPmain) {
-        document.body.appendChild(newPmain.cloneNode(true));
-      } else if (currPmain && !newPmain) {
-        currPmain.remove();
-      } else if (currPmain && newPmain) {
-        currPmain.innerHTML = newPmain.innerHTML;
+      cleanupOrphanFooterTables();
+
+      if (photoPage) {
+        removeTmainFooterRow();
+        replacePmain(doc);
+      } else {
+        removePmain();
+        const newFooter = doc.querySelector("td.footer");
+        ensureTmainFooterRow(newFooter ? newFooter.innerHTML : "");
       }
 
       const navbar = document.querySelector("#navbard");
       const titleSmall = document.querySelector("#title-small");
-      const isPhoto = /\/photo\/\d+/.test(newPath);
-      if (navbar) navbar.style.display = isPhoto ? "none" : "";
-      if (titleSmall) titleSmall.style.display = isPhoto ? "" : "none";
-
-      const currFooter = document.querySelector("td.footer");
-      const newFooter = doc.querySelector("td.footer");
-      if (currFooter && newFooter) {
-        currFooter.innerHTML = newFooter.innerHTML;
-      }
-
-      const footers = Array.from(document.querySelectorAll("footer"));
-      if (footers.length > 1) footers.slice(1).forEach((f) => f.remove());
+      if (navbar) navbar.style.display = photoPage ? "none" : "";
+      if (titleSmall) titleSmall.style.display = photoPage ? "" : "none";
 
       if (!isHistoryNavigation) {
         window.history.pushState({ ngSpa: true }, "", url);

@@ -110,7 +110,7 @@ class Routes
                 Router::any('/admin', 'AdminController@index');
                 Router::any('/api/admin/images/setvisibility', 'ApiController@adminsetvis');
                 Router::any('/api/admin/news/create', 'ApiController@admincreatenews');
-                Router::get('/api/admin/news/$id', 'ApiController@admingetnews');
+                Router::any('/api/admin/news/$id', 'ApiController@admingetnews');
                 Router::post('/api/admin/news/$id/edit', 'ApiController@admineditnews');
                 Router::any('/api/admin/news/$id/delete', 'ApiController@admindeletenews');
                 Router::any('/api/admin/loadnews', 'ApiController@adminloadnews');

@@ -246,26 +246,60 @@ const createNews = () => {
   });
 };
 
-const openEditNews = (postId) => {
+function parseNewsBodyAttr(raw) {
+  if (raw == null || raw === "") return "";
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return String(raw);
+  }
+}
+
+function showEditNewsModal(postId, body) {
+  var modalEl = document.getElementById("editNewsModal");
+  if (!modalEl) {
+    Notify.noty("danger", "Форма редактирования не найдена. Обновите страницу.");
+    return;
+  }
+  $("#edit-news-id").val(postId);
+  $("#edit-body").val(body || "");
+  if (typeof bootstrap === "undefined" || !bootstrap.Modal) {
+    Notify.noty("danger", "Bootstrap не загружен");
+    return;
+  }
+  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+const openEditNews = (postId, body) => {
+  if (body !== undefined && body !== null) {
+    showEditNewsModal(postId, body);
+    return;
+  }
   $.ajax({
     type: "GET",
     url: "/api/admin/news/" + postId,
-    success: function (response) {
-      var jsonData = typeof response === "string" ? JSON.parse(response) : response;
+    dataType: "json",
+    success: function (jsonData) {
       if (parseInt(jsonData.errorcode, 10) !== 0 || !jsonData.news) {
         Notify.noty("danger", jsonData.message || "Не удалось загрузить новость");
         return;
       }
-      $("#edit-news-id").val(postId);
-      $("#edit-body").val(jsonData.news.body || "");
-      var modal = new bootstrap.Modal(document.getElementById("editNewsModal"));
-      modal.show();
+      showEditNewsModal(postId, jsonData.news.body || "");
     },
     error: function () {
       Notify.noty("danger", "Ошибка загрузки новости");
     },
   });
 };
+
+window.openEditNews = openEditNews;
+
+$(document).on("click", ".edit-news-btn", function (e) {
+  e.preventDefault();
+  var postId = $(this).data("id");
+  var body = parseNewsBodyAttr($(this).attr("data-news-body"));
+  openEditNews(postId, body);
+});
 
 const updateNews = () => {
   var postId = $("#edit-news-id").val();

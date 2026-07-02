@@ -29,7 +29,8 @@ class News {
         }
         echo '<div class="mt-2">' . ($this->table->body ?? '') . '</div>';
         echo '<div class="mt-3">';
-        echo '<a class="btn btn-secondary me-2" href="#" onclick="openEditNews(' . $this->id . '); return false;">Редактировать</a>';
+        $bodyJson = htmlspecialchars(json_encode((string) ($this->table->body ?? ''), JSON_UNESCAPED_UNICODE), ENT_QUOTES);
+        echo '<a class="btn btn-secondary me-2 edit-news-btn" href="#" data-id="' . (int) $this->id . '" data-news-body="' . $bodyJson . '">Редактировать</a>';
         echo '<a class="btn btn-danger" href="#" onclick="deleteNews(' . $this->id . '); return false;">Удалить</a>';
         echo '</div></div></div>';
     }

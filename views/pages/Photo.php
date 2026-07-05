@@ -952,7 +952,7 @@ if ($photo->i('id') !== null) {
                                         <div contenteditable="true" id="wtext"></div><br>
                                         <div id="fileList" class="mt-3"></div>
                                         <p id="statusSend" style="display: none;">Ошибка</p>
-                                        <div class="cmt-submit"><input type="button" value="Добавить комментарий" id="sbmt"><button style="display: inline;" type="button" id="attachFile"><i class='bx bx-paperclip bx-rotate-90'></i></button><button style="display: inline;" type="button" id="showPicker"><i class='bx bx-smile'></i></button>
+                                        <div class="cmt-submit"><input type="button" value="Добавить комментарий" id="sbmt" onclick="if(window.ngSubmitPhotoComment){window.ngSubmitPhotoComment();}else if(window.ngFallbackPhotoComment){window.ngFallbackPhotoComment();}return false;"><button style="display: inline;" type="button" id="attachFile"><i class='bx bx-paperclip bx-rotate-90'></i></button><button style="display: inline;" type="button" id="showPicker"><i class='bx bx-smile'></i></button>
 
                                         </div>
                                         <div id="picker" class="emoji-picker">

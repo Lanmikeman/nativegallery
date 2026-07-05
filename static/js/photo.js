@@ -221,7 +221,95 @@
 			$('.top-disclaimer').slideUp();
 			return false;
 		});
+
+		$(document).on('click.ngPhotoComment', '#f1 #sbmt', function (e) {
+			e.preventDefault();
+			if (typeof window.ngSubmitPhotoComment === 'function') {
+				window.ngSubmitPhotoComment();
+				return false;
+			}
+			if (typeof window.ngFallbackPhotoComment === 'function') {
+				window.ngFallbackPhotoComment();
+			}
+			return false;
+		});
 	}
+
+	function ngFallbackPhotoComment() {
+		var form = document.getElementById('f1');
+		var editor = document.getElementById('wtext');
+		var hidden = document.getElementById('hiddenContent');
+		var statusEl = document.getElementById('statusSend');
+		if (!form || !editor || !hidden) {
+			return;
+		}
+
+		if (typeof window.ngSyncCommentForm === 'function') {
+			window.ngSyncCommentForm();
+		} else {
+			hidden.value = (editor.innerText || editor.textContent || '').trim();
+		}
+
+		var body = String(hidden.value || '').trim();
+		if (!body) {
+			if (statusEl) {
+				statusEl.style.display = 'block';
+				statusEl.style.color = 'red';
+				statusEl.textContent = 'Введите текст комментария';
+			}
+			return;
+		}
+
+		var formData = new FormData(form);
+		formData.set('wtext', body);
+		var photoId = formData.get('id');
+
+		fetch('/api/photo/comment', {
+			method: 'POST',
+			body: formData,
+			credentials: 'same-origin',
+			headers: { 'X-Requested-With': 'XMLHttpRequest' }
+		})
+			.then(function (response) { return response.text(); })
+			.then(function (raw) {
+				var jsonData;
+				try {
+					jsonData = JSON.parse(raw);
+				} catch (err) {
+					console.error('Invalid comment response:', raw);
+					return;
+				}
+				if (jsonData.errorcode !== '0') {
+					if (statusEl) {
+						statusEl.style.display = 'block';
+						statusEl.style.color = 'red';
+						statusEl.textContent = 'Не удалось отправить комментарий';
+					}
+					return;
+				}
+				editor.innerHTML = '';
+				hidden.value = '';
+				if (statusEl) {
+					statusEl.style.display = 'block';
+					statusEl.style.color = 'green';
+					statusEl.textContent = 'Комментарий отправлен!';
+				}
+				var postsEl = document.getElementById('posts');
+				if (photoId && postsEl) {
+					fetch('/api/photo/getcomments/' + photoId, {
+						method: 'POST',
+						credentials: 'same-origin'
+					})
+						.then(function (r) { return r.text(); })
+						.then(function (html) { postsEl.innerHTML = html; });
+				}
+			})
+			.catch(function (err) {
+				console.error('Comment submit failed:', err);
+			});
+	}
+
+	window.ngFallbackPhotoComment = ngFallbackPhotoComment;
 
 	$(document).ready(function () {
 		bindPhotoHandlers();

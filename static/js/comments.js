@@ -536,8 +536,8 @@
   document.addEventListener(
     "click",
     function (e) {
-      const btn = e.target && e.target.closest ? e.target.closest("#sbmt") : null;
-      if (!btn) {
+      const target = e.target;
+      if (!target || target.id !== "sbmt" || !target.closest("#f1")) {
         return;
       }
       e.preventDefault();

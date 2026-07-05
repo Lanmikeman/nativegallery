@@ -106,10 +106,7 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
                                 }
                             }
                                 ?>
-                <li class="mm-pad-right<?= AudioLibrary::isEnabled() ? ' mm-wide ng-music-user-row' : '' ?>">
-                    <?php if (AudioLibrary::isEnabled()) {
-                        include $_SERVER['DOCUMENT_ROOT'] . '/views/components/MusicPlayer.php';
-                    } ?>
+                <li class="mm-pad-right mm-wide">
                     <a href="/author/<?=Auth::userid()?>/" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-user"></i></span><span class="mm-label"><?=$user->i('username')?></span><?=$nonr?></a>
                     <div>
                         <ul class="mm-level-2">

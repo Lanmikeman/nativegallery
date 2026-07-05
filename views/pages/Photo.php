@@ -85,6 +85,7 @@ if ($photo->i('id') !== null) {
             <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
             <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+            <script src="<?= ng_asset('/static/js/comments.js') ?>" defer></script>
             <link
                 rel="stylesheet"
                 href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
@@ -943,7 +944,7 @@ if ($photo->i('id') !== null) {
                             <?php
                             if (Auth::userid() > 0) {
                                 if (NGALLERY['root']['registration']['emailverify'] != true || $user->i('status') != 3) { ?>
-                                    <form action="#" method="post" id="f1" enctype="multipart/form-data">
+                                    <form action="/comment.php" method="post" id="f1" enctype="multipart/form-data">
                                         <input type="hidden" name="sid" value="hgdl6old9r9qodmvkn1r4t7d6h">
                                         <input type="hidden" name="last_comment_rand" value="893329610">
                                         <input type="hidden" name="id" id="id" value="<?= $id ?>">
@@ -980,92 +981,65 @@ if ($photo->i('id') !== null) {
                 </div>
 
                 <script data-restart>
-                    (function () {
-                        function bindPhotoCommentForm() {
-                            var form = document.getElementById('f1');
-                            if (!form || form.dataset.ngInlineCommentBound === '1') {
-                                return;
-                            }
-                            form.dataset.ngInlineCommentBound = '1';
+                    $(document).ready(function() {
+                        $('#f1').submit(function(e) {
+                            e.preventDefault();
 
-                            form.addEventListener('submit', function (e) {
-                                e.preventDefault();
-                                e.stopPropagation();
+                            var formData = new FormData(this);
 
-                                if (typeof window.ngSubmitPhotoComment === 'function') {
-                                    window.ngSubmitPhotoComment(form);
-                                    return;
-                                }
+                            $.ajax({
+                                type: "POST",
+                                url: "/api/photo/comment",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                success: function(response) {
+                                    var jsonData = JSON.parse(response);
 
-                                var editor = document.getElementById('wtext');
-                                var hidden = document.getElementById('hiddenContent');
-                                if (typeof window.ngSyncCommentForm === 'function') {
-                                    window.ngSyncCommentForm();
-                                } else if (editor && hidden) {
-                                    hidden.value = (editor.innerText || editor.textContent || '').trim();
-                                }
+                                    if (jsonData.errorcode == "1") {
+                                        $('#statusSend').css({
+                                            display: 'block',
+                                            color: 'red'
+                                        }).text('Комментарий некорректен');
+                                    } else if (jsonData.errorcode == "2") {
+                                        $('#statusSend').css({
+                                            display: 'block',
+                                            color: 'yellow'
+                                        }).text('Пожалуйста, подождите...');
+                                        setTimeout(function() {
+                                            window.location.replace(jsonData.twofaurl);
+                                        }, 1000);
+                                    } else if (jsonData.errorcode == "0") {
+                                        $('#wtext').html('');
+                                        $('#hiddenContent').val('');
+                                        $('#fileList').html('');
+                                        $('#statusSend').css({
+                                            display: 'block',
+                                            color: 'green'
+                                        }).text('Комментарий отправлен!');
 
-                                var formData = new FormData(form);
-                                if (hidden) {
-                                    formData.set('wtext', hidden.value || '');
-                                }
-
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/api/photo/comment',
-                                    data: formData,
-                                    processData: false,
-                                    contentType: false,
-                                    success: function (response) {
-                                        var jsonData = JSON.parse(response);
-
-                                        if (jsonData.errorcode == '1') {
-                                            $('#statusSend').css({ display: 'block', color: 'red' }).text('Комментарий некорректен');
-                                        } else if (jsonData.errorcode == '2') {
-                                            $('#statusSend').css({ display: 'block', color: 'yellow' }).text('Пожалуйста, подождите...');
-                                            setTimeout(function () {
-                                                window.location.replace(jsonData.twofaurl);
-                                            }, 1000);
-                                        } else if (jsonData.errorcode == '0') {
-                                            if (editor) editor.innerHTML = '';
-                                            if (hidden) hidden.value = '';
-                                            $('#fileList').html('');
-                                            $('#statusSend').css({ display: 'block', color: 'green' }).text('Комментарий отправлен!');
-
-                                            $.ajax({
-                                                type: 'POST',
-                                                url: '/api/photo/getcomments/<?= $id ?>',
-                                                processData: false,
-                                                async: true,
-                                                success: function (r) {
-                                                    $('#posts').html(r);
-                                                }
-                                            });
-                                        } else {
-                                            alert('Неизвестная ошибка');
-                                        }
-                                    },
-                                    error: function (err) {
-                                        console.error('Ошибка при отправке формы', err);
+                                        $.ajax({
+                                            type: "POST",
+                                            url: "/api/photo/getcomments/<?= $id ?>",
+                                            processData: false,
+                                            async: true,
+                                            success: function(r) {
+                                                $('#posts').html(r);
+                                            },
+                                            error: function(r) {
+                                                console.log(r);
+                                            }
+                                        });
+                                    } else {
+                                        alert('Неизвестная ошибка');
                                     }
-                                });
+                                },
+                                error: function(err) {
+                                    console.error("Ошибка при отправке формы", err);
+                                }
                             });
-                        }
-
-                        if (typeof window.jQuery !== 'undefined') {
-                            $(bindPhotoCommentForm);
-                        } else {
-                            document.addEventListener('DOMContentLoaded', bindPhotoCommentForm);
-                        }
-
-                        window.addEventListener('ng:navigate', function () {
-                            var form = document.getElementById('f1');
-                            if (form) {
-                                delete form.dataset.ngInlineCommentBound;
-                            }
-                            window.setTimeout(bindPhotoCommentForm, 0);
                         });
-                    })();
+                    });
 
                     function errimg() {
                         const content = `<center>

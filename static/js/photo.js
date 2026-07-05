@@ -1,208 +1,231 @@
-(function () {
-	'use strict';
+$(document).ready(function()
+{
+	// Убираем лишние параметры
+	var url = document.location.toString();
+	url = url.replace(/\?vid=\d+$/, '');
+	url = url.replace(/\?gid=\d+$/, '');
+	url = url.replace(/\?aid=\d+$/, '');
+	url = url.replace(/\?upd=\d+$/, '');
+	url = url.replace(/\?top=\d+$/, '');
+	history.replaceState({}, '', url);
 
-	function photoPageActive() {
-		return $('#photobar').length > 0;
-	}
 
-	function cleanPhotoUrl() {
-		var url = document.location.toString();
-		url = url.replace(/\?vid=\d+$/, '');
-		url = url.replace(/\?gid=\d+$/, '');
-		url = url.replace(/\?aid=\d+$/, '');
-		url = url.replace(/\?upd=\d+$/, '');
-		url = url.replace(/\?top=\d+$/, '');
-		history.replaceState(window.history.state || {}, '', url);
-	}
+	// Переход к следующему фото
+	$('#prev, #next').click(function()
+	{
+		var next = (this.id == 'prev' ? 0 : 1);
 
-	function initPhotoPage() {
-		if (!photoPageActive()) return;
-
-		cleanPhotoUrl();
-
-		if ($('#pmain').is('.hidden')) {
-			$('.footer').addClass('hidden');
-		} else {
-			$('.footer').removeClass('hidden');
-		}
-
-		var showexif = $('#showexif');
-		if (showexif.length > 0 && $('#exif tr:visible').length === 1) {
-			showexif.trigger('click');
-		}
-
-		if (typeof Fancybox !== 'undefined') {
-			Fancybox.bind('[data-fancybox="gallery"]');
-		}
-	}
-
-	function bindPhotoHandlers() {
-		if (window.__ngPhotoHandlersBound) return;
-		window.__ngPhotoHandlersBound = true;
-
-		$(document).on('click.ngPhoto', '#showmap a', function () {
-			$('#map').show();
-			$('#showmap').hide();
-
-			if (typeof initMap === 'function') {
-				initMap(lat, lng, {
-					showNearMarkers: true,
-					showCenterMarker: true,
-					draggable: false,
-					dir: dir
-				});
+		$.get('/api.php', { action: 'move', pid: pid, vid: vid, gid: gid, aid: aid, next: next }, function(pid)
+		{
+			if (pid == 0)
+			{
+				if (!vid && !gid)
+				{
+					if (next)
+						 alert(_text['P_MOVE_FIRST'] + '.');
+					else alert(_text['P_MOVE_LAST']  + '.');
+				}
+				else alert(_text[vid ? 'P_MOVE_ALONE_V' : 'P_MOVE_ALONE_G'] + '.');
 			}
+			else window.location = '/photo/' + pid + '/' + (vid ? '?vid=' + vid : (gid ? '?gid=' + gid : (aid ? '?aid=' + aid : (upd ? '?upd=1' : ''))));
+		});
+	});
 
-			return false;
+
+	// Показ карты
+	$('#showmap a').click(function()
+	{
+		$('#map').show();
+		$('#showmap').hide();
+
+		initMap(lat, lng, {
+			showNearMarkers: true,
+			showCenterMarker: true,
+			draggable: false,
+			dir: dir
 		});
 
-		$(document).on('click.ngPhoto', '.vote_btn', function () {
-			var vote = $(this).attr('vote');
-			if (vote != 0 && vote != 1) return false;
+		return false;
+	});
 
-			var votePid = $(this).closest('.vote').attr('pid');
-			var savedClass1 = $('.vote_btn[vote="1"]').attr('class');
-			var savedClass0 = $('.vote_btn[vote="0"]').attr('class');
 
-			$(this).toggleClass('voted');
-			if ($(this).is('.voted')) {
-				$('.vote_btn[vote="' + Number(!Number(vote)) + '"]').removeClass('voted');
+	// Голосование за фото
+	$('.vote_btn').click(function()
+	{
+		var vote = $(this).attr('vote');
+		if (vote != 0 && vote != 1) return false;
+		if (vote) $('.toggle').attr('class', 'toggle on');
+
+		var pid = $(this).closest('.vote').attr('pid');
+
+		var savedClass1 = $('.vote_btn[vote="1"]').attr('class');
+		var savedClass0 = $('.vote_btn[vote="0"]').attr('class');
+
+		$(this).toggleClass('voted');
+		if ($(this).is('.voted')) $('.vote_btn[vote="' + Number(!Number(vote)) + '"]').removeClass('voted');
+
+		$('.loader[pid="' + pid + '"]').css('visibility', 'visible');
+
+		$.getJSON('/api/photo/vote', { action: 'vote-photo', pid: pid, vote: vote }, function(data)
+		{
+			if (data && !data.errors)
+			{
+				var signs, html = '', i, j;
+
+				for (i = 1; i >= 0; i--)
+				{
+					if (data.votes[i] && data.votes[i].length != 0)
+					{
+						console.log(i);
+						html += '<table class="vblock ' + (i ? 'pro' : 'con' ) + '"><col width="100%">';
+
+						for (j = 0; j < data.votes[i].length; j++)
+							html += '<tr><td><a href="/author/' + data.votes[i][j][0] + '/">' + data.votes[i][j][1] + '</a></td><td>' + (data.votes[i][j][2] > 0 ? '+' : '&ndash;') + '1</td></tr>';
+
+						html += '</table>';
+					}
+				}
+
+				$('#votes').html(html)[html == '' ? 'hide' : 'show']();
+				$('.vote[pid="' + pid + '"][vote="1"]')[data.buttons.posbtn ? 'addClass' : 'removeClass']('voted');
+				$('.vote[pid="' + pid + '"][vote="0"]')[data.buttons.negbtn ? 'addClass' : 'removeClass']('voted')
+
+				var rating = parseInt(data.rating);
+				if (rating > 0) $('#rating').html('+' + rating); else
+				if (rating < 0) $('#rating').html('&ndash;' + parseInt(-rating));
+						   else $('#rating').html('0');
+			}
+			else
+			{
+				$('.vote_btn[vote="1"]').attr('class', savedClass1);
+				$('.vote_btn[vote="0"]').attr('class', savedClass0);
+
+				if (data.errors) alert(data.errors);
 			}
 
-			$('.loader[pid="' + votePid + '"]').css('visibility', 'visible');
+			$('.loader[pid="' + pid + '"]').css('visibility', 'hidden');
+		})
+		.fail(function(jx) { if (jx.responseText != '') alert(jx.responseText); });
 
-			$.getJSON('/api/photo/vote', { action: 'vote-photo', pid: votePid, vote: vote }, function (data) {
-				if (data && !data.errors) {
-					var html = '', i, j;
+		return false;
+	});
 
-					for (i = 1; i >= 0; i--) {
-						if (data.votes[i] && data.votes[i].length !== 0) {
-							html += '<table class="vblock ' + (i ? 'pro' : 'con') + '"><col width="100%">';
 
-							for (j = 0; j < data.votes[i].length; j++) {
-								html += '<tr><td><a href="/author/' + data.votes[i][j][0] + '/">' + data.votes[i][j][1] + '</a></td><td>' + (data.votes[i][j][2] > 0 ? '+' : '&ndash;') + '1</td></tr>';
-							}
+	// Конкурсное голосование
+	$('.konk_btn').click(function()
+	{
+		var vote = $(this).attr('vote');
+		if (vote != 0 && vote != 1 || $(this).is('.locked')) return false;
 
-							html += '</table>';
-						}
+		var pid = $(this).closest('.vote').attr('pid');
+		var cid = $(this).closest('.vote').attr('cid');
+		var savedClass1 = $('.vote[pid="' + pid + '"] .konk_btn[vote="1"]').attr('class');
+		var savedClass0 = $('.vote[pid="' + pid + '"] .konk_btn[vote="0"]').attr('class');
+
+		$('.loader[pid="' + pid + '"]').css('visibility', 'visible');
+
+		$(this).toggleClass('voted');
+		if ($(this).is('.voted')) $('.vote[pid="' + pid + '"] .konk_btn[vote="' + Number(!Number(vote)) + '"]').removeClass('voted');
+		var self_p = 0;
+		if (!self_p) // Чужие фото
+		{
+			$(this).closest('.p20p').removeAttr('class').css('padding', '6px 6px 5px');
+
+			$.getJSON('/api/photo/vote', { action: 'vote-konk', pid: pid, vote: vote, cid: cid }, function (data)
+			{
+				if (data && !data.errors)
+				{
+					$('.star[pid="' + pid + '"]').html(data.star ? '<img src="/img/star_' + data.star + '.png" alt="" />' : '');
+					$('.vote[pid="' + pid + '"] .konk_btn[vote="1"]')[data.buttons.posbtn_contest ? 'addClass' : 'removeClass']('voted');
+					$('.vote[pid="' + pid + '"] .konk_btn[vote="0"]')[data.buttons.negbtn_contest ? 'addClass' : 'removeClass']('voted');
+
+
+					var rat = $('.s_rating[pid="' + pid + '"]');
+					if (rat.length)
+					{
+						var rating = parseInt(data.rating);
+						if (rating > 0) rat.html('+' + rating); else
+						if (rating < 0) rat.html('&ndash;' + parseInt(-rating));
+								   else rat.html('0');
 					}
+				}
+				else
+				{
+					$('.vote[pid="' + pid + '"] .konk_btn[vote="1"]').attr('class', savedClass1);
+					$('.vote[pid="' + pid + '"] .konk_btn[vote="0"]').attr('class', savedClass0);
 
-					$('#votes').html(html)[html === '' ? 'hide' : 'show']();
-					$('.vote[pid="' + votePid + '"][vote="1"]')[data.buttons.posbtn ? 'addClass' : 'removeClass']('voted');
-					$('.vote[pid="' + votePid + '"][vote="0"]')[data.buttons.negbtn ? 'addClass' : 'removeClass']('voted');
-
-					var rating = parseInt(data.rating, 10);
-					if (rating > 0) $('#rating').html('+' + rating);
-					else if (rating < 0) $('#rating').html('&ndash;' + parseInt(-rating, 10));
-					else $('#rating').html('0');
-				} else {
-					$('.vote_btn[vote="1"]').attr('class', savedClass1);
-					$('.vote_btn[vote="0"]').attr('class', savedClass0);
 					if (data.errors) alert(data.errors);
 				}
 
-				$('.loader[pid="' + votePid + '"]').css('visibility', 'hidden');
-			}).fail(function (jx) {
-				if (jx.responseText !== '') alert(jx.responseText);
-			});
+				$('.loader[pid="' + pid + '"]').css('visibility', 'hidden');
+			})
+			.fail(function(jx) { if (jx.responseText != '') alert(jx.responseText); });
+		}
+		else // Свои фото
+		{
+			$.getJSON('/api/photo/vote', { action: 'vote-author', pid: pid, vote: vote }, function (data)
+			{
+				if (data && !data.errors)
+				{
+					$('#star[pid="' + pid + '"]').html(data.star ? '<img src="/img/star_' + data.star + '.png" alt="" />' : '');
 
-			return false;
-		});
-
-		$(document).on('click.ngPhoto', '.konk_btn', function () {
-			var vote = $(this).attr('vote');
-			if (vote != 0 && vote != 1 || $(this).is('.locked')) return false;
-
-			var votePid = $(this).closest('.vote').attr('pid');
-			var savedClass1 = $('.vote[pid="' + votePid + '"] .konk_btn[vote="1"]').attr('class');
-			var savedClass0 = $('.vote[pid="' + votePid + '"] .konk_btn[vote="0"]').attr('class');
-
-			$('.loader[pid="' + votePid + '"]').css('visibility', 'visible');
-
-			$(this).toggleClass('voted');
-			if ($(this).is('.voted')) {
-				$('.vote[pid="' + votePid + '"] .konk_btn[vote="' + Number(!Number(vote)) + '"]').removeClass('voted');
-			}
-
-			if (!self_p) {
-				$(this).closest('.p20p').removeAttr('class').css('padding', '6px 6px 5px');
-
-				$.getJSON('/api/photo/vote', { action: 'vote-konk', pid: votePid, vote: vote, cid: $(this).closest('.vote').attr('cid') }, function (data) {
-					if (data && !data.errors) {
-						$('.star[pid="' + votePid + '"]').html(data.star ? '<img src="/img/star_' + data.star + '.png" alt="" />' : '');
-						$('.vote[pid="' + votePid + '"] .konk_btn[vote="1"]')[data.buttons.posbtn_contest ? 'addClass' : 'removeClass']('voted');
-						$('.vote[pid="' + votePid + '"] .konk_btn[vote="0"]')[data.buttons.negbtn_contest ? 'addClass' : 'removeClass']('voted');
-
-						var rat = $('.s_rating[pid="' + votePid + '"]');
-						if (rat.length) {
-							var rating = parseInt(data.rating, 10);
-							if (rating > 0) rat.html('+' + rating);
-							else if (rating < 0) rat.html('&ndash;' + parseInt(-rating, 10));
-							else rat.html('0');
-						}
-					} else {
-						$('.vote[pid="' + votePid + '"] .konk_btn[vote="1"]').attr('class', savedClass1);
-						$('.vote[pid="' + votePid + '"] .konk_btn[vote="0"]').attr('class', savedClass0);
-						if (data.errors) alert(data.errors);
-					}
-
-					$('.loader[pid="' + votePid + '"]').css('visibility', 'hidden');
-				}).fail(function (jx) {
-					if (jx.responseText !== '') alert(jx.responseText);
-				});
-			} else {
-				$.getJSON('/api/photo/vote', { action: 'vote-author', pid: votePid, vote: vote }, function (data) {
-					if (data && !data.errors) {
-						$('#star[pid="' + votePid + '"]').html(data.star ? '<img src="/img/star_' + data.star + '.png" alt="" />' : '');
-						$('.vote[pid="' + votePid + '"] .konk_btn[vote="1"]')[data.buttons.posbtn_contest ? 'addClass' : 'removeClass']('voted');
-						$('.vote[pid="' + votePid + '"] .konk_btn[vote="0"]')[data.buttons.negbtn_contest ? 'addClass' : 'removeClass']('voted');
-					} else {
-						$('.konk_btn[vote="0"]').attr('class', savedClass0);
-						$('.konk_btn[vote="1"]').attr('class', savedClass1);
-						if (data.errors) alert(data.errors);
-					}
-
-					$('.loader[pid="' + votePid + '"]').css('visibility', 'hidden');
-				}).fail(function (jx) {
-					if (jx.responseText !== '') alert(jx.responseText);
-				});
-			}
-
-			return false;
-		});
-
-		$(document).on('keydown.ngPhoto', function (e) {
-			if (!photoPageActive()) return;
-			if ($(e.target).is('input, textarea, [contenteditable="true"]')) return;
-
-			if (e.ctrlKey) {
-				switch (e.which) {
-					case 0x25:
-						window.location = '/ph.php?pid=' + pid + '&pub=0';
-						break;
-					case 0x27:
-						window.location = '/ph.php?pid=' + pid + '&pub=1';
-						break;
+					$('.vote[pid="' + pid + '"] .konk_btn[vote="1"]')[data.buttons.posbtn_contest ? 'addClass' : 'removeClass']('voted');
+					$('.vote[pid="' + pid + '"] .konk_btn[vote="0"]')[data.buttons.negbtn_contest ? 'addClass' : 'removeClass']('voted');
 				}
+				else
+				{
+					$('.konk_btn[vote="0"]').attr('class', savedClass0);
+					$('.konk_btn[vote="1"]').attr('class', savedClass1);
+
+					if (data.errors) alert(data.errors);
+				}
+
+				$('.loader[pid="' + pid + '"]').css('visibility', 'hidden');
+			})
+			.fail(function(jx) { if (jx.responseText != '') alert(jx.responseText); });
+		}
+
+		return false;
+	});
+
+
+	// Быстрый переход по фото
+    $(document).keydown(function(e)
+    {
+		if ($(e.target).is('input, textarea')) return;
+
+		if (e.ctrlKey)
+		{
+			switch (e.which)
+			{
+			case 0x25: window.location = '/ph.php?pid=' + pid + '&pub=0'; break;
+			case 0x27: window.location = '/ph.php?pid=' + pid + '&pub=1'; break;
 			}
-		});
+		}
+    });
 
-		$(document).on('click.ngPhoto', '#favLink', function () {
-			var segments = window.location.pathname.split('/');
-			var favId = segments[2];
-			var faved = parseInt($(this).attr('faved'), 10);
-			$(this).html(faved ? 'Добавить фото в Избранное' : 'Удалить фото из Избранного').attr('faved', faved ? 0 : 1);
 
-			$.get('/api/photo/' + favId + '/favorite', function (r) {
-				if (r != 0 && r != 1) alert(r);
-			}).fail(function (jx) {
-				if (jx.responseText !== '') alert(jx.responseText);
-			});
+	// Избранное
+	$('#favLink').click(function()
+	{
+		const url = window.location.pathname;
+		const segments = url.split('/'); 
+		const id = segments[2];
+		var faved = parseInt($(this).attr('faved'));
+		$(this).html(faved ? 'Добавить фото в Избранное' : 'Удалить фото из Избранного').attr('faved', faved ? 0 : 1);
+		if (!faved) $('.toggle').attr('class', 'toggle on');
 
-			return false;
-		});
+		$.get('/api/photo/'+id+'/favorite', function (r) { if (r != 0 && r != 1) alert(r); }).fail(function(jx) { if (jx.responseText != '') alert(jx.responseText); });
+		return false;
+	});
 
-		$(document).on('click.ngPhoto', '#showexif', function () {
+
+	// Показ всего EXIF
+	var showexif = $('#showexif');
+	if (showexif.length > 0)
+	{
+		showexif.on('click', function()
+		{
 			$('#exif tr').show();
 			$('#exif tr:even').attr('class', 's11 h21');
 			$('#exif tr:odd').attr('class', 's1 h21');
@@ -210,121 +233,30 @@
 			return false;
 		});
 
-		$(document).on('click.ngPhoto', '.pp-item-header', function () {
-			var header = $(this);
-			$('.chevron', header).toggleClass('active');
-			header.siblings('.pp-item-body').slideToggle('fast');
-		});
-
-		$(document).on('click.ngPhoto', '.top-disclaimer-close', function () {
-			document.cookie = 'nodisclaim=1;max-age=' + (86400 * 35) + ';path=/';
-			$('.top-disclaimer').slideUp();
-			return false;
-		});
-
-		$(document).on('click.ngPhotoComment', '#f1 #sbmt', function (e) {
-			e.preventDefault();
-			if (typeof window.ngSubmitPhotoComment === 'function') {
-				window.ngSubmitPhotoComment();
-				return false;
-			}
-			if (typeof window.ngFallbackPhotoComment === 'function') {
-				window.ngFallbackPhotoComment();
-			}
-			return false;
-		});
+		if ($('#exif tr:visible').length == 1) showexif.click();
 	}
 
-	function ngFallbackPhotoComment() {
-		var form = document.getElementById('f1');
-		var editor = document.getElementById('wtext');
-		var hidden = document.getElementById('hiddenContent');
-		var statusEl = document.getElementById('statusSend');
-		if (!form || !editor || !hidden) {
-			return;
-		}
 
-		if (typeof window.ngSyncCommentForm === 'function') {
-			window.ngSyncCommentForm();
-		} else {
-			hidden.value = (editor.innerText || editor.textContent || '').trim();
-		}
-
-		var body = String(hidden.value || '').trim();
-		if (!body) {
-			if (statusEl) {
-				statusEl.style.display = 'block';
-				statusEl.style.color = 'red';
-				statusEl.textContent = 'Введите текст комментария';
-			}
-			return;
-		}
-
-		var formData = new FormData(form);
-		formData.set('wtext', body);
-		var photoId = formData.get('id');
-
-		fetch('/api/photo/comment', {
-			method: 'POST',
-			body: formData,
-			credentials: 'same-origin',
-			headers: { 'X-Requested-With': 'XMLHttpRequest' }
-		})
-			.then(function (response) { return response.text(); })
-			.then(function (raw) {
-				var jsonData;
-				try {
-					jsonData = JSON.parse(raw);
-				} catch (err) {
-					console.error('Invalid comment response:', raw);
-					return;
-				}
-				if (jsonData.errorcode !== '0') {
-					if (statusEl) {
-						statusEl.style.display = 'block';
-						statusEl.style.color = 'red';
-						statusEl.textContent = 'Не удалось отправить комментарий';
-					}
-					return;
-				}
-				editor.innerHTML = '';
-				hidden.value = '';
-				if (statusEl) {
-					statusEl.style.display = 'block';
-					statusEl.style.color = 'green';
-					statusEl.textContent = 'Комментарий отправлен!';
-				}
-				var postsEl = document.getElementById('posts');
-				if (photoId && postsEl) {
-					fetch('/api/photo/getcomments/' + photoId, {
-						method: 'POST',
-						credentials: 'same-origin'
-					})
-						.then(function (r) { return r.text(); })
-						.then(function (html) { postsEl.innerHTML = html; });
-				}
-			})
-			.catch(function (err) {
-				console.error('Comment submit failed:', err);
-			});
-	}
-
-	window.ngFallbackPhotoComment = ngFallbackPhotoComment;
-
-	$(document).ready(function () {
-		bindPhotoHandlers();
-		initPhotoPage();
+	// Свёрнутые блоки в мобильной версии
+	$('.pp-item-header').on('click', function()
+	{
+		var header = $(this);
+		$('.chevron', header).toggleClass('active');
+		header.siblings('.pp-item-body').slideToggle('fast');
 	});
 
-	window.addEventListener('ng:navigate', function (e) {
-		var path = (e.detail && e.detail.path) || '';
-		if (/\/photo\/\d+/.test(path)) {
-			initPhotoPage();
-		}
-	});
 
-	window.NgPhotoPage = { init: initPhotoPage };
-})();
+	if ($('#pmain').is('.hidden')) $('.footer').addClass('hidden');
+
+
+	$('.top-disclaimer-close').on('click', function()
+	{
+		document.cookie = 'nodisclaim=1;max-age=' + (86400 * 35) + ';path=/';
+		$('.top-disclaimer').slideUp();
+		return false;
+	});
+});
+
 
 function showGrid() { $('#grid, #sh_gr, #hd_gr').toggle(); }
 

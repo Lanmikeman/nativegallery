@@ -2,15 +2,7 @@
   var navLock = false;
   var lastQuoteLinkBlock = true;
 
-  var onJqReady = function (fn) {
-    if (typeof window.jQuery === "undefined") {
-      console.error("comments.js: jQuery is not loaded");
-      return;
-    }
-    window.jQuery(fn);
-  };
-
-  onJqReady(function () {
+  $(document).ready(function () {
     // Изменение рейтинга комментария (с учётом форматирования)
     function setComVote(cell, rating) {
       if (rating > 0)
@@ -220,12 +212,7 @@
     // Окно ввода комментария
     $("#wtext")
       .on("keypress", function (e) {
-        if ((e.which == 10 || e.which == 13) && e.ctrlKey) {
-          e.preventDefault();
-          if (typeof window.ngSubmitPhotoComment === "function") {
-            window.ngSubmitPhotoComment();
-          }
-        }
+        if ((e.which == 10 || e.which == 13) && e.ctrlKey) $("#f1").submit();
       })
       .on("focus", function () {
         navLock = true;
@@ -374,178 +361,33 @@
     }
   });
 
-  function getCommentBodyFromEditor(editorElement) {
-    if (!editorElement) {
-      return "";
-    }
+  // Обработка отправки формы
+  const formElement = document.querySelector("form");
+  const editorElement = document.getElementById("wtext");
+  const hiddenContentElement = document.getElementById("hiddenContent");
 
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = editorElement.innerHTML;
+  if (formElement && editorElement && hiddenContentElement) {
+    formElement.addEventListener("submit", function (e) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = editorElement.innerHTML;
 
-    tempDiv.querySelectorAll("img.editor-emoji").forEach((img) => {
-      const textNode = document.createTextNode(img.dataset.code || "");
-      img.replaceWith(textNode);
-    });
-
-    tempDiv.querySelectorAll(".user-mention").forEach((mention) => {
-      const textNode = document.createTextNode(
-        `@[${mention.dataset.userId}:${mention.innerText.replace("@", "")}]`
-      );
-      mention.replaceWith(textNode);
-    });
-
-    let html = tempDiv.innerHTML.trim();
-    const plain = (editorElement.innerText || editorElement.textContent || "").trim();
-    const htmlMeaningful = html
-      .replace(/<br\s*\/?>/gi, "")
-      .replace(/<\/?div>/gi, "")
-      .replace(/&nbsp;/gi, "")
-      .trim();
-
-    if (!htmlMeaningful && plain) {
-      return plain;
-    }
-
-    return html || plain;
-  }
-
-  function syncCommentEditorToHidden() {
-    const editorElement = document.getElementById("wtext");
-    const hiddenContentElement = document.getElementById("hiddenContent");
-    if (!editorElement || !hiddenContentElement) {
-      return "";
-    }
-
-    const body = getCommentBodyFromEditor(editorElement);
-    hiddenContentElement.value = body;
-    return body;
-  }
-
-  window.ngSyncCommentForm = syncCommentEditorToHidden;
-
-  let commentFileInput = null;
-  let commentAttachHandler = null;
-  let commentFileChangeHandler = null;
-
-  function sendPhotoComment(form) {
-    form = form || document.getElementById("f1");
-    if (!form || form.id !== "f1") {
-      return;
-    }
-
-    const editor = document.getElementById("wtext");
-    const body = syncCommentEditorToHidden();
-    const formData = new FormData(form);
-    formData.set("wtext", body || getCommentBodyFromEditor(editor));
-
-    const photoId = formData.get("id");
-    const statusEl = document.getElementById("statusSend");
-    const postsEl = document.getElementById("posts");
-
-    const showStatus = function (text, color) {
-      if (!statusEl) return;
-      statusEl.style.display = "block";
-      statusEl.style.color = color;
-      statusEl.textContent = text;
-    };
-
-    const attachedFile = formData.get("filebody");
-    const hasFile = attachedFile && typeof attachedFile.size === "number" && attachedFile.size > 0;
-    if (!String(formData.get("wtext") || "").trim() && !hasFile) {
-      showStatus("Введите текст комментария", "red");
-      return;
-    }
-
-    fetch("/api/photo/comment", {
-      method: "POST",
-      body: formData,
-      credentials: "same-origin",
-      headers: { "X-Requested-With": "XMLHttpRequest" },
-    })
-      .then(function (response) {
-        return response.text();
-      })
-      .then(function (raw) {
-        let jsonData;
-        try {
-          jsonData = JSON.parse(raw);
-        } catch (err) {
-          console.error("Invalid comment response:", raw);
-          showStatus("Ошибка ответа сервера", "red");
-          return;
-        }
-
-        if (jsonData.errorcode == "1") {
-          showStatus("Комментарий некорректен", "red");
-        } else if (jsonData.errorcode == "2") {
-          showStatus("Пожалуйста, подождите...", "yellow");
-          if (jsonData.twofaurl) {
-            window.setTimeout(function () {
-              window.location.replace(jsonData.twofaurl);
-            }, 1000);
-          }
-        } else if (jsonData.errorcode == "0") {
-          const fileList = document.getElementById("fileList");
-          if (editor) editor.innerHTML = "";
-          const hidden = document.getElementById("hiddenContent");
-          if (hidden) hidden.value = "";
-          if (fileList) fileList.innerHTML = "";
-          if (commentFileInput) commentFileInput.value = "";
-          showStatus("Комментарий отправлен!", "green");
-
-          if (photoId && postsEl) {
-            fetch("/api/photo/getcomments/" + photoId, {
-              method: "POST",
-              credentials: "same-origin",
-            })
-              .then(function (r) {
-                return r.text();
-              })
-              .then(function (html) {
-                postsEl.innerHTML = html;
-              })
-              .catch(function (err) {
-                console.error("Failed to reload comments:", err);
-              });
-          }
-        } else {
-          alert("Неизвестная ошибка");
-        }
-      })
-      .catch(function (err) {
-        console.error("Ошибка при отправке формы", err);
-        showStatus("Ошибка при отправке", "red");
+      // Обработка смайлов
+      tempDiv.querySelectorAll("img.editor-emoji").forEach((img) => {
+        const textNode = document.createTextNode(img.dataset.code);
+        img.replaceWith(textNode);
       });
+
+      // Обработка упоминаний
+      tempDiv.querySelectorAll(".user-mention").forEach((mention) => {
+        const textNode = document.createTextNode(
+          `@[${mention.dataset.userId}:${mention.innerText.replace("@", "")}]`
+        );
+        mention.replaceWith(textNode);
+      });
+
+      hiddenContentElement.value = tempDiv.innerHTML;
+    });
   }
-
-  window.ngSubmitPhotoComment = sendPhotoComment;
-
-  document.addEventListener(
-    "submit",
-    function (e) {
-      if (!e.target || e.target.id !== "f1") {
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      sendPhotoComment(e.target);
-    },
-    true
-  );
-
-  document.addEventListener(
-    "click",
-    function (e) {
-      const target = e.target;
-      if (!target || target.id !== "sbmt" || !target.closest("#f1")) {
-        return;
-      }
-      e.preventDefault();
-      sendPhotoComment(document.getElementById("f1"));
-    },
-    true
-  );
-
   let allSmileys = [];
   function removeFirstLast(str) {
     return str.slice(1, -1);
@@ -836,124 +678,90 @@ function setupAutocomplete() {
     });
   }
 
-  function setupCommentForm() {
-    const form = document.getElementById("f1");
-    if (!form || form.dataset.ngCommentReady === "1") {
-      return;
-    }
-
-    if (!commentFileInput) {
-      commentFileInput = document.createElement("input");
-      commentFileInput.type = "file";
-      commentFileInput.name = "filebody";
-      commentFileInput.style.display = "none";
-    }
-
-    if (!form.querySelector('input[name="filebody"]')) {
-      form.appendChild(commentFileInput);
-    }
-
-    const button = document.getElementById("attachFile");
-    const fileList = document.getElementById("fileList");
-    if (button && !button.dataset.ngCommentBound) {
-      button.dataset.ngCommentBound = "1";
-      commentAttachHandler = function () {
-        commentFileInput.click();
-      };
-      button.addEventListener("click", commentAttachHandler);
-
-      commentFileChangeHandler = function () {
-        const file = commentFileInput.files[0];
-        if (!file || !fileList) return;
-
-        const maxSize = 100 * 1024 * 1024;
-        const forbiddenExtensions = [
-          ".html",
-          ".php",
-          ".htm",
-          ".exe",
-          ".com",
-          ".cmd",
-          ".bash",
-          ".sh",
-        ];
-
-        const fileName = file.name.toLowerCase();
-        if (file.size > maxSize) {
-          alert("Файл превышает 100 МБ.");
-          commentFileInput.value = "";
-          return;
-        }
-
-        if (forbiddenExtensions.some((ext) => fileName.endsWith(ext))) {
-          alert("Расширение не поддерживается.");
-          commentFileInput.value = "";
-          return;
-        }
-
-        const fileItem = document.createElement("div");
-        fileItem.setAttribute(
-          "style",
-          "border:solid 1px #bbb; width:max-content; font-size: 12px; padding:3px 10px 3px; margin-bottom:13px; background-color:#e2e2e2"
-        );
-        fileItem.textContent = file.name;
-
-        const removeBtn = document.createElement("a");
-        removeBtn.classList.add("compl");
-        removeBtn.setAttribute(
-          "style",
-          "display: inline-block; margin-left: 5px; color:#292929; cursor: pointer;"
-        );
-        removeBtn.textContent = "✖";
-        removeBtn.addEventListener("click", function () {
-          fileItem.remove();
-          commentFileInput.value = "";
-        });
-
-        fileItem.appendChild(removeBtn);
-        fileList.appendChild(fileItem);
-      };
-      commentFileInput.addEventListener("change", commentFileChangeHandler);
-    }
-
-    form.dataset.ngCommentReady = "1";
-  }
-
-  window.commentsCleanup = function () {
-    const form = document.getElementById("f1");
-    if (form) {
-      delete form.dataset.ngCommentReady;
-    }
-
-    const button = document.getElementById("attachFile");
-    if (button) {
-      delete button.dataset.ngCommentBound;
-      if (commentAttachHandler) {
-        button.removeEventListener("click", commentAttachHandler);
-      }
-    }
-
-    if (commentFileInput && commentFileChangeHandler) {
-      commentFileInput.removeEventListener("change", commentFileChangeHandler);
-    }
-  };
-
-  async function initCommentPage() {
-    setupCommentForm();
-
+  // Объединенный обработчик загрузки
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Инициализация редактора
     const editor = document.getElementById("wtext");
-    if (!editor) {
+
+    if (editor) {
+      setupImageValidation();
+      await loadSmileys().catch(console.error);
+      initEditor();
+      setupAutocomplete();
+    } else {
+      console.warn("Editor element (#wtext) not found");
+    }
+  });
+
+  const form = document.getElementById("f1");
+  if (!form) {
+    console.error("Форма #f1 не найдена!");
+    return;
+  }
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.name = "filebody"; // Устанавливаем имя filebody
+  fileInput.style.display = "none";
+
+  form.appendChild(fileInput); // Добавляем input внутрь формы
+
+  const button = document.getElementById("attachFile");
+  const fileList = document.getElementById("fileList");
+
+  button.addEventListener("click", function () {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const maxSize = 100 * 1024 * 1024; // 100 MB
+    const forbiddenExtensions = [
+      ".html",
+      ".php",
+      ".htm",
+      ".exe",
+      ".com",
+      ".cmd",
+      ".bash",
+      ".sh",
+    ];
+
+    const fileName = file.name.toLowerCase();
+    const fileSize = file.size;
+
+    if (fileSize > maxSize) {
+      alert("Файл превышает 100 МБ.");
       return;
     }
 
-    setupImageValidation();
-    await loadSmileys().catch(console.error);
-    initEditor();
-    setupAutocomplete();
-  }
+    if (forbiddenExtensions.some((ext) => fileName.endsWith(ext))) {
+      alert("Расширение не поддерживается.");
+      return;
+    }
 
-  document.addEventListener("DOMContentLoaded", initCommentPage);
-  window.addEventListener("ng:navigate", function () {
-    window.setTimeout(initCommentPage, 0);
+    const fileItem = document.createElement("div");
+    fileItem.setAttribute(
+      "style",
+      "border:solid 1px #bbb; width:max-content; font-size: 12px; padding:3px 10px 3px; margin-bottom:13px; background-color:#e2e2e2"
+    );
+    fileItem.textContent = file.name;
+
+    const removeBtn = document.createElement("a");
+    removeBtn.classList.add("compl");
+    removeBtn.setAttribute(
+      "style",
+      "display: inline-block; margin-left: 5px; color:#292929; cursor: pointer;"
+    );
+    removeBtn.textContent = "✖";
+    removeBtn.addEventListener("click", function () {
+      fileItem.remove();
+      fileInput.value = "";
+    });
+
+    fileItem.appendChild(removeBtn);
+    fileList.appendChild(fileItem);
   });
 })();

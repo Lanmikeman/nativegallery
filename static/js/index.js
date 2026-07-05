@@ -53,7 +53,7 @@ $(document).ready(function()
 		LoadRecentPhotos();
 	}
 
-	if (typeof updateInterval === 'undefined') {
+	if ($('#recent-photos').length && typeof updateInterval === 'undefined') {
 		updateInterval = setInterval(LoadPubPhotos, 60000);
 	}
 
@@ -286,26 +286,29 @@ window.addEventListener('ng:navigate', function (e) {
 function LoadPubPhotos()
 {
 	var recent = $('#recent-photos');
-	var firstpid = recent.attr('firstpid');
+	if (!recent.length) return;
 
-	if (firstpid == 0) return;
+	var firstpid = parseInt(recent.attr('firstpid'), 10);
+	if (!firstpid || firstpid <= 0) return;
 
-	$.getJSON('/api.php', { action: 'get-pub-photos', firstpid: firstpid }, function(data)
+	$.getJSON('/api/photo/loadnew', { firstpid: firstpid }, function(data)
 	{
-		if (data)
-		{
-			if (data.length)
-			{
-				for (var i = 0; i < data.length; i++)
-				{
-					$('.prw-grid-item:visible', recent).eq(-1).hide();
-					AddPhotoToBlock(recent, data[i], true);
-				}
-
-				recent.attr('firstpid', data[i-1].pid);
-			}
+		if (!Array.isArray(data)) {
+			clearInterval(updateInterval);
+			return;
 		}
-		else clearInterval(updateInterval);
+
+		if (data.length)
+		{
+			for (var i = 0; i < data.length; i++)
+			{
+				$('.prw-grid-item:visible', recent).eq(-1).hide();
+				AddPhotoToBlock(recent, data[i], true);
+			}
+
+			var last = data[data.length - 1];
+			recent.attr('firstpid', last.id || last.pid);
+		}
 	})
 	.fail(function(jx) { if (jx.responseText != '') console.log(jx.responseText); });
 }

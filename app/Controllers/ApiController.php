@@ -11,7 +11,9 @@ use \App\Controllers\Api\Images\Rate as PhotoVote;
 use \App\Controllers\Api\Images\Compress as PhotoCompress;
 use \App\Controllers\Api\Images\CheckAll as PhotoCheckAll;
 use \App\Controllers\Api\Images\LoadRecent as PhotoLoadRecent;
+use \App\Controllers\Api\Images\LoadNew as PhotoLoadNew;
 use \App\Controllers\Api\Images\LoadRandom as PhotoLoadRandom;
+use \App\Controllers\Api\LegacyApi;
 use \App\Controllers\Api\Images\Move as PhotoMove;
 use \App\Controllers\Api\Images\LoadMap as PhotoLoadMap;
 use \App\Controllers\Api\Images\Favorite as PhotoFavorite;
@@ -147,6 +149,12 @@ class ApiController
     }
     public static function recentphotos() {
         return new PhotoLoadRecent();
+    }
+    public static function loadnewphotos() {
+        return new PhotoLoadNew();
+    }
+    public static function legacyapi() {
+        return new LegacyApi();
     }
     public static function randomphotos() {
         return new PhotoLoadRandom();

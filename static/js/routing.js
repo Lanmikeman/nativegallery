@@ -186,12 +186,15 @@
       }
 
       if (!oldScript.src) {
+        const forceRestart = oldScript.hasAttribute("data-restart");
         const hash = simpleHash(code);
-        if (executedInlineScripts.has(hash)) {
+        if (!forceRestart && executedInlineScripts.has(hash)) {
           oldScript.remove();
           return;
         }
-        executedInlineScripts.add(hash);
+        if (!forceRestart) {
+          executedInlineScripts.add(hash);
+        }
       }
 
       const newScript = document.createElement("script");

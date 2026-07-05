@@ -943,7 +943,7 @@ if ($photo->i('id') !== null) {
                             <?php
                             if (Auth::userid() > 0) {
                                 if (NGALLERY['root']['registration']['emailverify'] != true || $user->i('status') != 3) { ?>
-                                    <form action="#" method="post" id="f1" enctype="multipart/form-data" onsubmit="return false;">
+                                    <form action="#" method="post" id="f1" enctype="multipart/form-data">
                                         <input type="hidden" name="sid" value="hgdl6old9r9qodmvkn1r4t7d6h">
                                         <input type="hidden" name="last_comment_rand" value="893329610">
                                         <input type="hidden" name="id" id="id" value="<?= $id ?>">
@@ -952,7 +952,7 @@ if ($photo->i('id') !== null) {
                                         <div contenteditable="true" id="wtext"></div><br>
                                         <div id="fileList" class="mt-3"></div>
                                         <p id="statusSend" style="display: none;">Ошибка</p>
-                                        <div class="cmt-submit"><input type="button" value="Добавить комментарий" id="sbmt" onclick="if(window.ngSubmitPhotoComment){window.ngSubmitPhotoComment();}else if(window.ngFallbackPhotoComment){window.ngFallbackPhotoComment();}return false;"><button style="display: inline;" type="button" id="attachFile"><i class='bx bx-paperclip bx-rotate-90'></i></button><button style="display: inline;" type="button" id="showPicker"><i class='bx bx-smile'></i></button>
+                                        <div class="cmt-submit"><input type="submit" value="Добавить комментарий" id="sbmt"><button style="display: inline;" type="button" id="attachFile"><i class='bx bx-paperclip bx-rotate-90'></i></button><button style="display: inline;" type="button" id="showPicker"><i class='bx bx-smile'></i></button>
 
                                         </div>
                                         <div id="picker" class="emoji-picker">
@@ -980,6 +980,93 @@ if ($photo->i('id') !== null) {
                 </div>
 
                 <script data-restart>
+                    (function () {
+                        function bindPhotoCommentForm() {
+                            var form = document.getElementById('f1');
+                            if (!form || form.dataset.ngInlineCommentBound === '1') {
+                                return;
+                            }
+                            form.dataset.ngInlineCommentBound = '1';
+
+                            form.addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                if (typeof window.ngSubmitPhotoComment === 'function') {
+                                    window.ngSubmitPhotoComment(form);
+                                    return;
+                                }
+
+                                var editor = document.getElementById('wtext');
+                                var hidden = document.getElementById('hiddenContent');
+                                if (typeof window.ngSyncCommentForm === 'function') {
+                                    window.ngSyncCommentForm();
+                                } else if (editor && hidden) {
+                                    hidden.value = (editor.innerText || editor.textContent || '').trim();
+                                }
+
+                                var formData = new FormData(form);
+                                if (hidden) {
+                                    formData.set('wtext', hidden.value || '');
+                                }
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/api/photo/comment',
+                                    data: formData,
+                                    processData: false,
+                                    contentType: false,
+                                    success: function (response) {
+                                        var jsonData = JSON.parse(response);
+
+                                        if (jsonData.errorcode == '1') {
+                                            $('#statusSend').css({ display: 'block', color: 'red' }).text('Комментарий некорректен');
+                                        } else if (jsonData.errorcode == '2') {
+                                            $('#statusSend').css({ display: 'block', color: 'yellow' }).text('Пожалуйста, подождите...');
+                                            setTimeout(function () {
+                                                window.location.replace(jsonData.twofaurl);
+                                            }, 1000);
+                                        } else if (jsonData.errorcode == '0') {
+                                            if (editor) editor.innerHTML = '';
+                                            if (hidden) hidden.value = '';
+                                            $('#fileList').html('');
+                                            $('#statusSend').css({ display: 'block', color: 'green' }).text('Комментарий отправлен!');
+
+                                            $.ajax({
+                                                type: 'POST',
+                                                url: '/api/photo/getcomments/<?= $id ?>',
+                                                processData: false,
+                                                async: true,
+                                                success: function (r) {
+                                                    $('#posts').html(r);
+                                                }
+                                            });
+                                        } else {
+                                            alert('Неизвестная ошибка');
+                                        }
+                                    },
+                                    error: function (err) {
+                                        console.error('Ошибка при отправке формы', err);
+                                    }
+                                });
+                            });
+                        }
+
+                        if (typeof window.jQuery !== 'undefined') {
+                            $(bindPhotoCommentForm);
+                        } else {
+                            document.addEventListener('DOMContentLoaded', bindPhotoCommentForm);
+                        }
+
+                        window.addEventListener('ng:navigate', function () {
+                            var form = document.getElementById('f1');
+                            if (form) {
+                                delete form.dataset.ngInlineCommentBound;
+                            }
+                            window.setTimeout(bindPhotoCommentForm, 0);
+                        });
+                    })();
+
                     function errimg() {
                         const content = `<center>
                         <div class="p20 s5" style="border:none; margin:0 -20px; display:none;">

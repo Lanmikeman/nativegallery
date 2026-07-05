@@ -241,89 +241,9 @@ use App\Services\{Router, Auth};
                 margin-right: 1px;
             }
 
-            .player {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
-            width: 500px;
-        }
-        .progress {
-            flex-grow: 1;
-            height: 5px;
-            background: #ccc;
-            position: relative;
-            cursor: pointer;
-            width: 100px;
-            border-radius: 3px;
-        }
-        .progress span {
-            position: absolute;
-            height: 100%;
-            width: 0%;
-            background: #666;
-            border-radius: 3px;
-        }
-        .slider {
-            position: absolute;
-            top: -3px;
-            height: 10px;
-            width: 10px;
-            background: #333;
-            border-radius: 50%;
-            transform: translateX(-50%);
-        }
-        .time {
-            font-size: 12px;
-            color: #333;
-        }
         </style>
         <tr>
             <td class="main">
-          
-     
-    <script>
-        const audio = document.getElementById("audio");
-        const playPause = document.getElementById("playPause");
-        const progressBar = document.getElementById("progressBar");
-        const progress = progressBar.querySelector("span");
-        const timeDisplay = document.getElementById("time");
-
-        playPause.addEventListener("click", () => {
-            if (audio.paused) {
-                audio.play();
-                playPause.textContent = "⏸";
-            } else {
-                audio.pause();
-                playPause.textContent = "▶";
-            }
-        });
-
-        audio.addEventListener("timeupdate", () => {
-            const currentTime = audio.currentTime;
-            const duration = audio.duration;
-            const progressPercent = (currentTime / duration) * 100;
-            progress.style.width = progressPercent + "%";
-            
-            const formatTime = (time) => {
-                const minutes = Math.floor(time / 60);
-                const seconds = Math.floor(time % 60).toString().padStart(2, '0');
-                return `${minutes}:${seconds}`;
-            };
-
-            timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
-        });
-
-        progressBar.addEventListener("click", (e) => {
-            const rect = progressBar.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const progressWidth = rect.width;
-            const newTime = (clickX / progressWidth) * audio.duration;
-            audio.currentTime = newTime;
-        });
-    </script>
                 <div class="wrap2">
                     <div class="wrap1">
                         <div id="auth" class="page-wrap">
@@ -451,36 +371,6 @@ use App\Services\{Router, Auth};
 
                                         <img src="https://ovk.to/assets/packages/static/openvk/img/tour/videos_w.png" width="440">
 
-
-                                        <br>
-                                    </div>
-
-                                    <div id="audios" class="tabcontent" style="display: none;">
-                                        <h2>Слушайте аудиозаписи</h2>
-
-                                        <ul class="listing">
-                                            <li><span>Вы можете слушать аудиозаписи в разделе "Мои Аудиозаписи"</span></li>
-                                            <li><span>Этот раздел также регулируется настройками приватности</span></li>
-                                            <li><span>Самые прослушиваемые песни находятся во вкладке "Популярное", а недавно загруженные — во вкладке "Новое"</span></li>
-                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios.png" width="440">
-                                        </ul>
-
-                                        <ul class="listing">
-                                            <li><span>Чтобы добавить песню в свою коллекцию, наведите на неё и нажмите на плюс. Найти нужную песню можно в поиске</span></li>
-                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios_search.png" width="440">
-                                            <li><span>Если вы не можете найти нужную песню, вы можете загрузить её самостоятельно</span></li>
-                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios_upload.png" width="440">
-                                        </ul>
-
-                                        <p class="big"><b>Важно:</b> песня не должна нарушать авторские права</p>
-
-                                        <h2>Создавайте плейлисты</h2>
-
-                                        <ul class="listing">
-                                            <li><span>Вы можете создавать сборники треков во вкладке "Мои плейлисты"</span></li>
-                                            <li><span>Можно также добавлять чужие плейлисты в свою коллекцию</span></li>
-                                            <img src="https://ovk.to/assets/packages/static/openvk/img/tour/audios_playlists.png" width="440">
-                                        </ul>
 
                                         <br>
                                     </div>

@@ -83,13 +83,6 @@ ngallery:
     video:
       upload:
         allow: true
-    audio:
-      enabled: true
-      upload:
-        allow: true
-        maxsize: 52428800
-      streams:
-        allow: true
     photo:
       uploadindex:
         enabled: false
@@ -144,15 +137,14 @@ run_migrations() {
     for sql_file in sqlcore/base.sql \
         sqlcore/sql_0001.sql sqlcore/sql_0002.sql sqlcore/sql_0003.sql \
         sqlcore/sql_0004.sql sqlcore/sql_0005.sql sqlcore/sql_0006.sql \
-        sqlcore/sql_0007.sql sqlcore/sql_0008.sql sqlcore/sql_0009.sql \
-        sqlcore/sql_0010.sql sqlcore/sql_0011.sql; do
+        sqlcore/sql_0007.sql sqlcore/sql_0008.sql sqlcore/sql_0009.sql; do
         if [[ -f "${NG_WEB_ROOT}/${sql_file}" ]]; then
             mysql -h "${NG_DB_HOST}" -u "${NG_DB_USER}" -p"${NG_DB_PASS}" "${NG_DB_NAME}" \
                 < "${NG_WEB_ROOT}/${sql_file}"
             echo "    imported: ${sql_file}"
         fi
     done
-    echo "11" > "${marker}"
+    echo "9" > "${marker}"
     chown "${NG_WEB_USER}:${NG_WEB_USER}" "${marker}" 2>/dev/null || true
 }
 

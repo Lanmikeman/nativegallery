@@ -116,8 +116,7 @@ $sqlFiles = @(
   "sqlcore\base.sql",
   "sqlcore\sql_0001.sql", "sqlcore\sql_0002.sql", "sqlcore\sql_0003.sql",
   "sqlcore\sql_0004.sql", "sqlcore\sql_0005.sql", "sqlcore\sql_0006.sql",
-  "sqlcore\sql_0007.sql", "sqlcore\sql_0008.sql", "sqlcore\sql_0009.sql",
-  "sqlcore\sql_0010.sql", "sqlcore\sql_0011.sql"
+  "sqlcore\sql_0007.sql", "sqlcore\sql_0008.sql", "sqlcore\sql_0009.sql"
 )
 foreach ($f in $sqlFiles) {
   Get-Content $f -Raw | mysql -u ngallery -p ngallery

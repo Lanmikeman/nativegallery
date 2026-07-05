@@ -1,5 +1,5 @@
--- Удаление таблиц музыки (sql_0010.sql + sql_0011.sql)
---   mysql -u USER -p DATABASE < sqlcore/drop_audio_tables.sql
+-- Удаление устаревших таблиц (если остались после отката функций)
+--   mysql -u USER -p DATABASE < sqlcore/drop_legacy_tables.sql
 
 SET FOREIGN_KEY_CHECKS = 0;
 

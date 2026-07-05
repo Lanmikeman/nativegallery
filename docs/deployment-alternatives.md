@@ -151,7 +151,7 @@ setsebool -P httpd_can_network_connect 1
 chcon -R -t httpd_sys_rw_content_t uploads cdn logs storage
 ```
 
-Нужно для OpenVK, внешних радиопотоков и записи в `storage/`.
+Нужно для OpenVK и записи в `storage/`.
 
 ### Права и cron на RHEL
 
@@ -214,7 +214,7 @@ sudo certbot --apache -d example.com
 
 ## Что одинаково на всех стеках
 
-- Миграции: `sqlcore/base.sql` → `sql_0011.sql` (см. [deployment.md](deployment.md))
+- Миграции: `sqlcore/base.sql` → `sql_0009.sql` (см. [deployment.md](deployment.md))
 - Конфиг: `ngallery.yaml` + overlay в `storage/`
 - Cron фотоконкурсов: `deploy/setup-cron.sh`
 - Обновление: `git pull`, `composer install --no-dev`, новые SQL-файлы

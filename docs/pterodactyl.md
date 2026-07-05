@@ -82,7 +82,7 @@ location / {
 
 1. `https://ваш-домен/register` — регистрация  
 2. MySQL: `UPDATE users SET admin = 1 WHERE username = 'ник';`  
-3. Миграции музыки уже в `NG_AUTO_MIGRATE=1` (`sql_0010`, `sql_0011`)
+3. Миграции до `sql_0009` применяются при `NG_AUTO_MIGRATE=1`
 
 ## Обновление
 

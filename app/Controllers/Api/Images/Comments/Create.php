@@ -86,8 +86,6 @@ class Create
                 $type = 'img';
                 $destination = '/cdn/temp/' . $filename . '.jpg';
                 imagejpeg($image, $_SERVER['DOCUMENT_ROOT'] . $destination, 60);
-            } elseif (preg_match('/^audio\//', $mime)) {
-                die('Аудио');
             } elseif (preg_match('/^video\//', $mime)) {
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                     $ffmpeg = \FFMpeg\FFMpeg::create([

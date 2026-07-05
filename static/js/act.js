@@ -387,49 +387,6 @@ const deleteSiteLink = (id) => {
   });
 };
 
-const createGlobalRadio = () => {
-  $.ajax({
-    type: "POST",
-    url: "/api/admin/radio/create",
-    data: {
-      title: $("#radio-title").val(),
-      url: $("#radio-url").val(),
-      sort_order: $("#radio-sort").val(),
-    },
-    dataType: "json",
-    success: function (res) {
-      if (res.error) {
-        Notify.noty("danger", res.message || "Ошибка");
-        return;
-      }
-      Notify.noty("success", "Радиостанция добавлена!");
-      location.reload();
-    },
-    error: function () {
-      Notify.noty("danger", "Ошибка запроса");
-    },
-  });
-};
-
-const deleteGlobalRadio = (id) => {
-  $.ajax({
-    type: "GET",
-    url: "/api/admin/radio/delete?id=" + id,
-    dataType: "json",
-    success: function (res) {
-      if (res.error) {
-        Notify.noty("danger", res.message || "Ошибка");
-        return;
-      }
-      Notify.noty("success", "Удалено!");
-      $("#radio" + id).remove();
-    },
-    error: function () {
-      Notify.noty("danger", "Ошибка запроса");
-    },
-  });
-};
-
 const loadPages = () => {
   $.ajax({
     type: "GET",

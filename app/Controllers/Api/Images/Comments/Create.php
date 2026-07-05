@@ -17,6 +17,21 @@ class Create
         return $text === '';
     }
 
+    private static function hasUploadedFile(): bool
+    {
+        if (!isset($_FILES['filebody']) || !is_array($_FILES['filebody'])) {
+            return false;
+        }
+
+        $file = $_FILES['filebody'];
+        $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        $tmpName = (string) ($file['tmp_name'] ?? '');
+
+        return $error === UPLOAD_ERR_OK
+            && $tmpName !== ''
+            && is_uploaded_file($tmpName);
+    }
+
     private static function create($content, $id, $postbody)
     {
         DB::query(
@@ -46,23 +61,24 @@ class Create
 
         $type = 'none';
         self::$filesrc = '';
-        $hasFile = isset($_FILES['filebody']) && (int) $_FILES['filebody']['error'] !== UPLOAD_ERR_NO_FILE;
+        $hasFile = self::hasUploadedFile();
 
         if ($hasFile) {
+            $tmpName = (string) $_FILES['filebody']['tmp_name'];
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime = finfo_file($finfo, $_FILES['filebody']['tmp_name']);
+            $mime = finfo_file($finfo, $tmpName);
             finfo_close($finfo);
             $filename = GenerateRandomStr::gen_uuid();
 
             if (preg_match('/^image\//', $mime)) {
-                $info = getimagesize($_FILES['filebody']['tmp_name']);
+                $info = getimagesize($tmpName);
 
                 if ($info['mime'] == 'image/jpeg') {
-                    $image = imagecreatefromjpeg($_FILES['filebody']['tmp_name']);
+                    $image = imagecreatefromjpeg($tmpName);
                 } elseif ($info['mime'] == 'image/gif') {
-                    $image = imagecreatefromgif($_FILES['filebody']['tmp_name']);
+                    $image = imagecreatefromgif($tmpName);
                 } elseif ($info['mime'] == 'image/png') {
-                    $image = imagecreatefrompng($_FILES['filebody']['tmp_name']);
+                    $image = imagecreatefrompng($tmpName);
                 } else {
                     die(json_encode(['errorcode' => '1', 'error' => 1]));
                 }
@@ -83,7 +99,7 @@ class Create
                 } else {
                     $ffmpeg = \FFMpeg\FFMpeg::create();
                 }
-                $video = $ffmpeg->open($_FILES['filebody']['tmp_name']);
+                $video = $ffmpeg->open($tmpName);
                 $video->save(new \FFMpeg\Format\Video\X264(), $_SERVER['DOCUMENT_ROOT'] . '/cdn/temp/' . $filename . '.mp4');
                 $video->frame(\FFMpeg\Coordinate\TimeCode::fromSeconds(1))->save($_SERVER['DOCUMENT_ROOT'] . '/cdn/temp/VIDPRV_' . $filename . '.jpg');
                 $type = 'video';

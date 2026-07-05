@@ -81,7 +81,6 @@ class Routes
             Router::get('/lk/editimage', 'ProfileController@editimage');
             Router::get('/lk/editimage.php', 'ProfileController@editimage');
             Router::get('/fav_authors', 'MainController@favauthors');
-            Router::get('/music', 'MusicController@index');
 
             Router::get('/messages', 'MessagesController@i');
 
@@ -103,14 +102,6 @@ class Routes
             Router::any('/vehicle/dbedit', 'VehicleController@dbedit');
             Router::any('/vehicle/$id', 'VehicleController@i');
             Router::post('/api/upload', 'ApiController@upload');
-            Router::post('/api/audio/upload', 'ApiController@audioupload');
-            Router::post('/api/audio/stream', 'ApiController@audiostream');
-            Router::post('/api/audio/url', 'ApiController@audiourl');
-            Router::get('/api/audio/library', 'ApiController@audiolibrary');
-            Router::get('/api/audio/proxy', 'ApiController@audioproxy');
-            Router::get('/api/audio/metadata', 'ApiController@audiometadata');
-            Router::post('/api/audio/delete', 'ApiController@audiodelete');
-            Router::post('/api/audio/playlist', 'ApiController@audioplaylist');
             Router::post('/api/photo/edit', 'ApiController@photoedit');
             Router::post('/api/profile/update', 'ApiController@updateprofile');
             Router::post('/api/photo/comment', 'ApiController@photocomment');
@@ -154,8 +145,6 @@ class Routes
                 Router::post('/api/admin/chronology/$id/delete', 'ApiController@admindeletechronology');
                 Router::post('/api/admin/links/create', 'ApiController@admincreatelink');
                 Router::get('/api/admin/links/delete', 'ApiController@admindeletelink');
-                Router::post('/api/admin/radio/create', 'ApiController@admincreateradio');
-                Router::get('/api/admin/radio/delete', 'ApiController@admindeleteradio');
                 Router::any('/api/admin/getvehicleinputs/$id', 'ApiController@admingetvehicleinputs');
                 Router::any('/api/admin/models/requests/$id/$type', 'ApiController@adminmodelsrequesthandler');
                 Router::any('/api/admin/geodb/create', 'ApiController@admingeodbcreate');
@@ -165,7 +154,6 @@ class Routes
                 Router::post('/api/admin/contests/forceclose', 'ApiController@admincontestsforceclose');
                 Router::post('/api/admin/contests/cancel', 'ApiController@admincontestscancel');
                 Router::any('/api/admin/settings/taskmanager', 'ApiController@admintaskmanager');
-                Router::post('/api/admin/settings/music', 'ApiController@adminsettingsmusic');
                 Router::post('/api/admin/settings/auth', 'ApiController@adminsettingsauth');
                 Router::post('/api/admin/settings/auth/providers', 'ApiController@adminsettingsauthprovider');
                 Router::post('/api/admin/settings/auth/providers/$id', 'ApiController@adminsettingsauthprovider');

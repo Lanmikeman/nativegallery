@@ -48,8 +48,6 @@ use \App\Controllers\Api\Admin\Chronology\Create as AdminCreateChronology;
 use \App\Controllers\Api\Admin\Chronology\Delete as AdminDeleteChronology;
 use \App\Controllers\Api\Admin\Links\Create as AdminCreateLink;
 use \App\Controllers\Api\Admin\Links\Delete as AdminDeleteLink;
-use \App\Controllers\Api\Admin\Radio\Create as AdminCreateRadio;
-use \App\Controllers\Api\Admin\Radio\Delete as AdminDeleteRadio;
 use \App\Controllers\Api\Admin\GetVehicleInputs as AdminGetVehicleInputs;
 use \App\Controllers\Api\Admin\Models\RequestHandler as AdminModelsRequestHandler;
 use \App\Controllers\Api\Admin\GeoDB\Create as AdminGeoDBCreate;
@@ -61,7 +59,6 @@ use \App\Controllers\Api\Admin\Contests\ForceClose as AdminContestsForceClose;
 use \App\Controllers\Api\Admin\Contests\Cancel as AdminContestsCancel;
 use \App\Controllers\Api\Admin\Settings\TaskManager as AdminTaskManager;
 use \App\Controllers\Api\Admin\Settings\Auth as AdminSettingsAuth;
-use \App\Controllers\Api\Admin\Settings\Music as AdminSettingsMusic;
 use \App\Controllers\Api\Admin\Settings\AuthProvider as AdminSettingsAuthProvider;
 use \App\Controllers\Api\Admin\Settings\Debug as AdminSettingsDebug;
 use \App\Controllers\Api\Admin\Settings\ServerConfig as AdminSettingsServerConfig;
@@ -71,14 +68,6 @@ use \App\Controllers\Api\Messages\UploadFile as MSGUpload;
 use \App\Controllers\Api\Messages\GetUsers as MSGGetUsers;
 use \App\Controllers\Api\Messages\CreateChat as MSGCreateChat;
 use \App\Controllers\Api\Emoji\Load as EmojiLoad;
-use \App\Controllers\Api\Audio\Upload as AudioUpload;
-use \App\Controllers\Api\Audio\CreateStream as AudioCreateStream;
-use \App\Controllers\Api\Audio\AddUrl as AudioAddUrl;
-use \App\Controllers\Api\Audio\Library as AudioLibraryApi;
-use \App\Controllers\Api\Audio\Delete as AudioDelete;
-use \App\Controllers\Api\Audio\Playlist as AudioPlaylist;
-use \App\Controllers\Api\Audio\Proxy as AudioProxy;
-use \App\Controllers\Api\Audio\Metadata as AudioMetadata;
 
 class ApiController
 {
@@ -213,12 +202,6 @@ class ApiController
     public static function admindeletelink() {
         return new AdminDeleteLink();
     }
-    public static function admincreateradio() {
-        return new AdminCreateRadio();
-    }
-    public static function admindeleteradio() {
-        return new AdminDeleteRadio();
-    }
     public static function admingetvehicleinputs() {
         return new AdminGetVehicleInputs();
     }
@@ -245,9 +228,6 @@ class ApiController
     }
     public static function admintaskmanager() {
         return new AdminTaskManager();
-    }
-    public static function adminsettingsmusic() {
-        return new AdminSettingsMusic();
     }
     public static function adminsettingsauth() {
         return new AdminSettingsAuth();
@@ -294,31 +274,4 @@ class ApiController
     public static function adminmodelsrequesthandler() {
         return new AdminModelsRequestHandler();
     }
-
-    public static function audioupload() {
-        return new AudioUpload();
-    }
-    public static function audiostream() {
-        return new AudioCreateStream();
-    }
-    public static function audiourl() {
-        return new AudioAddUrl();
-    }
-    public static function audiolibrary() {
-        return new AudioLibraryApi();
-    }
-    public static function audiodelete() {
-        return new AudioDelete();
-    }
-    public static function audioplaylist() {
-        return new AudioPlaylist();
-    }
-    public static function audioproxy() {
-        return new AudioProxy();
-    }
-    public static function audiometadata() {
-        return new AudioMetadata();
-    }
-
-
 }

@@ -60,13 +60,6 @@ ngallery:
     video:
       upload:
         allow: true
-    audio:
-      enabled: true
-      upload:
-        allow: true
-        maxsize: 52428800
-      streams:
-        allow: true
     photo:
       uploadindex:
         enabled: false

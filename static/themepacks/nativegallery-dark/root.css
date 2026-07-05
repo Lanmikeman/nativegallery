@@ -270,20 +270,6 @@ a.underphoto:hover { background-color:#222; }
 .p-comment .rank { color:var(--theme-muted-color); }
 .p-comment .pc-topost { color:var(--theme-link-color); }
 
-.ng-music-page .ng-music-tab {
-    background:var(--theme-form-color);
-    color:var(--theme-text-color);
-}
-.ng-music-page .ng-music-tab.active {
-    background:var(--theme-bg-hover-color);
-    color:var(--theme-fg-color);
-}
-.ng-music-page .ng-music-list li {
-    color:var(--theme-text-color);
-}
-.ng-music-page .ng-music-empty {
-    color:var(--theme-muted-color);
-}
 .w-btn.voted, .w-btn.voted:hover { background-color:#444 !important; }
 
 .no-politics { color:#fd7272; }

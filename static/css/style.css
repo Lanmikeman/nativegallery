@@ -214,25 +214,6 @@ li.ui-menu-item a:hover, li.ui-menu-item a:visited:hover {
 .p-comment .pc-topost { color:var(--theme-link-color); }
 .p-comment .message-text.feed a { color:var(--theme-link-color); }
 
-/* /music — вкладки и списки на светлом фоне .main */
-.ng-music-page .ng-music-tab {
-    background:var(--theme-form-color);
-    color:var(--theme-text-color);
-}
-.ng-music-page .ng-music-tab.active {
-    background:var(--theme-main-color);
-    color:var(--theme-text-color);
-}
-.ng-music-page .ng-music-list li {
-    color:var(--theme-text-color);
-}
-.ng-music-page .ng-music-empty {
-    color:var(--theme-muted-color);
-}
-.ng-music-page .ng-music-form label {
-    color:var(--theme-text-color);
-}
-
 .idx-donate { display:inline-block; background-color:#db7746; text-align:right; margin-right:-20px; padding:0 4px 0 0; text-shadow: 1px 1px 1px rgba(0,0,0,.3); }
 .idx-donate > a { display:inline-block; padding:2px 24px 3px 19px; margin:0 -4px; font-size:18px; color:#fff; font-family:var(--narrow-font); }
 

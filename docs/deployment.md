@@ -1,6 +1,6 @@
 # Развёртывание и обслуживание
 
-Актуально для форка **v1.7**.
+Актуально для форка **v1.8**.
 
 **Production:** Ubuntu 24.04 + Nginx (`deploy/install-ubuntu-24.04.sh`).  
 **Пути:** [paths.md](paths.md) — по умолчанию `/var/www/nativegallery`; свой каталог через `NG_WEB_ROOT`.
@@ -11,12 +11,13 @@
 
 | С версии | Действия |
 |----------|----------|
-| 1.6 → 1.7 | `git pull`, Ctrl+F5 в браузере (при необходимости `sql_0009.sql`) |
+| **1.7 → 1.8** | `git pull`, `drop_legacy_tables.sql` (если ставили музыку), Ctrl+Shift+R в браузере |
+| 1.6 → 1.7 | `git pull`, Ctrl+F5 (при необходимости `sql_0009.sql`) — **музыка из 1.7 в 1.8 удалена** |
 | 1.4 → 1.6 | `sql_0008.sql`, `sql_0009.sql` (при необходимости), права на `storage/`, cron, владелец (`admin = 4`) |
 | 1.3 → 1.4 | `sql_0005.sql` … `sql_0007.sql`, `timezone`, cron |
-| Чистая установка | `deploy/install-ubuntu-24.04.sh` (все миграции автоматически) |
+| Чистая установка | `deploy/install-ubuntu-24.04.sh` (миграции до `sql_0009.sql`) |
 
-Подробные заметки: [releases/1.7.md](releases/1.7.md), [releases/1.6.md](releases/1.6.md), [releases/1.4.md](releases/1.4.md).
+Подробные заметки: [releases/1.8.md](releases/1.8.md), [releases/1.7.md](releases/1.7.md), [releases/1.6.md](releases/1.6.md), [releases/1.4.md](releases/1.4.md).
 
 ## Обновление с GitHub
 
@@ -44,6 +45,18 @@ mysql -u USER -p DATABASE < sqlcore/sql_0009.sql   # updated_at у pages
 Полный список при чистой установке: `base.sql` → `sql_0001.sql` … → `sql_0009.sql`.
 
 Роль владельца сервера (`admin = 4`) **не требует** отдельной миграции.
+
+### Очистка после релиза 1.7 (музыка)
+
+Если на сервере применяли `sql_0010.sql` / `sql_0011.sql` (музыкальный раздел, убран в 1.8):
+
+```bash
+mysql -u USER -p DATABASE < sqlcore/drop_legacy_tables.sql
+```
+
+Удаляются таблицы: `audio_playlist_items`, `audio_playlists`, `audio_streams`, `audio_tracks`, `audio_global_streams`.
+
+В `storage/auth-settings.json` можно удалить блок `"audio"` — необязательно.
 
 ## Каталоги и права
 
@@ -128,5 +141,5 @@ sudo systemctl reload nginx php8.3-fpm
 
 ```bash
 git describe --tags --always
-# ожидается release-1.7 или коммит поверх него
+# ожидается main (1.8) или тег release-1.8
 ```

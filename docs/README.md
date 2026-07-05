@@ -2,7 +2,7 @@
 
 Документация для форка [Lanmikeman/nativegallery](https://github.com/Lanmikeman/nativegallery) — ответвление от [claradex/nativegallery](https://github.com/claradex/nativegallery), ориентированное на развёртывание Ubuntu 24.04 + Nginx + PHP 8.3 + MariaDB и функциональный паритет с [transphoto.org](https://transphoto.org).
 
-**Текущая версия форка:** 1.7 (2026-07-02) · тег [`release-1.7`](https://github.com/Lanmikeman/nativegallery/releases/tag/release-1.7)
+**Текущая версия форка:** **1.8** (2026-07-05) · ветка `main`
 
 ## Разделы
 
@@ -17,15 +17,17 @@
 | [docker.md](docker.md) | Docker-образ и docker compose |
 | [pterodactyl.md](pterodactyl.md) | Egg для Pterodactyl Panel |
 | [routes.md](routes.md) | Публичные URL, ЛК, конкурсы, OpenVK, API админки |
-| [releases/1.7.md](releases/1.7.md) | Заметки к релизу 1.7 — SPA-навигация, перелистывание фото |
-| [releases/1.6.md](releases/1.6.md) | Заметки к релизу 1.6 — OpenVK, конкурсы, владелец сервера |
-| [releases/1.4.md](releases/1.4.md) | Заметки к релизу 1.4 — обновления, поиск, публичные разделы |
+| [releases/1.8.md](releases/1.8.md) | **Актуально:** откат музыки и SPA, комментарии, очистка БД |
+| [releases/1.7.md](releases/1.7.md) | Исторический релиз 1.7 (SPA, музыка — убраны в 1.8) |
+| [releases/1.6.md](releases/1.6.md) | OpenVK, конкурсы, владелец сервера |
+| [releases/1.4.md](releases/1.4.md) | Обновления, поиск, публичные разделы |
 
 ## Быстрые ссылки
 
 - Установка: [README.md](../README.md#установка)
 - История изменений: [CHANGELOG.md](../CHANGELOG.md)
 - Пример конфигурации: [ngallery-example.yaml](../ngallery-example.yaml)
+- Очистка БД после 1.7: [drop_legacy_tables.sql](../sqlcore/drop_legacy_tables.sql)
 - Автоустановка (production): [deploy/install-ubuntu-24.04.sh](../deploy/install-ubuntu-24.04.sh)
 - Debian 12/13: [deploy/install-debian-12.sh](../deploy/install-debian-12.sh), [install-debian-12-apache.sh](../deploy/install-debian-12-apache.sh)
 - Ручная установка: [manual-install.md](manual-install.md)
@@ -39,13 +41,17 @@
 
 | Версия | Дата | Ключевые изменения |
 |--------|------|-------------------|
-| **1.7** | 2026-07-02 | SPA-навигация, перелистывание фото (`/api/photo/move`), кэш статики, улучшения админ-панели |
-| 1.6 | 2026-07-02 | OpenVK, фотоконкурсы (rating, sendpretend, pk.php), роль владельца (`admin=4`), ЛК (ticket/konkurs), `/help/`, overlay `server-settings.json` |
+| **1.8** | 2026-07-05 | Удалена музыка (`/music`, `audio_*`); SPA отключена; комментарии по схеме claradex; `drop_legacy_tables.sql` |
+| 1.7 | 2026-07-02 | SPA, музыка (позже убрана), перелистывание фото, кэш `ng_asset()`, админ-панель |
+| 1.6 | 2026-07-02 | OpenVK, фотоконкурсы (rating, sendpretend, pk.php), роль владельца (`admin=4`), ЛК (ticket/konkurs), `/help/` |
 | 1.4 | 2026-07-02 | `/update`, поиск, `/news`, `/links`, фотоконкурсы (cron), deploy-скрипты, редактирование фото |
 | 1.3 | 2025-05-26 | Базовый upstream claradex/nativegallery |
 
-## Что нового в 1.7 (кратко)
+## Что нового в 1.8 (кратко)
 
-- **SPA** — переходы по меню без перезагрузки; стрелки фото через `/api/photo/move`
-- **Кэш статики** — `ng_asset()` добавляет git-hash к URL CSS/JS
-- **Админ-панель** — сгруппированное меню, пагинация фото, редактор страниц через API
+- **Музыка удалена** — весь раздел, API, админка, миграции `sql_0010`/`sql_0011`; очистка: `drop_legacy_tables.sql`
+- **SPA отключена** — полная перезагрузка страниц (как upstream)
+- **Комментарии** — восстановлена отправка через inline jQuery в `Photo.php`
+- **Миграции** — последний файл: `sql_0009.sql`
+
+Подробнее: [releases/1.8.md](releases/1.8.md)

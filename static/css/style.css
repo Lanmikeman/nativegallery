@@ -44,6 +44,10 @@ h1, h2, h3, h4, th, .th, .n, .g, .yellow_stripes, .narrow, .tools, .underphoto {
 
 p, h1, h2, h3 { margin:13px 0; }
 h1 { font-size:36px; font-weight:normal; margin:11px 0; }
+h1 .role-star { vertical-align:middle; margin-left:6px; }
+.role-star--owner {
+	filter: hue-rotate(168deg) saturate(1.55) brightness(1.02) contrast(1.05);
+}
 h2 { font-size:28px; font-weight:normal; }
 h3 { font-size:22px; font-weight:normal; }
 h4 { font-size:20px; font-weight:bold; margin:0 0 10px; color:var(--theme-text-color); }

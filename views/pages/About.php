@@ -37,7 +37,7 @@ use \App\Models\User;
                             <?php
                             $owners = DB::query('SELECT * FROM users WHERE admin=4');
                             foreach ($owners as $a) {
-                                echo '<li><b><a href="/author/'.$a['id'].'/"><img onerror="this.src = `/static/img/avatar.png`; this.onerror = null;" src="'.$a['photourl'].'" width="32" style="border-radius: 3px; margin-right: 5px;">'.htmlspecialchars($a['username']).'</a></b></li>';
+                                echo '<li><b><a href="/author/'.$a['id'].'/"><img onerror="this.src = `/static/img/avatar.png`; this.onerror = null;" src="'.$a['photourl'].'" width="32" style="border-radius: 3px; margin-right: 5px;">'.htmlspecialchars($a['username']).'</a></b> '.\App\Services\UserRoleBadge::starHtml(4, 20).'</li>';
                             }
                             if ($owners === []) {
                                 echo '<li class="sm">Не назначены</li>';
@@ -51,7 +51,7 @@ use \App\Models\User;
                             <?php
                             $admins = DB::query('SELECT * FROM users WHERE admin=1');
                             foreach ($admins as $a) {
-                                echo '<li><b><a href="/author/'.$a['id'].'/"><img onerror="this.src = `/static/img/avatar.png`; this.onerror = null;" src="'.$a['photourl'].'" width="32" style="border-radius: 3px; margin-right: 5px;">'.htmlspecialchars($a['username']).'</a></b></li>';
+                                echo '<li><b><a href="/author/'.$a['id'].'/"><img onerror="this.src = `/static/img/avatar.png`; this.onerror = null;" src="'.$a['photourl'].'" width="32" style="border-radius: 3px; margin-right: 5px;">'.htmlspecialchars($a['username']).'</a></b> '.\App\Services\UserRoleBadge::starHtml(1, 20).'</li>';
                             }
                             ?>
                         </ul>

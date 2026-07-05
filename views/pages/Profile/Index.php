@@ -1,6 +1,6 @@
 <?php
 
-use \App\Services\{Auth, DB, Date, OpenVKAuth};
+use \App\Services\{Auth, DB, Date, OpenVKAuth, UserRoleBadge};
 use \App\Models\{User, UserCTTC};
 
 
@@ -34,18 +34,15 @@ $birthdate = json_decode($userprofile->i('content'), true)['aboutbirthday']['val
                 <?php
 
                 if (((int)$userprofile->i('id') === (int)explode('/', $_SERVER['REQUEST_URI'])[2]) || $usercttc === True) { ?>
-                    <h1><?= htmlspecialchars($userprofile->i('username')) ?><?php if ($userprofile->i('admin') === 1) {
-                                                                                echo '<img width="32" src="/static/img/star.png">';
-                                                                            } ?></h1>
+                    <h1><?= htmlspecialchars($userprofile->i('username')) ?><?= UserRoleBadge::starHtml((int) $userprofile->i('admin')) ?></h1>
 
                     <?php
                     if ($usercttc === True) {
                         echo '<div style="float:left; border:solid 1px #3b7dc1; padding:6px 10px 7px; margin-bottom:13px; background-color:#0199ff44"><b>Профиль на transphoto.org</b><br>Пользователь не зарегистрирован на сервере ' . NGALLERY['root']['title'] . '. Информация может быть неполной.<br><a href="https://transphoto.org/author/' . (int)explode('/', explode('@', $_SERVER['REQUEST_URI'])[0])[2] . '" target="_blank">Открыть на transphoto.org</a></div>';
                     }
-                    if ($userprofile->i('admin') === 1) {
-                        echo 'Администратор сервера';
-                    } else if ($userprofile->i('admin') === 2) {
-                        echo 'Фотомодератор';
+                    $roleTitle = UserRoleBadge::roleTitle((int) $userprofile->i('admin'));
+                    if ($roleTitle !== '') {
+                        echo $roleTitle;
                     }
 
                     if ($userprofile->i('id') === Auth::userid()) { ?>

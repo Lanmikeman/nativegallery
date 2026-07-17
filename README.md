@@ -1,3 +1,5 @@
+НАСТОЯЩИЙ МАТЕРИАЛ (ИСХОДНЫЙ КОД) СОЗДАН И (ИЛИ) ОТРЕДАКТИРОВАН ПРИ УЧАСТИИ ИИ-АГЕНТА И (ИЛИ) КАСАЕТСЯ ДЕЯТЕЛЬНОСТИ ТАКОГО ИИ-АГЕНТА
+
 # NativeGallery
 ![](https://raw.githubusercontent.com/claradex/nativegallery/main/static/img/banner.png)
 NativeGallery - это реверсивный open-source движок популярного сайта transphoto.org (СТТС), RailGallery, Fotobus и ему подобных.
